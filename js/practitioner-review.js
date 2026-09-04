@@ -71,6 +71,7 @@ const PractitionerReview = (() => {
         if (typeof DigitalTwin !== "undefined" && currentPatient) {
             DigitalTwin.renderPanel("digitalTwinContainer", "doctor", currentPatient.id, currentCase.id);
         }
+        renderHealthMonitoring();
     }
 
     function renderPatientHeader() {
@@ -452,30 +453,40 @@ const PractitionerReview = (() => {
         const tabTimeline = document.getElementById("tabTimelineBtn");
         const tabMedRecon = document.getElementById("tabMedReconBtn");
         const tabDocReports = document.getElementById("tabDocReportsBtn");
+        const tabHealthVitals = document.getElementById("tabHealthVitalsBtn");
 
         const secReview = document.getElementById("structuredReviewSection");
         const secSplit = document.getElementById("splitViewSection");
         const secTimeline = document.getElementById("timelineSection");
         const secMedRecon = document.getElementById("medReconSection");
         const secDocReports = document.getElementById("docReportsSection");
+        const secHealthVitals = document.getElementById("healthVitalsSection");
 
-        const tabs = [tabReview, tabSplit, tabTimeline, tabMedRecon, tabDocReports];
-        const sections = [secReview, secSplit, secTimeline, secMedRecon, secDocReports];
+        const tabs = [tabReview, tabSplit, tabTimeline, tabMedRecon, tabDocReports, tabHealthVitals];
+        const sections = [secReview, secSplit, secTimeline, secMedRecon, secDocReports, secHealthVitals];
 
         tabs.forEach((tab, index) => {
             if (!tab) return;
             tab.addEventListener("click", () => {
                 tabs.forEach(t => {
+                    if (!t) return;
                     t.className = "sih-btn";
                     t.style.color = "#374151";
                     t.style.background = "#e5e7eb";
                 });
-                sections.forEach(s => s.style.display = "none");
+                sections.forEach(s => { if (s) s.style.display = "none"; });
 
                 tab.className = "sih-btn primary";
                 tab.style.color = "";
                 tab.style.background = "";
-                sections[index].style.display = "block";
+                if (sections[index]) sections[index].style.display = "block";
+
+                // Re-render health chart when tab becomes visible
+                if (tab === tabHealthVitals) {
+                    setTimeout(() => {
+                        renderDoctorHealthChart(docCurrentChartMetric, docCurrentChartDays, docCurrentChartCustomStart, docCurrentChartCustomEnd);
+                    }, 50);
+                }
             });
         });
     }
@@ -670,6 +681,224 @@ const PractitionerReview = (() => {
         renderReportComparison();
     }
 
+    /* =========================================================================
+       HEALTH MONITORING (DOCTOR VIEW)
+       ========================================================================= */
+    let docHealthChartInstance = null;
+    let docCurrentChartMetric = "bp";
+    let docCurrentChartDays = 30;
+    let docCurrentChartCustomStart = null;
+    let docCurrentChartCustomEnd = null;
+
+    function renderHealthMonitoring() {
+        renderDoctorHealthReadingsTable();
+        renderDoctorHealthChart(docCurrentChartMetric, docCurrentChartDays);
+    }
+
+    function renderDoctorHealthReadingsTable() {
+        const tbody = document.getElementById("docHealthReadingsTableBody");
+        const countBadge = document.getElementById("docReadingsCountBadge");
+        if (!tbody || !currentPatient) return;
+
+        let readings = ClinicalStorage.getHealthReadings(currentPatient.id);
+        
+        countBadge.textContent = `${readings.length} Readings`;
+
+        tbody.innerHTML = "";
+        if (readings.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #64748b; padding: 24px;">No health readings recorded for this patient yet.</td></tr>`;
+            return;
+        }
+
+        readings.forEach(r => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td style="font-weight: 600; color: #1e293b;">${r.date || '—'}</td>
+                <td style="color: #64748b;">${r.time || '—'}</td>
+                <td>
+                    ${(r.systolic && r.diastolic) ? 
+                        `<strong>${r.systolic}</strong> / ${r.diastolic}
+                         ${r.systolic > 140 || r.diastolic > 90 ? '<i class="fa-solid fa-arrow-up" style="color: #dc2626; font-size: 10px; margin-left: 4px;"></i>' : ''}
+                         ${r.systolic < 90 || r.diastolic < 60 ? '<i class="fa-solid fa-arrow-down" style="color: #dc2626; font-size: 10px; margin-left: 4px;"></i>' : ''}` 
+                        : '—'}
+                </td>
+                <td>
+                    ${r.bloodSugar ? 
+                        `<strong>${r.bloodSugar}</strong>
+                         ${r.bloodSugar > 140 ? '<i class="fa-solid fa-arrow-up" style="color: #dc2626; font-size: 10px; margin-left: 4px;"></i>' : ''}
+                         ${r.bloodSugar < 70 ? '<i class="fa-solid fa-arrow-down" style="color: #dc2626; font-size: 10px; margin-left: 4px;"></i>' : ''}` 
+                        : '—'}
+                </td>
+                <td>
+                    ${r.heartRate ? 
+                        `<strong>${r.heartRate}</strong>
+                         ${r.heartRate > 100 || r.heartRate < 60 ? '<i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b; font-size: 10px; margin-left: 4px;"></i>' : ''}`
+                        : '—'}
+                </td>
+                <td>${r.temperature ? `<strong>${r.temperature}</strong> ${r.temperature > 99.5 ? '<i class="fa-solid fa-arrow-up" style="color: #dc2626; font-size: 10px; margin-left: 4px;"></i>' : ''}` : '—'}</td>
+                <td>${r.spo2 ? `<strong>${r.spo2}</strong> ${r.spo2 < 95 ? '<i class="fa-solid fa-arrow-down" style="color: #dc2626; font-size: 10px; margin-left: 4px;"></i>' : ''}` : '—'}</td>
+                <td>${r.weight ? `<strong>${r.weight}</strong>` : '—'}</td>
+                <td style="font-size: 11px; color: #64748b; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${r.notes || ''}">
+                    ${r.notes || '—'}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderDoctorHealthChart(metric, days, customStart = null, customEnd = null) {
+        if (typeof Chart === "undefined") {
+            console.warn("Chart.js not loaded. Cannot render health chart.");
+            return;
+        }
+
+        const ctx = document.getElementById("doctorHealthChart");
+        if (!ctx) return;
+
+        if (docHealthChartInstance) {
+            docHealthChartInstance.destroy();
+        }
+
+        let readings = ClinicalStorage.getHealthReadings(currentPatient.id);
+        readings = [...readings].reverse(); // oldest to newest for chart
+
+        // Filter by date
+        if (days !== 'all' && !customStart) {
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
+            readings = readings.filter(r => new Date(r.date) >= cutoffDate);
+        } else if (customStart && customEnd) {
+            const startD = new Date(customStart);
+            const endD = new Date(customEnd);
+            readings = readings.filter(r => {
+                const rd = new Date(r.date);
+                return rd >= startD && rd <= endD;
+            });
+        }
+
+        const labels = readings.map(r => r.date.substring(5) + (r.time ? ' ' + r.time : ''));
+        let datasets = [];
+
+        if (metric === "bp") {
+            const sysData = readings.map(r => r.systolic || null);
+            const diaData = readings.map(r => r.diastolic || null);
+            datasets = [
+                {
+                    label: "Systolic (mmHg)",
+                    data: sysData,
+                    borderColor: "#dc2626",
+                    backgroundColor: "rgba(220, 38, 38, 0.1)",
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: "Diastolic (mmHg)",
+                    data: diaData,
+                    borderColor: "#2563eb",
+                    backgroundColor: "rgba(37, 99, 235, 0.1)",
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }
+            ];
+        } else if (metric === "bloodSugar") {
+            datasets = [{
+                label: "Blood Sugar (mg/dL)",
+                data: readings.map(r => r.bloodSugar || null),
+                borderColor: "#2563eb",
+                backgroundColor: "rgba(37, 99, 235, 0.1)",
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+            }];
+        } else if (metric === "heartRate") {
+            datasets = [{
+                label: "Heart Rate (bpm)",
+                data: readings.map(r => r.heartRate || null),
+                borderColor: "#7c3aed",
+                backgroundColor: "rgba(124, 58, 237, 0.1)",
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+            }];
+        } else if (metric === "spo2") {
+            datasets = [{
+                label: "SpO₂ (%)",
+                data: readings.map(r => r.spo2 || null),
+                borderColor: "#0ea5e9",
+                backgroundColor: "rgba(14, 165, 233, 0.1)",
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+            }];
+        } else if (metric === "weight") {
+            datasets = [{
+                label: "Weight (kg)",
+                data: readings.map(r => r.weight || null),
+                borderColor: "#0f766e",
+                backgroundColor: "rgba(15, 118, 110, 0.1)",
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+            }];
+        }
+
+        docHealthChartInstance = new Chart(ctx, {
+            type: "line",
+            data: { labels, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: "'Inter', sans-serif" } } }
+                },
+                scales: {
+                    x: { ticks: { font: { family: "'Inter', sans-serif", size: 10 } }, grid: { display: false } },
+                    y: { ticks: { font: { family: "'Inter', sans-serif", size: 11 } }, grid: { color: '#f1f5f9' } }
+                }
+            }
+        });
+    }
+
+    function switchHealthChartMetric(metric, btnEl) {
+        docCurrentChartMetric = metric;
+        const tabs = document.querySelectorAll("#docChartMetricTabs .chart-tab-btn");
+        tabs.forEach(t => t.classList.remove("active"));
+        if (btnEl) btnEl.classList.add("active");
+        renderDoctorHealthChart(docCurrentChartMetric, docCurrentChartDays, docCurrentChartCustomStart, docCurrentChartCustomEnd);
+    }
+
+    function switchHealthChartRange(days, btnEl) {
+        docCurrentChartDays = days;
+        docCurrentChartCustomStart = null;
+        docCurrentChartCustomEnd = null;
+        const btns = document.querySelectorAll("#docChartRangeBtns .chart-range-btn");
+        btns.forEach(b => {
+            if (b.textContent !== "Apply") b.classList.remove("active");
+        });
+        if (btnEl) btnEl.classList.add("active");
+        renderDoctorHealthChart(docCurrentChartMetric, docCurrentChartDays);
+    }
+
+    function applyHealthChartCustomRange() {
+        const start = document.getElementById("docChartFromDate").value;
+        const end = document.getElementById("docChartToDate").value;
+        if (!start || !end) {
+            alert("Please select both start and end dates.");
+            return;
+        }
+        docCurrentChartDays = 'custom';
+        docCurrentChartCustomStart = start;
+        docCurrentChartCustomEnd = end;
+
+        const btns = document.querySelectorAll("#docChartRangeBtns .chart-range-btn");
+        btns.forEach(b => b.classList.remove("active"));
+        // Make the apply button look active or just remove active from others
+        
+        renderDoctorHealthChart(docCurrentChartMetric, docCurrentChartDays, docCurrentChartCustomStart, docCurrentChartCustomEnd);
+    }
+
     return {
         init,
         loadCase,
@@ -682,7 +911,13 @@ const PractitionerReview = (() => {
         saveFollowup,
         editMedDose,
         markMissingInfo,
-        uploadReportSimulation
+        uploadReportSimulation,
+        switchHealthChartMetric,
+        switchHealthChartRange,
+        applyHealthChartCustomRange,
+        openAddTimelineModal: function() {
+            alert("Timeline event feature — add via Case Taking or the audit log system.");
+        }
     };
 })();
 

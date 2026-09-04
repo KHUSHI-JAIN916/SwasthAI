@@ -20,6 +20,7 @@ const PatientPortal = (() => {
         renderDailyReminders();
         renderWeeklyMedChart();
         renderSmartTimeline("all");
+        initHealthMonitoring();
 
         setupModalListeners();
 
@@ -57,7 +58,7 @@ const PatientPortal = (() => {
     }
 
     function setupModalListeners() {
-        const modals = ["addDiseaseModal", "addPastDoctorModal"];
+        const modals = ["addDiseaseModal", "addPastDoctorModal", "addHealthReadingModal"];
         modals.forEach(id => {
             const modal = document.getElementById(id);
             if (modal) {
@@ -576,6 +577,7 @@ const PatientPortal = (() => {
         });
     }
 
+<<<<<<< HEAD
     function getMedicationListForPatient() {
         const cases = ClinicalStorage.getCases().filter(c => c.patientId === currentPatient.id);
         const verifiedCases = cases.filter(c => c.currentMedications && c.currentMedications.length > 0);
@@ -991,6 +993,528 @@ const PatientPortal = (() => {
             btnEl.style.border = "none";
         }
         renderSmartTimeline(type);
+=======
+    /* =========================================================================
+       DAILY HEALTH MONITORING CONTROLLER
+       ========================================================================= */
+    let healthChartInstance = null;
+    let currentChartMetric = "bp";
+    let currentChartDays = 30;
+    let currentChartCustomStart = null;
+    let currentChartCustomEnd = null;
+
+    function initHealthMonitoring() {
+        if (!currentPatient) return;
+
+        // Set default date/time in modal to today/now
+        const todayStr = new Date().toISOString().split("T")[0];
+        const nowTime = new Date().toTimeString().slice(0, 5);
+        const dateEl = document.getElementById("readingDate");
+        const timeEl = document.getElementById("readingTime");
+        if (dateEl && !dateEl.value) dateEl.value = todayStr;
+        if (timeEl && !timeEl.value) timeEl.value = nowTime;
+
+        renderHealthSummaryCards();
+        renderHealthReadingsTable();
+        renderPatientHealthChart(currentChartMetric, currentChartDays);
+
+        // Wire up health reading modal close on backdrop click
+        const modal = document.getElementById("addHealthReadingModal");
+        if (modal) {
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) closeAddReadingModal();
+            });
+        }
+    }
+
+    function openAddReadingModal(readingId) {
+        const modal = document.getElementById("addHealthReadingModal");
+        const titleEl = document.getElementById("healthReadingModalTitle");
+        const editIdEl = document.getElementById("editReadingId");
+        const form = document.getElementById("addHealthReadingForm");
+        const successMsg = document.getElementById("healthReadingSuccessMsg");
+        const errorMsg = document.getElementById("healthReadingErrorMsg");
+
+        if (!modal) return;
+
+        // Reset messages
+        if (successMsg) successMsg.style.display = "none";
+        if (errorMsg) errorMsg.style.display = "none";
+
+        if (readingId) {
+            // Edit mode
+            const reading = ClinicalStorage.getHealthReadingById(readingId);
+            if (!reading) { alert("Reading not found."); return; }
+
+            titleEl.textContent = "Edit Health Reading";
+            editIdEl.value = readingId;
+            document.getElementById("readingDate").value = reading.date || "";
+            document.getElementById("readingTime").value = reading.time || "";
+            document.getElementById("readingSystolic").value = reading.systolic || "";
+            document.getElementById("readingDiastolic").value = reading.diastolic || "";
+            document.getElementById("readingBloodSugar").value = reading.bloodSugar || "";
+            document.getElementById("readingHeartRate").value = reading.heartRate || "";
+            document.getElementById("readingTemperature").value = reading.temperature || "";
+            document.getElementById("readingSpO2").value = reading.spo2 || "";
+            document.getElementById("readingWeight").value = reading.weight || "";
+            document.getElementById("readingNotes").value = reading.notes || "";
+        } else {
+            // Add mode
+            titleEl.textContent = "Add Today's Health Reading";
+            editIdEl.value = "";
+            if (form) form.reset();
+            // Re-set defaults after reset
+            const todayStr = new Date().toISOString().split("T")[0];
+            const nowTime = new Date().toTimeString().slice(0, 5);
+            document.getElementById("readingDate").value = todayStr;
+            document.getElementById("readingTime").value = nowTime;
+        }
+
+        modal.classList.add("active");
+    }
+
+    function closeAddReadingModal() {
+        const modal = document.getElementById("addHealthReadingModal");
+        if (modal) modal.classList.remove("active");
+    }
+
+    function submitHealthReading(e) {
+        e.preventDefault();
+        const successMsg = document.getElementById("healthReadingSuccessMsg");
+        const successText = document.getElementById("healthReadingSuccessText");
+        const errorMsg = document.getElementById("healthReadingErrorMsg");
+        const errorText = document.getElementById("healthReadingErrorText");
+
+        if (successMsg) successMsg.style.display = "none";
+        if (errorMsg) errorMsg.style.display = "none";
+
+        const editId = document.getElementById("editReadingId").value.trim();
+
+        const readingData = {
+            patientId: currentPatient.id,
+            date: document.getElementById("readingDate").value,
+            time: document.getElementById("readingTime").value,
+            systolic: document.getElementById("readingSystolic").value,
+            diastolic: document.getElementById("readingDiastolic").value,
+            bloodSugar: document.getElementById("readingBloodSugar").value,
+            heartRate: document.getElementById("readingHeartRate").value,
+            temperature: document.getElementById("readingTemperature").value,
+            spo2: document.getElementById("readingSpO2").value,
+            weight: document.getElementById("readingWeight").value,
+            notes: document.getElementById("readingNotes").value
+        };
+
+        if (editId) readingData.id = editId;
+
+        const result = ClinicalStorage.saveHealthReading(readingData);
+
+        if (!result.success) {
+            if (errorMsg) {
+                errorText.textContent = result.message;
+                errorMsg.style.display = "block";
+            }
+            return;
+        }
+
+        // Show success
+        if (successMsg) {
+            successText.textContent = result.isUpdate
+                ? "Reading updated successfully!"
+                : "Today's reading saved successfully! Your health data is up to date.";
+            successMsg.style.display = "block";
+        }
+
+        // Refresh UI
+        renderHealthSummaryCards();
+        renderHealthReadingsTable();
+        renderPatientHealthChart(currentChartMetric, currentChartDays);
+
+        // Auto-close modal after short delay
+        setTimeout(() => {
+            closeAddReadingModal();
+        }, 1400);
+    }
+
+    function deleteHealthReading(readingId) {
+        if (!confirm("Are you sure you want to delete this reading? This action cannot be undone.")) return;
+        const result = ClinicalStorage.deleteHealthReading(readingId);
+        if (result.success) {
+            renderHealthSummaryCards();
+            renderHealthReadingsTable();
+            renderPatientHealthChart(currentChartMetric, currentChartDays);
+        } else {
+            alert("Could not delete reading: " + result.message);
+        }
+    }
+
+    function renderHealthSummaryCards() {
+        const container = document.getElementById("vitalsSummaryGrid");
+        if (!container || !currentPatient) return;
+
+        const summary = ClinicalStorage.getHealthSummary(currentPatient.id);
+
+        if (!summary.hasData) {
+            container.innerHTML = `
+                <div style="grid-column: 1 / -1;" class="vitals-empty-state">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <p style="font-size: 14px; font-weight: 600; margin: 0 0 6px 0;">No health readings yet</p>
+                    <p style="font-size: 12px; margin: 0;">Click "Add Today's Reading" to start tracking your vitals.</p>
+                </div>
+            `;
+            // Hide chart wrapper
+            const chartWrapper = document.getElementById("healthChartWrapper");
+            if (chartWrapper) chartWrapper.style.display = "none";
+            return;
+        }
+
+        const chartWrapper = document.getElementById("healthChartWrapper");
+        if (chartWrapper) chartWrapper.style.display = "block";
+
+        const r = summary.latest;
+        const ev = summary.evaluation;
+
+        const bpStr = (r.systolic && r.diastolic) ? `${r.systolic}/${r.diastolic}` : "—";
+        const sugarStr = r.bloodSugar ? `${r.bloodSugar}` : "—";
+        const hrStr = r.heartRate ? `${r.heartRate}` : "—";
+        const tempStr = r.temperature ? `${r.temperature}` : "—";
+        const spo2Str = r.spo2 ? `${r.spo2}` : "—";
+        const weightStr = r.weight ? `${r.weight}` : "—";
+
+        function getBadgeClass(status) {
+            if (status === "danger") return "vital-badge vital-badge-danger";
+            if (status === "warning") return "vital-badge vital-badge-warning";
+            if (status === "info") return "vital-badge vital-badge-info";
+            return "vital-badge vital-badge-normal";
+        }
+
+        container.innerHTML = `
+            <div class="vital-summary-card">
+                <div class="vital-card-header">
+                    <span class="vital-card-title">Blood Pressure</span>
+                    <span class="vital-card-icon" style="background: #fee2e2; color: #dc2626;"><i class="fa-solid fa-heart-pulse"></i></span>
+                </div>
+                <div class="vital-card-value">${bpStr} <span class="vital-card-unit">mmHg</span></div>
+                <div class="vital-card-footer">
+                    <span class="${getBadgeClass(ev.bp ? ev.bp.status : 'normal')}">${ev.bp ? ev.bp.label : 'Normal'}</span>
+                    <span style="font-size: 11px; color: #94a3b8;">${r.date}</span>
+                </div>
+            </div>
+            <div class="vital-summary-card">
+                <div class="vital-card-header">
+                    <span class="vital-card-title">Blood Sugar</span>
+                    <span class="vital-card-icon" style="background: #eff6ff; color: #2563eb;"><i class="fa-solid fa-droplet"></i></span>
+                </div>
+                <div class="vital-card-value">${sugarStr} <span class="vital-card-unit">mg/dL</span></div>
+                <div class="vital-card-footer">
+                    <span class="${getBadgeClass(ev.bloodSugar ? ev.bloodSugar.status : 'normal')}">${ev.bloodSugar ? ev.bloodSugar.label : 'Normal'}</span>
+                    <span style="font-size: 11px; color: #94a3b8;">${r.date}</span>
+                </div>
+            </div>
+            <div class="vital-summary-card">
+                <div class="vital-card-header">
+                    <span class="vital-card-title">Heart Rate</span>
+                    <span class="vital-card-icon" style="background: #f5f3ff; color: #7c3aed;"><i class="fa-solid fa-stethoscope"></i></span>
+                </div>
+                <div class="vital-card-value">${hrStr} <span class="vital-card-unit">bpm</span></div>
+                <div class="vital-card-footer">
+                    <span class="${getBadgeClass(ev.heartRate ? ev.heartRate.status : 'normal')}">${ev.heartRate ? ev.heartRate.label : 'Normal'}</span>
+                    <span style="font-size: 11px; color: #94a3b8;">${r.date}</span>
+                </div>
+            </div>
+            <div class="vital-summary-card">
+                <div class="vital-card-header">
+                    <span class="vital-card-title">Temperature</span>
+                    <span class="vital-card-icon" style="background: #fff7ed; color: #ea580c;"><i class="fa-solid fa-thermometer"></i></span>
+                </div>
+                <div class="vital-card-value">${tempStr} <span class="vital-card-unit">°F</span></div>
+                <div class="vital-card-footer">
+                    <span class="${getBadgeClass(ev.temperature ? ev.temperature.status : 'normal')}">${ev.temperature ? ev.temperature.label : 'Normal'}</span>
+                    <span style="font-size: 11px; color: #94a3b8;">${r.date}</span>
+                </div>
+            </div>
+            <div class="vital-summary-card">
+                <div class="vital-card-header">
+                    <span class="vital-card-title">SpO₂</span>
+                    <span class="vital-card-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fa-solid fa-lungs"></i></span>
+                </div>
+                <div class="vital-card-value">${spo2Str} <span class="vital-card-unit">%</span></div>
+                <div class="vital-card-footer">
+                    <span class="${getBadgeClass(ev.spo2 ? ev.spo2.status : 'normal')}">${ev.spo2 ? ev.spo2.label : 'Normal'}</span>
+                    <span style="font-size: 11px; color: #94a3b8;">${r.date}</span>
+                </div>
+            </div>
+            <div class="vital-summary-card">
+                <div class="vital-card-header">
+                    <span class="vital-card-title">Weight</span>
+                    <span class="vital-card-icon" style="background: #f0fdfa; color: #0f766e;"><i class="fa-solid fa-weight-scale"></i></span>
+                </div>
+                <div class="vital-card-value">${weightStr} <span class="vital-card-unit">kg</span></div>
+                <div class="vital-card-footer">
+                    <span class="vital-badge vital-badge-normal"><i class="fa-solid fa-circle-check"></i> Recorded</span>
+                    <span style="font-size: 11px; color: #94a3b8;">${r.date}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderHealthReadingsTable() {
+        const tbody = document.getElementById("healthReadingsTableBody");
+        const countBadge = document.getElementById("readingsCountBadge");
+        if (!tbody || !currentPatient) return;
+
+        const readings = ClinicalStorage.getHealthReadings(currentPatient.id);
+        if (countBadge) countBadge.textContent = `${readings.length} Total Reading${readings.length !== 1 ? "s" : ""}`;
+
+        if (readings.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="10" style="text-align: center; padding: 40px 20px; color: #64748b;">
+                        <i class="fa-solid fa-heart-pulse" style="font-size: 32px; color: #cbd5e1; display: block; margin-bottom: 10px;"></i>
+                        No readings recorded yet. Click <strong>"Add Today's Reading"</strong> to start tracking.
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        tbody.innerHTML = "";
+        readings.forEach(r => {
+            const ev = ClinicalStorage.evaluateVitals(r);
+            const bpStr = (r.systolic && r.diastolic) ? `${r.systolic}/${r.diastolic}` : "—";
+
+            function cellBadge(val, unit, evalObj) {
+                if (!val && val !== 0) return `<span style="color: #94a3b8;">—</span>`;
+                const badgeClass = evalObj && evalObj.status !== "normal"
+                    ? (evalObj.status === "danger" ? "vital-badge vital-badge-danger" : (evalObj.status === "info" ? "vital-badge vital-badge-info" : "vital-badge vital-badge-warning"))
+                    : "";
+                const label = evalObj && evalObj.status !== "normal" ? ` <span class="${badgeClass}" style="font-size:10px;">${evalObj.label}</span>` : "";
+                return `<strong>${val}</strong> <span style="font-size:11px;color:#94a3b8;">${unit}</span>${label}`;
+            }
+
+            const bpEv = ev.bp;
+            const bpCellBadge = (r.systolic && r.diastolic)
+                ? `<strong>${r.systolic}/${r.diastolic}</strong> <span style="font-size:11px;color:#94a3b8;">mmHg</span>${bpEv.status !== "normal" ? ` <span class="vital-badge ${bpEv.status === 'danger' ? 'vital-badge-danger' : (bpEv.status === 'info' ? 'vital-badge-info' : 'vital-badge-warning')}" style="font-size:10px;">${bpEv.label}</span>` : ""}`
+                : `<span style="color:#94a3b8;">—</span>`;
+
+            const dateFmt = r.date ? new Date(r.date + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+            const notesStr = r.notes ? `<span title="${r.notes}" style="cursor:help; max-width:100px; display:inline-block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; color:#475569;">${r.notes}</span>` : `<span style="color:#94a3b8;font-size:11px;">—</span>`;
+
+            const rowStyle = ev.isAbnormal ? 'border-left: 3px solid #fca5a5;' : '';
+
+            const tr = document.createElement("tr");
+            if (rowStyle) tr.style.cssText = rowStyle;
+            tr.innerHTML = `
+                <td style="font-weight: 700; color: #1e293b; font-size:13px;">${dateFmt}</td>
+                <td style="color: #475569; font-size:13px;">${r.time || "—"}</td>
+                <td>${bpCellBadge}</td>
+                <td>${cellBadge(r.bloodSugar, "mg/dL", ev.bloodSugar)}</td>
+                <td>${cellBadge(r.heartRate, "bpm", ev.heartRate)}</td>
+                <td>${cellBadge(r.temperature, "°F", ev.temperature)}</td>
+                <td>${cellBadge(r.spo2, "%", ev.spo2)}</td>
+                <td>${(r.weight != null) ? `<strong>${r.weight}</strong> <span style="font-size:11px;color:#94a3b8;">kg</span>` : '<span style="color:#94a3b8;">—</span>'}</td>
+                <td>${notesStr}</td>
+                <td>
+                    <button class="table-action-btn edit-btn" onclick="PatientPortal.openAddReadingModal('${r.id}')" title="Edit Reading"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button class="table-action-btn delete-btn" onclick="PatientPortal.deleteHealthReading('${r.id}')" title="Delete Reading"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderPatientHealthChart(metric, days) {
+        const canvas = document.getElementById("patientHealthChart");
+        if (!canvas || !currentPatient) return;
+
+        // Calculate options
+        const opts = {};
+        if (currentChartCustomStart && currentChartCustomEnd) {
+            opts.startDate = currentChartCustomStart;
+            opts.endDate = currentChartCustomEnd;
+        } else if (days && days !== "all") {
+            opts.days = days;
+        }
+
+        const readings = ClinicalStorage.getHealthReadings(currentPatient.id, opts);
+        const sorted = [...readings].reverse(); // oldest first for chart
+
+        let labels = sorted.map(r => {
+            if (!r.date) return "";
+            const d = new Date(r.date + "T00:00:00");
+            return `${d.getDate()} ${d.toLocaleString("en-IN", { month: "short" })}`;
+        });
+
+        const metricConfigs = {
+            bp: {
+                label: "Blood Pressure",
+                datasets: [
+                    {
+                        label: "Systolic (mmHg)",
+                        data: sorted.map(r => r.systolic || null),
+                        borderColor: "#dc2626",
+                        backgroundColor: "rgba(220, 38, 38, 0.08)",
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        borderWidth: 2
+                    },
+                    {
+                        label: "Diastolic (mmHg)",
+                        data: sorted.map(r => r.diastolic || null),
+                        borderColor: "#fb923c",
+                        backgroundColor: "rgba(251, 146, 60, 0.06)",
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        borderWidth: 2,
+                        borderDash: [4, 3]
+                    }
+                ],
+                yMin: 50
+            },
+            bloodSugar: {
+                label: "Blood Sugar (mg/dL)",
+                datasets: [{
+                    label: "Blood Sugar (mg/dL)",
+                    data: sorted.map(r => r.bloodSugar || null),
+                    borderColor: "#2563eb",
+                    backgroundColor: "rgba(37, 99, 235, 0.1)",
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2
+                }],
+                yMin: 50
+            },
+            heartRate: {
+                label: "Heart Rate (bpm)",
+                datasets: [{
+                    label: "Heart Rate (bpm)",
+                    data: sorted.map(r => r.heartRate || null),
+                    borderColor: "#7c3aed",
+                    backgroundColor: "rgba(124, 58, 237, 0.1)",
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2
+                }],
+                yMin: 40
+            },
+            spo2: {
+                label: "SpO₂ (%)",
+                datasets: [{
+                    label: "SpO₂ (%)",
+                    data: sorted.map(r => r.spo2 || null),
+                    borderColor: "#0284c7",
+                    backgroundColor: "rgba(2, 132, 199, 0.1)",
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2
+                }],
+                yMin: 80
+            },
+            weight: {
+                label: "Weight (kg)",
+                datasets: [{
+                    label: "Weight (kg)",
+                    data: sorted.map(r => r.weight || null),
+                    borderColor: "#0f766e",
+                    backgroundColor: "rgba(15, 118, 110, 0.1)",
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2
+                }],
+                yMin: 0
+            }
+        };
+
+        const config = metricConfigs[metric] || metricConfigs.bp;
+
+        // Destroy existing chart
+        if (healthChartInstance) {
+            healthChartInstance.destroy();
+            healthChartInstance = null;
+        }
+
+        if (sorted.length === 0) {
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "14px Inter, sans-serif";
+            ctx.fillStyle = "#94a3b8";
+            ctx.textAlign = "center";
+            ctx.fillText("No readings in selected range", canvas.width / 2, canvas.height / 2);
+            return;
+        }
+
+        healthChartInstance = new Chart(canvas.getContext("2d"), {
+            type: "line",
+            data: { labels, datasets: config.datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: "index" },
+                plugins: {
+                    legend: { position: "top", labels: { font: { size: 12, weight: "700" }, usePointStyle: true, boxWidth: 8 } },
+                    tooltip: {
+                        backgroundColor: "#0f172a",
+                        titleFont: { size: 12, weight: "700" },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: true
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: "rgba(0,0,0,0.04)" },
+                        ticks: { font: { size: 11 }, color: "#64748b" }
+                    },
+                    y: {
+                        min: config.yMin,
+                        grid: { color: "rgba(0,0,0,0.04)" },
+                        ticks: { font: { size: 11 }, color: "#64748b" }
+                    }
+                }
+            }
+        });
+    }
+
+    function switchChartMetric(metric, btnEl) {
+        currentChartMetric = metric;
+        document.querySelectorAll(".chart-tab-btn").forEach(b => b.classList.remove("active"));
+        if (btnEl) btnEl.classList.add("active");
+        renderPatientHealthChart(metric, currentChartDays);
+    }
+
+    function switchChartRange(days, btnEl) {
+        currentChartDays = days;
+        currentChartCustomStart = null;
+        currentChartCustomEnd = null;
+        document.querySelectorAll(".chart-range-btn").forEach(b => b.classList.remove("active"));
+        if (btnEl) btnEl.classList.add("active");
+        renderPatientHealthChart(currentChartMetric, days);
+    }
+
+    function applyCustomRange() {
+        const from = document.getElementById("chartFromDate");
+        const to = document.getElementById("chartToDate");
+        if (!from || !to || !from.value || !to.value) {
+            alert("Please select both start and end dates.");
+            return;
+        }
+        currentChartCustomStart = from.value;
+        currentChartCustomEnd = to.value;
+        currentChartDays = "custom";
+        document.querySelectorAll(".chart-range-btn").forEach(b => b.classList.remove("active"));
+        renderPatientHealthChart(currentChartMetric, "custom");
+>>>>>>> c581b0e (Add daily health monitoring feature)
     }
 
     return {
@@ -1004,6 +1528,7 @@ const PatientPortal = (() => {
         openAddPastDoctorModal,
         closeAddPastDoctorModal,
         submitAddPastDoctor,
+<<<<<<< HEAD
         renderDailyReminders,
         toggleDoseStatus,
         triggerVoiceMedReminder,
@@ -1011,6 +1536,15 @@ const PatientPortal = (() => {
         checkForEmergency,
         renderSmartTimeline,
         filterTimeline
+=======
+        openAddReadingModal,
+        closeAddReadingModal,
+        submitHealthReading,
+        deleteHealthReading,
+        switchChartMetric,
+        switchChartRange,
+        applyCustomRange
+>>>>>>> c581b0e (Add daily health monitoring feature)
     };
 })();
 

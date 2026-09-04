@@ -115,6 +115,73 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("dossierLoginCreds").textContent = `Patient Portal Login -> ID: ${p.id} | Password: ${p.password || '123456'}`;
         document.getElementById("dossierStartCaseBtn").href = `case-taking.html?patientId=${p.id}`;
 
+        // Find matching case or default for review link
+        const matchingCase = (fullProfile.cases && fullProfile.cases.length > 0) ? fullProfile.cases[0].id : "CASE-DEMO-2026";
+        const reviewLinkEl = document.getElementById("dossierReviewVitalsLink");
+        if (reviewLinkEl) {
+            reviewLinkEl.href = `practitioner-review.html?caseId=${matchingCase}`;
+        }
+
+        // Populate Daily Health Monitoring Summary
+        const vitalsContainer = document.getElementById("dossierHealthVitalsContainer");
+        if (vitalsContainer) {
+            vitalsContainer.innerHTML = "";
+            const readings = fullProfile.healthReadings || [];
+            if (readings.length === 0) {
+                vitalsContainer.innerHTML = `<div style="font-size: 12px; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1;">No health vitals logged yet for this patient.</div>`;
+            } else {
+                const latest = readings[0];
+                const evalInfo = ClinicalStorage.evaluateVitals(latest);
+                const bpStr = (latest.systolic && latest.diastolic) ? `${latest.systolic}/${latest.diastolic} mmHg` : "—";
+                const sugarStr = latest.bloodSugar ? `${latest.bloodSugar} mg/dL` : "—";
+                const hrStr = latest.heartRate ? `${latest.heartRate} bpm` : "—";
+                const tempStr = latest.temperature ? `${latest.temperature} °F` : "—";
+                const spo2Str = latest.spo2 ? `${latest.spo2}%` : "—";
+                const wtStr = latest.weight ? `${latest.weight} kg` : "—";
+
+                const vitalsCard = document.createElement("div");
+                vitalsCard.style.cssText = "background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 12px;";
+                vitalsCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 12px; font-weight: 800; color: #166534;">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Latest Reading: ${latest.date} (${latest.time || 'Logged'})
+                        </span>
+                        <span style="font-size: 11px; background: ${evalInfo.isAbnormal ? '#fee2e2' : '#dcfce7'}; color: ${evalInfo.isAbnormal ? '#991b1b' : '#166534'}; padding: 2px 8px; border-radius: 10px; font-weight: 800;">
+                            ${evalInfo.isAbnormal ? '⚠️ Needs Review' : '✓ Normal Vitals'}
+                        </span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; font-size: 12px;">
+                        <div style="background: white; padding: 6px 8px; border-radius: 6px; border: 1px solid #dcfce7;">
+                            <span style="font-size: 10px; color: #64748b; display: block;">BP</span>
+                            <strong style="color: #1e293b;">${bpStr}</strong>
+                        </div>
+                        <div style="background: white; padding: 6px 8px; border-radius: 6px; border: 1px solid #dcfce7;">
+                            <span style="font-size: 10px; color: #64748b; display: block;">Blood Sugar</span>
+                            <strong style="color: #1e293b;">${sugarStr}</strong>
+                        </div>
+                        <div style="background: white; padding: 6px 8px; border-radius: 6px; border: 1px solid #dcfce7;">
+                            <span style="font-size: 10px; color: #64748b; display: block;">Heart Rate</span>
+                            <strong style="color: #1e293b;">${hrStr}</strong>
+                        </div>
+                        <div style="background: white; padding: 6px 8px; border-radius: 6px; border: 1px solid #dcfce7;">
+                            <span style="font-size: 10px; color: #64748b; display: block;">SpO₂</span>
+                            <strong style="color: #1e293b;">${spo2Str}</strong>
+                        </div>
+                        <div style="background: white; padding: 6px 8px; border-radius: 6px; border: 1px solid #dcfce7;">
+                            <span style="font-size: 10px; color: #64748b; display: block;">Temp</span>
+                            <strong style="color: #1e293b;">${tempStr}</strong>
+                        </div>
+                        <div style="background: white; padding: 6px 8px; border-radius: 6px; border: 1px solid #dcfce7;">
+                            <span style="font-size: 10px; color: #64748b; display: block;">Weight</span>
+                            <strong style="color: #1e293b;">${wtStr}</strong>
+                        </div>
+                    </div>
+                    ${latest.notes ? `<div style="font-size: 11px; color: #475569; margin-top: 6px; font-style: italic;">Note: "${latest.notes}"</div>` : ''}
+                `;
+                vitalsContainer.appendChild(vitalsCard);
+            }
+        }
+
         // Populate Reported Diseases
         const diseasesContainer = document.getElementById("dossierReportedDiseases");
         if (diseasesContainer) {
