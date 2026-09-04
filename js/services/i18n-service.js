@@ -4672,9 +4672,147 @@ const I18nService = (() => {
     let isTranslating = false;
     let observer = null;
 
+    function injectGoogleTranslateStyles() {
+        if (document.getElementById("gt-clean-styles")) return;
+        const style = document.createElement("style");
+        style.id = "gt-clean-styles";
+        style.innerHTML = `
+            .goog-te-banner-frame, iframe.goog-te-banner-frame, .goog-te-banner, #goog-gt-, #goog-gt-tt, .goog-te-balloon-frame {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                width: 0 !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+            body {
+                top: 0px !important;
+                position: static !important;
+                margin-top: 0px !important;
+            }
+            .goog-tooltip, .goog-tooltip:hover {
+                display: none !important;
+                visibility: hidden !important;
+            }
+            .goog-text-highlight {
+                background-color: transparent !important;
+                box-shadow: none !important;
+            }
+            .goog-te-spinner-pos {
+                display: none !important;
+            }
+            font {
+                background-color: transparent !important;
+                box-shadow: none !important;
+            }
+            iframe.skiptranslate {
+                display: none !important;
+                visibility: hidden !important;
+                width: 0 !important;
+                height: 0 !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    function hideGoogleTranslateBanner() {
+        injectGoogleTranslateStyles();
+        const banners = document.querySelectorAll(".goog-te-banner-frame, iframe.goog-te-banner-frame, .goog-te-banner");
+        banners.forEach(b => {
+            b.style.display = "none";
+            b.style.visibility = "hidden";
+            b.style.height = "0px";
+        });
+        if (document.body) {
+            document.body.style.top = "0px";
+            document.body.style.marginTop = "0px";
+        }
+    }
+
+    function triggerGoogleTranslateSelect(lang) {
+        const targetCode = (lang === "hinglish" || lang === "hi") ? "hi" : lang;
+        
+        // 1. Set cookies for all domain levels
+        const cookieStr = "/en/" + targetCode;
+        document.cookie = "googtrans=" + cookieStr + "; path=/;";
+        if (window.location.hostname) {
+            document.cookie = "googtrans=" + cookieStr + "; domain=" + window.location.hostname + "; path=/;";
+            document.cookie = "googtrans=" + cookieStr + "; domain=." + window.location.hostname + "; path=/;";
+        }
+
+        // If English, clear googtrans cookie to restore pristine page
+        if (targetCode === "en") {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + window.location.hostname + "; path=/;";
+        }
+
+        // 2. Interact with google translate select combo if present
+        const combo = document.querySelector(".goog-te-combo");
+        if (combo) {
+            if (combo.value !== targetCode) {
+                combo.value = targetCode;
+                combo.dispatchEvent(new Event("change"));
+            }
+        } else {
+            setTimeout(() => {
+                const retryCombo = document.querySelector(".goog-te-combo");
+                if (retryCombo && retryCombo.value !== targetCode) {
+                    retryCombo.value = targetCode;
+                    retryCombo.dispatchEvent(new Event("change"));
+                }
+            }, 600);
+        }
+    }
+
+    function initGoogleTranslate() {
+        injectGoogleTranslateStyles();
+
+        if (!document.getElementById("google_translate_element_container")) {
+            const container = document.createElement("div");
+            container.id = "google_translate_element_container";
+            container.style.cssText = "position:absolute; top:-9999px; left:-9999px; width:0; height:0; overflow:hidden; visibility:hidden;";
+            container.innerHTML = '<div id="google_translate_element"></div>';
+            document.body.appendChild(container);
+        }
+
+        if (!window.googleTranslateElementInit) {
+            window.googleTranslateElementInit = function() {
+                try {
+                    new google.translate.TranslateElement({
+                        pageLanguage: 'en',
+                        includedLanguages: 'hi,mr,bn,ta,te,gu,kn,pa,ur,en',
+                        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                        autoDisplay: false
+                    }, 'google_translate_element');
+
+                    const savedLang = localStorage.getItem(STORAGE_KEY) || "en";
+                    if (savedLang !== "en") {
+                        triggerGoogleTranslateSelect(savedLang);
+                    }
+                } catch(e) {
+                    console.warn("Google Translate init issue:", e);
+                }
+            };
+        }
+
+        if (!document.getElementById("google-translate-script")) {
+            const script = document.createElement("script");
+            script.id = "google-translate-script";
+            script.type = "text/javascript";
+            script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+            document.head.appendChild(script);
+        }
+    }
+
     function init() {
         renderLanguageSwitcher();
+        initGoogleTranslate();
+        hideGoogleTranslateBanner();
+        setInterval(hideGoogleTranslateBanner, 500);
         applyTranslations(currentLang);
+        if (currentLang !== "en") {
+            triggerGoogleTranslateSelect(currentLang);
+        }
         initMutationObserver();
     }
 
@@ -4683,18 +4821,16 @@ const I18nService = (() => {
         if (!supported.includes(lang) && !DICTIONARY[lang]) lang = "en";
         currentLang = lang;
         localStorage.setItem(STORAGE_KEY, lang);
-        
-        // Set googtrans cookie for global language translation fallback
-        const targetCode = lang === "hinglish" ? "hi" : lang;
-        document.cookie = "googtrans=/en/" + targetCode + "; path=/;";
-        document.cookie = "googtrans=/en/" + targetCode + "; domain=" + window.location.hostname + "; path=/;";
+
+        hideGoogleTranslateBanner();
 
         // Disconnect observer briefly to prevent loops during translation
         if (observer) observer.disconnect();
 
         applyTranslations(lang);
+        triggerGoogleTranslateSelect(lang);
         updateSwitcherUI();
-        
+
         initMutationObserver();
         window.dispatchEvent(new CustomEvent("languageChanged", { detail: { lang } }));
     }
@@ -4706,6 +4842,67 @@ const I18nService = (() => {
     function t(key) {
         const dict = DICTIONARY[currentLang] || DICTIONARY.en;
         return dict[key] || DICTIONARY.en[key] || key;
+    }
+
+    function translateToRegional(text, targetLang) {
+        if (!text || typeof text !== "string" || targetLang === "en") return null;
+        const targetCode = (targetLang === "hinglish") ? "hi" : targetLang;
+
+        const regionalMap = {
+            mr: {
+                "Dashboard": "डॅशबोर्ड", "Patients": "रुग्ण", "Add Patient": "नवीन रुग्ण जोडा", "New Case": "नवीन केस",
+                "Review Workspace": "समीक्षा कार्यक्षेत्र", "Case History": "केस इतिहास", "Analytics": "विश्लेषण",
+                "AI Assistant": "AI सहाय्यक", "Voice Case Taking": "व्हॉईस केस-टेकिंग", "AI Consultation Notes": "AI सल्लागार नोट्स",
+                "My Profile": "माझे प्रोफाईल", "Logout": "लॉगआउट", "Doctor": "डॉक्टर", "Patient": "रुग्ण",
+                "Symptoms": "लक्षणे", "Medicines": "औषधे", "Diagnosis": "निदान", "Severity": "तीव्रता", "Duration": "कालावधी",
+                "Hospital": "रुग्णालय", "Clinic": "क्लिनिक", "Age": "वय", "Gender": "लिंग", "Male": "पुरुष", "Female": "स्त्री",
+                "Date": "दिनांक", "Save": "जतन करा", "Cancel": "रद्द करा", "Submit": "सादर करा", "Search": "शोधा",
+                "Clear": "स्वच्छ करा", "View": "पहा", "Delete": "काढून टाका", "Edit": "संपादित करा", "Details": "तपशील",
+                "Status": "स्थिती", "Action": "कृती", "Normal": "सामान्य", "Severe": "गंभीर", "Mild": "सौम्य",
+                "High": "उच्च", "Low": "कमी", "Yes": "होय", "No": "नाही", "Doctor / Practitioner": "डॉक्टर / वैद्यकीय",
+                "Patient Health Portal": "रुग्ण आरोग्य पोर्टल", "Tap to Speak": "बोलण्यासाठी दाबा", "Emergency Help": "आणीबाणी मदत"
+            },
+            bn: {
+                "Dashboard": "ড্যাশবোর্ড", "Patients": "রোগী", "Add Patient": "নতুন রোগী যোগ করুন", "New Case": "নতুন কেস",
+                "Review Workspace": "পর্যালোচনা", "Case History": "কেস ইতিহাস", "Analytics": "বিশ্লেষণ",
+                "AI Assistant": "AI সহকারী", "Voice Case Taking": "ভয়েস কেস-টেকিং", "AI Consultation Notes": "AI পরামর্শ নোট",
+                "My Profile": "আমার প্রোফাইল", "Logout": "লগআউট", "Doctor": "ডাক্তার", "Patient": "রোগী",
+                "Symptoms": "লক্ষণসমূহ", "Medicines": "ওষুধ", "Diagnosis": "রোগ নির্ণয়", "Severity": "টিব্রতা", "Duration": "সময়কাল",
+                "Hospital": "হাসপাতাল", "Clinic": "ক্লিনিক", "Age": "বয়স", "Gender": "লিঙ্গ", "Male": "পুরুষ", "Female": "মহিলা",
+                "Date": "তারিখ", "Save": "সংরক্ষণ করুন", "Cancel": "বাতিল করুন", "Submit": "জমা দিন", "Search": "অনুসন্ধান",
+                "Clear": "পরিষ্কার করুন", "View": "দেখুন", "Delete": "মুছে ফেলুন", "Edit": "সম্পাদনা করুন", "Details": "বিস্তারিত",
+                "Status": "অবস্থা", "Action": "পদক্ষেপ", "Normal": "স্বাভাবিক", "Severe": "গুরুতর", "Mild": "মৃদু",
+                "High": "উচ্চ", "Low": "কম", "Yes": "হ্যাঁ", "No": "না", "Tap to Speak": "কথা বলতে চাপুন"
+            },
+            ta: {
+                "Dashboard": "முகப்பு", "Patients": "நோயாளிகள்", "Add Patient": "புதிய நோயாளி", "New Case": "புதிய சிகிச்சை",
+                "Review Workspace": "ஆய்வு மையம்", "Case History": "சிகிச்சை வரலாறு", "Analytics": "பகுப்பாய்வு",
+                "AI Assistant": "AI உதவியாளர்", "Voice Case Taking": "குரல் வழி பதிவு", "AI Consultation Notes": "ஆலோசனை குறிப்புகள்",
+                "My Profile": "என் சுயவிவரம்", "Logout": "வெளியேறு", "Doctor": "மருத்துவர்", "Patient": "நோயாளி",
+                "Symptoms": "அறிகுறிகள்", "Medicines": "மருந்துகள்", "Diagnosis": "பரிசோதனை", "Severity": "தீவிரம்", "Duration": "கால அளவு",
+                "Hospital": "மருத்துவமனை", "Clinic": "கிளினிக்", "Age": "வயது", "Gender": "பாலினம்", "Male": "ஆண்", "Female": "பெண்",
+                "Date": "தேதி", "Save": "சேமி", "Cancel": "ரத்து", "Submit": "சமர்ப்பி", "Search": "தேடு",
+                "Clear": "அழி", "View": "பார்", "Delete": "நீக்கு", "Edit": "திருத்து", "Details": "விவரங்கள்",
+                "Status": "நிலை", "Action": "நடவடிக்கை", "Normal": "சாதாரண", "Severe": "கடும்", "Mild": "மிதமான",
+                "High": "அதிகம்", "Low": "குறைவு", "Yes": "ஆம்", "No": "இல்லை", "Tap to Speak": "பேச அழுத்தவும்"
+            },
+            te: {
+                "Dashboard": "డాష్‌బోర్డ్", "Patients": "పేషెంట్లు", "Add Patient": "కొత్త పేషెంట్", "New Case": "కొత్త కేసు",
+                "Review Workspace": "పరిశీలన విభాగం", "Case History": "కేసు చరిత్ర", "Analytics": "విశ్లేషణ",
+                "AI Assistant": "AI అసిస్టెంట్", "Voice Case Taking": "వాయిస్ కేస్-టేకింగ్", "AI Consultation Notes": "AI సలహా నోట్స్",
+                "My Profile": "నా ప్రొఫైల్", "Logout": "లాగ్ అవుట్", "Doctor": "డాక్టర్", "Patient": "పేషెంట్",
+                "Symptoms": "లక్షణాలు", "Medicines": "మందులు", "Diagnosis": "నిర్ధారణ", "Severity": "తీవ్రత", "Duration": "వ్యవధి",
+                "Hospital": "ఆసుపత్రి", "Clinic": "క్లినిక్", "Age": "వయస్సు", "Gender": "లింగం", "Male": "పురుషుడు", "Female": "స్త్రీ",
+                "Date": "తేదీ", "Save": "సేవ్ చేయండి", "Cancel": "రద్దు చేయండి", "Submit": "సమర్పించండి", "Search": "శోధించండి",
+                "Clear": "క్లియర్ చేయండి", "View": "చూడండి", "Delete": "తొలగించండి", "Edit": "సవరించండి", "Details": "వివరాలు",
+                "Status": "స్థితి", "Action": "చర్య", "Normal": "సాధారణం", "Severe": "తీవ్రమైన", "Mild": "తేలికపాటి",
+                "High": "ఎక్కువ", "Low": "తక్కువ", "Yes": "అవును", "No": "కాదు", "Tap to Speak": "మాట్లాడటానికి నొక్కండి"
+            }
+        };
+
+        const dict = regionalMap[targetCode];
+        if (dict && dict[text]) return dict[text];
+        return null;
     }
 
     // Smart sentence & phrase translation
@@ -4724,9 +4921,18 @@ const I18nService = (() => {
         const norm = normalizeKey(trimmed);
         let match = lookupMap.get(norm);
         if (match) {
-            const translated = match[targetLang] || (targetLang === "en" ? match.en : match.hi);
+            let translated = match[targetLang];
+            if (!translated && (targetLang === "hi" || targetLang === "hinglish")) {
+                translated = match.hi || match.hinglish;
+            }
+            if (!translated) {
+                translated = translateToRegional(match.en || trimmed, targetLang);
+            }
             if (translated) return lead + translated + trail;
         }
+
+        const regMatch = translateToRegional(trimmed, targetLang);
+        if (regMatch) return lead + regMatch + trail;
 
         // 2. Trailing punctuation check (e.g. "Doctor:", "Chief Complaint:", "Age:", "Full Name *")
         const punctMatch = trimmed.match(/^([\s\S]+?)([:\-\.\!\?\*]+)$/);
@@ -4736,7 +4942,7 @@ const I18nService = (() => {
             const baseNorm = normalizeKey(baseText);
             const baseMatch = lookupMap.get(baseNorm);
             if (baseMatch) {
-                const translated = baseMatch[targetLang] || (targetLang === "en" ? baseMatch.en : baseMatch.hi);
+                let translated = baseMatch[targetLang] || translateToRegional(baseMatch.en || baseText, targetLang);
                 if (translated) return lead + translated + trailingPunct + trail;
             }
         }
@@ -4749,7 +4955,7 @@ const I18nService = (() => {
             const baseNorm = normalizeKey(baseText);
             const baseMatch = lookupMap.get(baseNorm);
             if (baseMatch) {
-                const translated = baseMatch[targetLang] || (targetLang === "en" ? baseMatch.en : baseMatch.hi);
+                let translated = baseMatch[targetLang] || translateToRegional(baseMatch.en || baseText, targetLang);
                 if (translated) return lead + translated + " " + emoji + trail;
             }
         }
@@ -4761,7 +4967,7 @@ const I18nService = (() => {
                 const pNorm = normalizeKey(part);
                 const pMatch = lookupMap.get(pNorm);
                 if (pMatch) {
-                    const translated = pMatch[targetLang] || pMatch.en;
+                    const translated = pMatch[targetLang] || translateToRegional(pMatch.en || part, targetLang);
                     if (translated && (targetLang !== "en" || part !== trimmed)) {
                         return lead + translated + trail;
                     }
@@ -4848,27 +5054,30 @@ const I18nService = (() => {
                     if (node.parentElement.closest(".notranslate")) return;
                 }
 
-                // Save pristine source text permanently (never overwritten once recorded)
+                // Save pristine source text permanently (mapped to English if available)
                 if (node.__sourceText === undefined) {
-                    node.__sourceText = raw;
+                    const norm = normalizeKey(raw);
+                    const match = lookupMap.get(norm);
+                    if (match && match.en) {
+                        node.__sourceText = match.en;
+                    } else {
+                        node.__sourceText = raw;
+                    }
                 }
 
                 if (targetLang === "en") {
-                    // Check if lookupMap has an English equivalent for bilingual or Hindi originals
                     const match = lookupMap.get(normalizeKey(node.__sourceText)) || lookupMap.get(normalizeKey(raw));
-                    if (match && match.en) {
-                        // Preserve leading/trailing whitespace
-                        const lead = raw.match(/^\s*/) ? raw.match(/^\s*/)[0] : "";
-                        const trail = raw.match(/\s*$/) ? raw.match(/\s*$/)[0] : "";
-                        node.textContent = lead + match.en + trail;
-                    } else {
-                        // Restore pristine source text directly
-                        node.textContent = node.__sourceText;
-                    }
+                    const enVal = (match && match.en) ? match.en : node.__sourceText;
+                    const lead = raw.match(/^\s*/) ? raw.match(/^\s*/)[0] : "";
+                    const trail = raw.match(/\s*$/) ? raw.match(/\s*$/)[0] : "";
+                    node.textContent = lead + enVal + trail;
                 } else {
                     const translated = translateText(node.__sourceText, targetLang);
-                    if (translated && translated !== raw) {
+                    if (translated && translated !== node.__sourceText) {
                         node.textContent = translated;
+                    } else {
+                        // Dynamic online translation for any text node not in local dictionary
+                        fetchOnlineTranslation(node.__sourceText, targetLang, node);
                     }
                 }
             }
@@ -4879,17 +5088,54 @@ const I18nService = (() => {
         }
     }
 
+    const onlineTranslationCache = new Map();
+
+    function fetchOnlineTranslation(text, targetLang, node) {
+        if (!text || typeof text !== "string" || targetLang === "en") return;
+        const targetCode = (targetLang === "hinglish") ? "hi" : targetLang;
+        const cacheKey = targetCode + "::" + text.trim();
+
+        if (onlineTranslationCache.has(cacheKey)) {
+            const cached = onlineTranslationCache.get(cacheKey);
+            if (cached && node && node.textContent !== cached) {
+                node.textContent = cached;
+            }
+            return;
+        }
+
+        const url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" + targetCode + "&dt=t&q=" + encodeURIComponent(text.trim());
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data[0] && data[0][0] && data[0][0][0]) {
+                    const translatedStr = data[0].map(item => item[0]).join("");
+                    const lead = text.match(/^\s*/) ? text.match(/^\s*/)[0] : "";
+                    const trail = text.match(/\s*$/) ? text.match(/\s*$/)[0] : "";
+                    const finalVal = lead + translatedStr + trail;
+                    onlineTranslationCache.set(cacheKey, finalVal);
+                    if (node && document.body && document.body.contains(node)) {
+                        node.textContent = finalVal;
+                    }
+                }
+            })
+            .catch(() => {});
+    }
+
     function applyTranslations(lang) {
         if (isTranslating) return;
         isTranslating = true;
 
         try {
-            const dict = DICTIONARY[lang] || DICTIONARY.en;
+            const dict = DICTIONARY[lang] || {};
 
             // 1. Apply data-i18n attributes safely without destroying child icons
             document.querySelectorAll("[data-i18n]").forEach(el => {
                 const key = el.getAttribute("data-i18n");
-                const val = dict[key] || (DICTIONARY.en ? DICTIONARY.en[key] : "");
+                let val = dict[key];
+                if (!val && DICTIONARY.en && DICTIONARY.en[key]) {
+                    val = translateText(DICTIONARY.en[key], lang);
+                }
                 if (!val) return;
 
                 if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
@@ -4963,56 +5209,45 @@ const I18nService = (() => {
     function renderLanguageSwitcher() {
         let switcherContainers = document.querySelectorAll("#globalLanguageSwitcherContainer, .lang-switcher-wrapper");
         
-        // If not present in HTML, locate or create container in topbar or navbar
         if (switcherContainers.length === 0) {
-            let topbarRight = document.querySelector(".topbar-right");
-            if (!topbarRight) {
-                const topbar = document.querySelector(".topbar");
-                if (topbar) {
-                    topbarRight = document.createElement("div");
-                    topbarRight.className = "topbar-right";
-                    topbar.appendChild(topbarRight);
-                }
-            }
-
+            const topbarRight = document.querySelector(".topbar-right, .topbar, .landing-nav div:last-child, .patient-portal-header div:last-child");
             if (topbarRight) {
                 const wrapper = document.createElement("div");
                 wrapper.id = "globalLanguageSwitcherContainer";
                 wrapper.className = "lang-switcher-wrapper notranslate";
                 topbarRight.prepend(wrapper);
                 switcherContainers = [wrapper];
-            } else {
-                const navRight = document.querySelector(".landing-nav div:last-child");
-                if (navRight) {
-                    const wrapper = document.createElement("div");
-                    wrapper.id = "globalLanguageSwitcherContainer";
-                    wrapper.className = "lang-switcher-wrapper notranslate";
-                    navRight.prepend(wrapper);
-                    switcherContainers = [wrapper];
-                }
             }
         }
 
+        const fullOptions = `
+            <option class="lang-option notranslate" value="hi" ${currentLang === 'hi' ? 'selected' : ''}>🇮🇳 हिंदी (Hindi)</option>
+            <option class="lang-option notranslate" value="hinglish" ${currentLang === 'hinglish' ? 'selected' : ''}>🗣️ Hinglish</option>
+            <option class="lang-option notranslate" value="en" ${currentLang === 'en' ? 'selected' : ''}>🇬🇧 English</option>
+            <option class="lang-option notranslate" value="mr" ${currentLang === 'mr' ? 'selected' : ''}>🇮🇳 मराठी (Marathi)</option>
+            <option class="lang-option notranslate" value="bn" ${currentLang === 'bn' ? 'selected' : ''}>🇮🇳 বাংলা (Bengali)</option>
+            <option class="lang-option notranslate" value="ta" ${currentLang === 'ta' ? 'selected' : ''}>🇮🇳 தமிழ் (Tamil)</option>
+            <option class="lang-option notranslate" value="te" ${currentLang === 'te' ? 'selected' : ''}>🇮🇳 తెలుగు (Telugu)</option>
+        `;
+
         switcherContainers.forEach(container => {
             container.classList.add("notranslate");
+            container.style.display = "inline-flex";
+            container.style.alignItems = "center";
+            container.style.marginRight = "10px";
             container.innerHTML = `
                 <i class="fa-solid fa-language" style="color: #1f7a57; font-size: 16px; margin-right: 4px;"></i>
                 <select class="lang-dropdown global-lang-select notranslate" title="Change Language / भाषा बदलें" style="padding: 6px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; font-weight: 700; background: #ffffff; color: #1e293b; cursor: pointer; outline: none;">
-                    <option class="lang-option notranslate" value="hi" ${currentLang === 'hi' ? 'selected' : ''}>🇮🇳 हिंदी (Hindi)</option>
-                    <option class="lang-option notranslate" value="hinglish" ${currentLang === 'hinglish' ? 'selected' : ''}>🗣️ Hinglish</option>
-                    <option class="lang-option notranslate" value="en" ${currentLang === 'en' ? 'selected' : ''}>🇬🇧 English</option>
-                    <option class="lang-option notranslate" value="mr" ${currentLang === 'mr' ? 'selected' : ''}>🇮🇳 मराठी (Marathi)</option>
-                    <option class="lang-option notranslate" value="bn" ${currentLang === 'bn' ? 'selected' : ''}>🇮🇳 বাংলা (Bengali)</option>
-                    <option class="lang-option notranslate" value="ta" ${currentLang === 'ta' ? 'selected' : ''}>🇮🇳 தமிழ் (Tamil)</option>
-                    <option class="lang-option notranslate" value="te" ${currentLang === 'te' ? 'selected' : ''}>🇮🇳 తెలుగు (Telugu)</option>
+                    ${fullOptions}
                 </select>
             `;
         });
 
         document.querySelectorAll(".global-lang-select, #globalLanguageSelect").forEach(selectEl => {
             selectEl.value = currentLang;
-            selectEl.removeEventListener("change", handleSwitcherChange);
-            selectEl.addEventListener("change", handleSwitcherChange);
+            selectEl.onchange = function(e) {
+                setLanguage(e.target.value);
+            };
         });
     }
 
