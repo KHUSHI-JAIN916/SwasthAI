@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Account | SWASTHAI</title>
+
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <link
+        rel="stylesheet"
+        href="css/auth.css"
+    >
+
+</head>
+
+
+<body>
+    <!-- TOPBAR -->
+    <header class="patient-portal-header" style="background: #ffffff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
+        <a href="index.html" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+            <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo" style="width: 44px; height: 44px;">
+            <div>
+                <h2 style="font-size: 18px; font-weight: 900; color: #1f7a57; margin: 0; line-height: 1;">SWASTHAI</h2>
+                <span style="font-size: 10px; color: #4b5563; font-weight: 600;" data-i18n="appTagline">From Patient's Voice to Doctor's Insight</span>
+            </div>
+        </a>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div id="globalLanguageSwitcherContainer" class="lang-switcher-wrapper">
+                <i class="fa-solid fa-language" style="color: #2563eb;"></i>
+                <select class="lang-dropdown global-lang-select notranslate">
+                    <option value="hi">🇮🇳 हिंदी (Hindi)</option>
+                    <option value="hinglish">🗣️ Hinglish</option>
+                    <option value="en">🇬🇧 English</option>
+                </select>
+            </div>
+
+            <a href="index.html" style="text-decoration: none; font-size: 13px; color: #475569; font-weight: 700;">
+                <i class="fa-solid fa-arrow-left"></i> Home
+            </a>
+        </div>
+    </header>
+
+<div class="auth-page">
+
+
+    <!-- LEFT -->
+
+    <div class="auth-brand">
+
+        <div class="brand-content">
+
+
+
+            </div>
+
+
+            <div class="brand-text">
+
+
+                <span class="small-label">
+
+                    JOIN THE PLATFORM
+
+                </span>
+
+
+                <h2>
+
+                    Build Better Patient
+                    <br>
+                    Case Documentation
+
+                </h2>
+
+
+                <p>
+
+                    Create your practitioner account and start
+                    managing patient cases with intelligent tools.
+
+                </p>
+
+
+            </div>
+
+
+            <div class="brand-features">
+
+
+                <div>
+
+                    <i class="fa-solid fa-shield-heart"></i>
+
+                    Secure Case Documentation
+
+                </div>
+
+
+                <div>
+
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                    AI-Powered Insights
+
+                </div>
+
+
+                <div>
+
+                    <i class="fa-solid fa-leaf"></i>
+
+                    AYUSH Focused System
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- RIGHT -->
+
+    <div class="auth-form-section">
+
+
+        <div class="auth-form-container">
+
+
+            <h2>
+                Create Account 🚀
+            </h2>
+
+
+            <p>
+                Start using SWASTHAI today.
+            </p>
+
+
+
+            <form id="signupForm">
+
+
+                <!-- NAME -->
+
+                <div class="auth-input-group">
+
+
+                    <label>
+                        Full Name
+                    </label>
+
+
+                    <div class="input-icon">
+
+
+                        <i class="fa-solid fa-user"></i>
+
+
+                        <input
+                            type="text"
+                            id="signupName"
+                            placeholder="Enter your full name"
+                            required
+                        >
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- EMAIL -->
+
+                <div class="auth-input-group">
+
+
+                    <label>
+                        Email Address
+                    </label>
+
+
+                    <div class="input-icon">
+
+
+                        <i class="fa-solid fa-envelope"></i>
+
+
+                        <input
+                            type="email"
+                            id="signupEmail"
+                            placeholder="Enter your email"
+                            required
+                        >
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- ROLE -->
+
+                <div class="auth-input-group">
+
+
+                    <label>
+                        Practitioner Type
+                    </label>
+
+
+                    <div class="input-icon">
+
+
+                        <i class="fa-solid fa-user-doctor"></i>
+
+
+                        <select
+                            id="signupRole"
+                            required
+                        >
+
+                            <option value="">
+                                Select Practitioner Type
+                            </option>
+
+                            <option>
+                                Ayurveda Practitioner
+                            </option>
+
+                            <option>
+                                Homeopathy Practitioner
+                            </option>
+
+                            <option>
+                                Unani Practitioner
+                            </option>
+
+                            <option>
+                                Yoga Practitioner
+                            </option>
+
+                        </select>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- PASSWORD -->
+
+                <div class="auth-input-group">
+
+
+                    <label>
+                        Password
+                    </label>
+
+
+                    <div class="input-icon">
+
+
+                        <i class="fa-solid fa-lock"></i>
+
+
+                        <input
+                            type="password"
+                            id="signupPassword"
+                            placeholder="Create password"
+                            minlength="6"
+                            required
+                        >
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div
+                    class="auth-message"
+                    id="signupMessage"
+                ></div>
+
+
+
+                <button
+                    type="submit"
+                    class="auth-btn"
+                >
+
+                    <i class="fa-solid fa-user-plus"></i>
+
+                    Create Account
+
+                </button>
+
+
+            </form>
+
+
+
+            <p class="auth-switch">
+
+
+                Already have an account?
+
+
+                <a href="index.html">
+
+                    Sign In
+
+                </a>
+
+
+            </p>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<script src="js/services/i18n-service.js"></script>
+<script src="js/auth.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Login & Register | SWASTHAI स्वास्थ AI</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/clinical-system.css">
+
+    <style>
+        .patient-auth-wrapper {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #eff6ff 100%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-container-card {
+            max-width: 480px;
+            width: 100%;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 32px 28px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+            border: 2px solid #bbf7d0;
+        }
+
+        .tab-btn-group {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+            gap: 4px;
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .auth-tab-btn.active {
+            background: #16a34a;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+        }
+
+        .input-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+            transition: border 0.2s;
+        }
+
+        .auth-input:focus {
+            border-color: #16a34a;
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+        }
+
+        .quick-demo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid #86efac;
+            margin-top: 4px;
+        }
+
+        .quick-demo-badge:hover {
+            background: #bbf7d0;
+        }
+    </style>
+</head>
+
+<body>
+<div class="patient-auth-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="patient-portal-header" style="background: #ffffff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
+        <a href="index.html" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+            <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo" style="width: 44px; height: 44px;">
+            <div>
+                <h2 style="font-size: 18px; font-weight: 900; color: #1f7a57; margin: 0; line-height: 1;">SWASTHAI</h2>
+                <span style="font-size: 10px; color: #4b5563; font-weight: 600;" data-i18n="appTagline">From Patient's Voice to Doctor's Insight</span>
+            </div>
+        </a>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div id="globalLanguageSwitcherContainer" class="lang-switcher-wrapper">
+                <i class="fa-solid fa-language" style="color: #1f7a57;"></i>
+                <select class="lang-dropdown global-lang-select notranslate">
+                    <option value="hi">🇮🇳 हिंदी (Hindi)</option>
+                    <option value="hinglish">🗣️ Hinglish</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="mr">🇮🇳 मराठी (Marathi)</option>
+                    <option value="bn">🇮🇳 বাংলা (Bengali)</option>
+                    <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
+                    <option value="te">🇮🇳 తెలుగు (Telugu)</option>
+                </select>
+            </div>
+
+            <button type="button" class="audio-guide-btn" onclick="I18nService.playAudioGuide('audioGuidePrompt')" style="padding: 6px 12px; font-size: 12px;">
+                <i class="fa-solid fa-volume-high"></i> <span data-i18n="audioGuideBtn">Audio Help</span>
+            </button>
+
+            <a href="index.html" style="text-decoration: none; font-size: 13px; color: #475569; font-weight: 700;">
+                <i class="fa-solid fa-arrow-left"></i> होम (Home)
+            </a>
+        </div>
+    </header>
+
+    <!-- AUTH CARD -->
+    <main style="padding: 0 16px; flex: 1; display: flex; align-items: center;">
+        <div class="auth-container-card">
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 58px; height: 58px; background: #dcfce7; color: #16a34a; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 12px auto;">
+                    <i class="fa-solid fa-hands-holding-child"></i>
+                </div>
+                <h2 style="font-size: 22px; font-weight: 900; color: #111827; margin: 0 0 6px 0;" data-i18n="patientPortalLoginTitle">
+                    मरीज़ स्वास्थ्य पोर्टल लॉगिन
+                </h2>
+                <p style="font-size: 13px; color: #64748b; margin: 0;" data-i18n="patientPortalLoginSub">
+                    अपनी बीमारी, लक्षण व पुराने डॉक्टर के पर्चे सुरक्षित रखें
+                </p>
+            </div>
+
+            <!-- TABS -->
+            <div class="tab-btn-group">
+                <button type="button" class="auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span data-i18n="tabPatientLogin">मरीज़ लॉगिन (Login)</span>
+                </button>
+                <button type="button" class="auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">
+                    <i class="fa-solid fa-user-plus"></i> <span data-i18n="tabPatientRegister">नया खाता बनाएं (Register)</span>
+                </button>
+            </div>
+
+            <!-- ================= 1. LOGIN FORM ================= -->
+            <form id="patientLoginForm" onsubmit="handlePatientLogin(event)">
+                <div style="margin-bottom: 16px;">
+                    <label class="input-label" data-i18n="loginFieldId">Patient ID या मोबाइल नंबर</label>
+                    <input type="text" id="loginPatientId" class="auth-input" placeholder="उदा. AYU-2026-DEMO या 9876543210" required>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+                        <span class="quick-demo-badge" onclick="fillDemoCredentials('AYU-2026-DEMO', '123456')">
+                            <i class="fa-solid fa-bolt"></i> Demo 1: Rajesh Patel (AYU-2026-DEMO)
+                        </span>
+                        <span class="quick-demo-badge" onclick="fillDemoCredentials('AYU-2026-002', '123456')">
+                            <i class="fa-solid fa-bolt"></i> Demo 2: Priya Sharma (AYU-2026-002)
+                        </span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label class="input-label" data-i18n="loginFieldPassword">पासवर्ड (Password)</label>
+                    <div style="position: relative;">
+                        <input type="password" id="loginPassword" class="auth-input" placeholder="पासवर्ड दर्ज करें" value="123456" required>
+                        <i class="fa-solid fa-eye" id="togglePassIcon" onclick="togglePasswordVisibility('loginPassword', this)" style="position: absolute; right: 14px; top: 14px; color: #94a3b8; cursor: pointer;"></i>
+                    </div>
+                    <span style="font-size: 11px; color: #64748b; margin-top: 4px; display: block;"><span data-i18n="defaultDemoPassword">डिफ़ॉल्ट डेमो पासवर्ड:</span> <strong>123456</strong></span>
+                </div>
+
+                <div id="loginErrorMsg" style="display: none; background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-bottom: 14px;"></div>
+
+                <button type="submit" style="width: 100%; padding: 14px; background: #16a34a; color: #ffffff; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; transition: background 0.2s;">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> <span data-i18n="enterPortalBtn">पोर्टल में प्रवेश करें (Enter Portal)</span>
+                </button>
+            </form>
+
+            <!-- ================= 2. REGISTER FORM ================= -->
+            <form id="patientRegisterForm" onsubmit="handlePatientRegister(event)" style="display: none;">
+                <div style="margin-bottom: 14px;">
+                    <label class="input-label">मरीज़ का पूरा नाम (Full Name) *</label>
+                    <input type="text" id="regFullName" class="auth-input" placeholder="उदा. Ramesh Gupta" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                    <div>
+                        <label class="input-label">उम्र (Age) *</label>
+                        <input type="number" id="regAge" class="auth-input" placeholder="35" min="1" max="120" required>
+                    </div>
+                    <div>
+                        <label class="input-label">लिंग (Gender) *</label>
+                        <select id="regGender" class="auth-input" required>
+                            <option value="Male">पुरुष (Male)</option>
+                            <option value="Female">महिला (Female)</option>
+                            <option value="Other">अन्य (Other)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label class="input-label">मोबाइल नंबर (Mobile Number) *</label>
+                    <input type="tel" id="regPhone" class="auth-input" placeholder="उदा. 9811223344" required>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label class="input-label">ब्लड ग्रुप (Blood Group) व एलर्जी</label>
+                    <input type="text" id="regAllergies" class="auth-input" placeholder="उदा. O+, Penicillin से एलर्जी या कोई नहीं">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label class="input-label">नया पासवर्ड बनाएं (Create Password) *</label>
+                    <input type="password" id="regPassword" class="auth-input" placeholder="कम से कम 4 अक्षर का पासवर्ड" value="123456" required>
+                </div>
+
+                <div id="registerErrorMsg" style="display: none; background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-bottom: 14px;"></div>
+
+                <button type="submit" style="width: 100%; padding: 14px; background: #16a34a; color: #ffffff; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; transition: background 0.2s;">
+                    <i class="fa-solid fa-user-plus"></i> खाता बनाएं व प्रवेश करें (Register & Login)
+                </button>
+            </form>
+
+            <div style="margin-top: 24px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+                <span style="font-size: 13px; color: #64748b;" data-i18n="areYouDoctor">Are you a doctor or hospital clinic?</span>
+                <a href="doctor-login.html" style="color: #2563eb; font-weight: 800; font-size: 13px; text-decoration: none; margin-left: 6px;">
+                    <span data-i18n="enterDoctorPortal">Open Doctor & Hospital Login</span> &rarr;
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+</div>
+
+<!-- SCRIPTS -->
+<script src="js/models/clinical-state.js"></script>
+<script src="js/storage/clinical-storage.js"></script>
+<script src="js/services/speech-service.js"></script>
+<script src="js/services/i18n-service.js"></script>
+<script src="js/patient-login.js"></script>
+</body>
+</html>

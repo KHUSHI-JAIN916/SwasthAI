@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add Patient | SWASTHAI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/clinical-system.css">
+</head>
+
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo">
+        <div>
+            <h2>SWASTHAI</h2>
+            <span>From Voice to Insight</span>
+        </div>
+    </div>
+
+    <div class="menu-title">
+        MAIN MENU
+    </div>
+
+    <nav class="nav-menu">
+        <a href="dashboard.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="add-patient.html" class="nav-item active">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add Patient</span>
+        </a>
+
+        <a href="case-taking.html" class="nav-item">
+            <i class="fa-solid fa-file-medical"></i>
+            <span>New Case</span>
+        </a>
+
+        <a href="practitioner-review.html" class="nav-item">
+            <i class="fa-solid fa-user-doctor"></i>
+            <span>Review Workspace</span>
+        </a>
+
+        <a href="case-history.html" class="nav-item">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Case History</span>
+        </a>
+
+        <a href="analytics.html" class="nav-item">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Analytics</span>
+        </a>
+        <a href="ai-assistant.html" class="nav-item">
+            <i class="fa-solid fa-robot"></i>
+            <span>AI Assistant</span>
+        </a>
+        <a href="voice-case.html" class="nav-item">
+            <i class="fa-solid fa-microphone"></i>
+            <span>Voice Case Taking</span>
+        </a>
+
+        <a href="consultation-notes.html" class="nav-item">
+            <i class="fa-solid fa-notes-medical"></i>
+            <span data-i18n="navConsultationNotes">AI Consultation Notes</span>
+        </a>
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+        <a href="#" class="nav-item">
+            <i class="fa-solid fa-gear"></i>
+            <span>Settings</span>
+        </a>
+
+        <a href="#" class="nav-item logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Logout</span>
+        </a>
+
+    </div>
+
+</aside>
+
+
+<!-- ================= MAIN CONTENT ================= -->
+
+<main class="main-content">
+
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+        <div class="topbar-left">
+
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <div>
+
+                <p class="breadcrumb">
+                    Dashboard / Patients / Add Patient
+                </p>
+
+                <h1>Add New Patient</h1>
+
+            </div>
+
+        </div>
+
+
+        <div class="topbar-right">
+
+            <button class="icon-btn notification-btn">
+                <i class="fa-regular fa-bell"></i>
+                <span class="notification-dot"></span>
+            </button>
+
+
+            <div class="doctor-profile">
+
+                <div class="doctor-avatar">
+                    DS
+                </div>
+
+                <div class="doctor-info">
+
+                    <h4>Dr. Sharma</h4>
+
+                    <p>Doctor / Practitioner</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= PAGE CONTENT ================= -->
+
+    <section class="add-patient-container">
+
+
+        <!-- HEADER -->
+
+        <div class="add-page-header">
+
+            <div>
+
+                <h2>Register a New Patient</h2>
+
+                <p>
+                    Enter the patient's information to create a secure
+                    digital healthcare profile.
+                </p>
+
+            </div>
+
+
+            <div class="patient-id-preview">
+
+                <span>Patient ID</span>
+
+                <strong id="generatedPatientId">
+                    AYU-2026-0006
+                </strong>
+
+            </div>
+
+        </div>
+
+        <!-- IMPORT PATIENT BY CREDENTIALS CARD -->
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 2px dashed #16a34a; border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.08);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #16a34a; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #166534;">Auto-Fill Patient Details by ID / Password</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: #15803d;">Enter existing Patient ID / Mobile Number and Password to automatically fetch and populate all details.</p>
+                    </div>
+                </div>
+                <span style="font-size: 11px; font-weight: 700; background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 12px;">Fast Credential Auto-Fill</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; align-items: flex-end;">
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Patient ID or Mobile *</label>
+                    <input type="text" id="fetchPatientIdInput" placeholder="e.g. AYU-2026-DEMO or 9876543210" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; font-weight: 600;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Password *</label>
+                    <input type="password" id="fetchPatientPassInput" placeholder="e.g. 123456" value="123456" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; font-weight: 600;">
+                </div>
+                <div>
+                    <button type="button" id="fetchPatientCredsBtn" style="width: 100%; padding: 10px 16px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
+                        <i class="fa-solid fa-cloud-arrow-down"></i> Fetch & Auto-Fill Details
+                    </button>
+                </div>
+            </div>
+            <div id="fetchPatientStatusMsg" style="display: none; margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600;"></div>
+        </div>
+
+
+        <!-- PROGRESS -->
+
+        <div class="form-progress">
+
+            <div class="progress-step active-step">
+
+                <div class="progress-circle">
+                    1
+                </div>
+
+                <span>Personal</span>
+
+            </div>
+
+
+            <div class="progress-line"></div>
+
+
+            <div class="progress-step">
+
+                <div class="progress-circle">
+                    2
+                </div>
+
+                <span>Contact</span>
+
+            </div>
+
+
+            <div class="progress-line"></div>
+
+
+            <div class="progress-step">
+
+                <div class="progress-circle">
+                    3
+                </div>
+
+                <span>Medical</span>
+
+            </div>
+
+
+            <div class="progress-line"></div>
+
+
+            <div class="progress-step">
+
+                <div class="progress-circle">
+                    4
+                </div>
+
+                <span>Review</span>
+
+            </div>
+
+        </div>
+
+
+        <!-- FORM -->
+
+        
+        <form id="addPatientForm"></form>
+            
+
+
+            <!-- ================= STEP 1 ================= -->
+
+            <div class="form-step active-form-step">
+
+
+                <div class="form-card">
+
+                    <div class="form-card-header">
+
+                        <div class="form-icon">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>Personal Information</h3>
+
+                            <p>
+                                Basic details about the patient.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+
+                        <div class="input-group">
+
+                            <label>Full Name *</label>
+
+                            <input
+                                type="text"
+                                id="fullName"
+                                placeholder="Enter patient's full name"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label>Date of Birth *</label>
+
+                            <input
+                                type="date"
+                                id="dob"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label>Gender *</label>
+
+                            <select id="gender" required>
+
+                                <option value="">
+                                    Select Gender
+                                </option>
+
+                                <option>Male</option>
+
+                                <option>Female</option>
+
+                                <option>Other</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label>Blood Group</label>
+
+                            <select id="bloodGroup">
+
+                                <option value="">
+                                    Select Blood Group
+                                </option>
+
+                                <option>A+</option>
+                                <option>A-</option>
+
+                                <option>B+</option>
+                                <option>B-</option>
+
+                                <option>AB+</option>
+                                <option>AB-</option>
+
+                                <option>O+</option>
+                                <option>O-</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="input-group full-width">
+
+                            <label>Occupation</label>
+
+                            <input
+                                type="text"
+                                id="occupation"
+                                placeholder="Enter occupation"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= STEP 2 ================= -->
+
+            <div class="form-step">
+
+
+                <div class="form-card">
+
+                    <div class="form-card-header">
+
+                        <div class="form-icon">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>Contact Information</h3>
+
+                            <p>
+                                How can we contact the patient?
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+
+                        <div class="input-group">
+
+                            <label>Phone Number *</label>
+
+                            <input
+                                type="tel"
+                                id="phone"
+                                placeholder="+91 98765 43210"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label>Email Address</label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                placeholder="patient@email.com"
+                            >
+
+                        </div>
+
+
+
+                        <div class="input-group full-width">
+
+                            <label>Residential Address *</label>
+
+                            <textarea
+                                id="address"
+                                placeholder="Enter complete address"
+                                required
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label>Emergency Contact Name *</label>
+
+                            <input
+                                type="text"
+                                id="emergencyName"
+                                placeholder="Contact person name"
+                                required
+                            >
+
+                        </div>
+                        
+                        
+
+
+                        <div class="input-group">
+
+                            <label>Emergency Contact Number *</label>
+
+                            <input
+                                type="tel"
+                                id="emergencyPhone"
+                                placeholder="+91 98765 43210"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= STEP 3 ================= -->
+
+            <div class="form-step">
+
+
+                <div class="form-card">
+
+                    <div class="form-card-header">
+
+                        <div class="form-icon">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>Basic Medical Information</h3>
+
+                            <p>
+                                General health details and previous history.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+
+                        <div class="input-group">
+
+                            <label>Known Allergies</label>
+
+                            <input
+                                type="text"
+                                id="allergies"
+                                placeholder="Example: Dust, Penicillin"
+                            >
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label>Existing Conditions</label>
+
+                            <input
+                                type="text"
+                                id="conditions"
+                                placeholder="Example: Diabetes, Asthma"
+                            >
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label>Current Medication</label>
+
+                            <input
+                                type="text"
+                                id="medication"
+                                placeholder="Enter current medication"
+                            >
+
+                        </div>
+
+
+                        <div class="input-group">
+
+                            <label>Previous Surgery</label>
+
+                            <input
+                                type="text"
+                                id="surgery"
+                                placeholder="Enter surgery details"
+                            >
+
+                        </div>
+
+
+                        <div class="input-group full-width">
+
+                            <label>Additional Notes</label>
+
+                            <textarea
+                                id="medicalNotes"
+                                placeholder="Any additional medical information..."
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= STEP 4 ================= -->
+
+            <div class="form-step">
+
+
+                <div class="form-card review-card">
+
+                    <div class="form-card-header">
+
+                        <div class="form-icon">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>Review Patient Information</h3>
+
+                            <p>
+                                Review all information before creating
+                                the patient profile.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div id="reviewData" class="review-data">
+
+                        <!-- JAVASCRIPT DATA -->
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= BUTTONS ================= -->
+
+            <div class="form-navigation">
+
+                <button
+                    type="button"
+                    class="back-btn"
+                    id="prevBtn"
+                >
+                    <i class="fa-solid fa-arrow-left"></i>
+
+                    Back
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="next-btn"
+                    id="nextBtn"
+                >
+                    Continue
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="submit-patient-btn"
+                    id="submitBtn"
+                >
+                    <i class="fa-solid fa-user-check"></i>
+
+                    Create Patient Profile
+
+                </button>
+
+            </div>
+
+
+        </form>
+
+
+    </section>
+
+</main>
+
+
+<!-- SUCCESS MODAL -->
+
+<div class="success-modal" id="successModal">
+
+    <div class="success-modal-content">
+
+        <div class="success-icon">
+            <i class="fa-solid fa-check"></i>
+        </div>
+
+        <h2>Patient Registered!</h2>
+
+        <p>
+            The patient's digital profile has been created successfully.
+        </p>
+
+        <div class="success-patient-id">
+
+            Patient ID:
+            <strong id="successPatientId">
+                AYU-2026-0006
+            </strong>
+
+        </div>
+
+        <button id="goToPatients">
+
+            View Patients
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script src="js/models/clinical-state.js"></script>
+<script src="js/storage/clinical-storage.js"></script>
+<script src="js/services/speech-service.js"></script>
+<script src="js/services/i18n-service.js"></script>
+<script src="js/services/demo-service.js"></script>
+<script src="js/add-patient.js"></script>
+</body>
+</html>
