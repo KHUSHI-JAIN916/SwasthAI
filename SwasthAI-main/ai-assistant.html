@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Clinical Assistant | SWASTHAI</title>
+
+
+    <!-- GOOGLE FONT -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- FONT AWESOME -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <!-- MAIN CSS -->
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+    <link
+        rel="stylesheet"
+        href="css/clinical-system.css"
+    >
+</head>
+
+
+<body>
+
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar">
+
+
+    <div class="logo">
+        <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo">
+        <div>
+            <h2>SWASTHAI</h2>
+            <span>From Voice to Insight</span>
+        </div>
+    </div>
+
+
+    <div class="menu-title">
+
+        MAIN MENU
+
+    </div>
+
+
+    <nav class="nav-menu">
+
+        <a
+            href="dashboard.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-house"></i>
+
+            <span>Dashboard</span>
+
+        </a>
+
+        <a
+            href="add-patient.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-user-plus"></i>
+
+            <span>Add Patient</span>
+
+        </a>
+
+
+        <a
+            href="case-taking.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-file-medical"></i>
+
+            <span>New Case</span>
+
+        </a>
+
+
+        <a
+            href="practitioner-review.html"
+            class="nav-item"
+        >
+            <i class="fa-solid fa-user-doctor"></i>
+            <span>Review Workspace</span>
+        </a>
+
+        <a
+            href="case-history.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-clock-rotate-left"></i>
+
+            <span>Case History</span>
+
+        </a>
+
+
+        <a
+            href="analytics.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-chart-line"></i>
+
+            <span>Analytics</span>
+
+        </a>
+
+
+        <!-- AI ASSISTANT -->
+
+        <a
+            href="ai-assistant.html"
+            class="nav-item active"
+        >
+
+            <i class="fa-solid fa-robot"></i>
+
+            <span>AI Assistant</span>
+
+        </a>
+        <a href="voice-case.html" class="nav-item">
+
+            <i class="fa-solid fa-microphone"></i>
+
+            <span>Voice Case Taking</span>
+
+        </a>
+       
+
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+        <a
+            href="profile.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-gear"></i>
+
+            <span>System & Settings</span>
+
+        </a>
+
+
+        <a
+            href="index.html"
+            class="nav-item logout"
+        >
+
+            <i class="fa-solid fa-right-from-bracket"></i>
+
+            <span>Logout</span>
+
+        </a>
+
+
+    </div>
+
+
+</aside>
+
+
+<!-- ================= MAIN CONTENT ================= -->
+
+<main class="main-content">
+
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+
+        <div class="topbar-left">
+
+
+            <button
+                class="menu-toggle"
+                id="menuToggle"
+            >
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div>
+
+
+                <p class="breadcrumb">
+
+                    Dashboard / AI Assistant
+
+                </p>
+
+
+                <h1>
+
+                    AI Clinical Assistant
+
+                </h1>
+
+
+            </div>
+
+
+        </div>
+
+
+        <div class="topbar-right">
+
+
+            <button class="icon-btn">
+
+                <i class="fa-regular fa-bell"></i>
+
+            </button>
+
+
+            <div class="doctor-profile">
+
+
+                <div class="doctor-avatar">
+
+                    DS
+
+                </div>
+
+
+                <div class="doctor-info">
+
+
+                    <h4>
+
+                        Dr. Sharma
+
+                    </h4>
+
+
+                    <p>
+
+                        Doctor / Practitioner
+
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </header>
+
+
+
+    <!-- ================= AI CONTENT ================= -->
+
+    <section class="ai-assistant-container">
+
+
+        <!-- HERO -->
+
+        <div class="ai-hero">
+
+
+            <div class="ai-hero-icon">
+
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+            </div>
+
+
+            <div>
+
+
+                <h2>
+
+                    AI-Powered Case Intelligence
+
+                </h2>
+
+
+                <p>
+
+                    Review structured case observations,
+                    suggested questions and follow-up insights.
+
+                </p>
+
+
+            </div>
+
+
+            <button
+                class="generate-ai-btn"
+                id="generateAiBtn"
+            >
+
+                <i class="fa-solid fa-robot"></i>
+
+                Generate Analysis
+
+            </button>
+
+
+        </div>
+
+
+
+        <!-- PATIENT SELECT -->
+
+        <div class="ai-patient-card">
+
+
+            <div>
+
+
+                <h3>
+
+                    Select Patient Case
+
+                </h3>
+
+
+                <p>
+
+                    Choose a patient case for AI-assisted analysis.
+
+                </p>
+
+
+            </div>
+
+
+            <select
+                id="patientCaseSelect"
+            >
+
+                <option value="Rahul Kumar">
+
+                    Rahul Kumar — Chronic Headache
+
+                </option>
+
+
+                <option value="Priya Sharma">
+
+                    Priya Sharma — Digestive Discomfort
+
+                </option>
+
+
+                <option value="Amit Singh">
+
+                    Amit Singh — Joint Pain
+
+                </option>
+
+
+                <option value="Neha Verma">
+
+                    Neha Verma — Fatigue
+
+                </option>
+
+
+            </select>
+
+
+        </div>
+
+
+
+        <!-- AI STATUS -->
+
+        <div
+            class="ai-processing"
+            id="aiProcessing"
+        >
+
+
+            <div class="ai-loader"></div>
+
+
+            <div>
+
+
+                <h3>
+
+                    AI is analyzing the patient case...
+
+                </h3>
+
+
+                <p>
+
+                    Reviewing symptoms, history and AYUSH assessment.
+
+                </p>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ================= RESULTS ================= -->
+
+        <div
+            class="ai-results"
+            id="aiResults"
+        >
+
+
+            <!-- SUMMARY -->
+
+            <div class="ai-summary-card">
+
+
+                <div class="ai-card-header">
+
+
+                    <div>
+
+
+                        <i class="fa-solid fa-file-waveform"></i>
+
+
+                        <div>
+
+
+                            <h3>
+
+                                AI Case Summary
+
+                            </h3>
+
+
+                            <p>
+
+                                Structured overview of patient information
+
+                            </p>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    <span
+                        class="ai-generated-badge"
+                    >
+
+                        <i class="fa-solid fa-sparkles"></i>
+
+                        AI Generated
+
+                    </span>
+
+
+                </div>
+
+
+                <div
+                    class="ai-summary-text"
+                    id="aiSummaryText"
+                >
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- TWO COLUMN -->
+
+            <div class="ai-grid-two">
+
+
+                <!-- AYUSH -->
+
+                <div class="ai-info-card">
+
+
+                    <div class="ai-section-title">
+
+                        <i class="fa-solid fa-leaf"></i>
+
+                        <h3>
+
+                            AYUSH Observation
+
+                        </h3>
+
+                    </div>
+
+
+                    <div
+                        id="ayushObservation"
+                    >
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- CONFIDENCE -->
+
+                <div class="ai-info-card">
+
+
+                    <div class="ai-section-title">
+
+                        <i class="fa-solid fa-chart-simple"></i>
+
+                        <h3>
+
+                            Analysis Confidence
+
+                        </h3>
+
+                    </div>
+
+
+                    <div class="confidence-box">
+
+
+                        <div class="confidence-circle">
+
+                            <span
+                                id="confidenceScore"
+                            >
+
+                                0%
+
+                            </span>
+
+                        </div>
+
+
+                        <p>
+
+                            Confidence is based on completeness
+                            and consistency of entered information.
+
+                        </p>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ATTENTION FLAGS -->
+
+            <div class="ai-info-card full-card">
+
+
+                <div class="ai-section-title">
+
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+
+                    <h3>
+
+                        Attention Flags
+
+                    </h3>
+
+                </div>
+
+
+                <div
+                    class="attention-flags"
+                    id="attentionFlags"
+                >
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- SUGGESTED QUESTIONS -->
+
+            <div class="ai-info-card full-card">
+
+
+                <div class="ai-section-title">
+
+                    <i class="fa-solid fa-comments"></i>
+
+                    <h3>
+
+                        Suggested Follow-up Questions
+
+                    </h3>
+
+                </div>
+
+
+                <div
+                    class="suggested-questions"
+                    id="suggestedQuestions"
+                >
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- FOLLOW UP -->
+
+            <div class="ai-info-card full-card">
+
+
+                <div class="ai-section-title">
+
+                    <i class="fa-solid fa-calendar-check"></i>
+
+                    <h3>
+
+                        Follow-up Recommendations
+
+                    </h3>
+
+                </div>
+
+
+                <div
+                    class="followup-list"
+                    id="followUpList"
+                >
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- DISCLAIMER -->
+
+            <div class="ai-disclaimer">
+
+
+                <i class="fa-solid fa-circle-info"></i>
+
+
+                <p>
+
+                    AI-generated observations are intended to support
+                    case documentation and practitioner review.
+                    They are not a substitute for professional clinical
+                    judgement or diagnosis.
+
+                </p>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+
+<script src="js/models/clinical-state.js"></script>
+<script src="js/storage/clinical-storage.js"></script>
+<script src="js/services/ai-service.js"></script>
+<script src="js/services/speech-service.js"></script>
+<script src="js/services/i18n-service.js"></script>
+<script src="js/services/demo-service.js"></script>
+<script src="js/ai-assistant.js"></script>
+</body>
+</html>

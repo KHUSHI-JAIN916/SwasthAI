@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Case History | SWASTHAI</title>
+
+
+    <!-- Google Font -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Font Awesome -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <!-- Main CSS -->
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+    <link
+        rel="stylesheet"
+        href="css/clinical-system.css"
+    >
+</head>
+
+
+<body>
+
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo">
+        <div>
+            <h2>SWASTHAI</h2>
+            <span>From Voice to Insight</span>
+        </div>
+    </div>
+
+    <div class="menu-title">
+        MAIN MENU
+    </div>
+
+    <nav class="nav-menu">
+        <a
+            href="dashboard.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-house"></i>
+
+            <span>Dashboard</span>
+
+        </a>
+
+        <a
+            href="add-patient.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-user-plus"></i>
+
+            <span>Add Patient</span>
+
+        </a>
+
+
+        <a
+            href="case-taking.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-file-medical"></i>
+
+            <span>New Case</span>
+
+        </a>
+
+
+        <a
+            href="case-history.html"
+            class="nav-item active"
+        >
+
+            <i class="fa-solid fa-clock-rotate-left"></i>
+
+            <span>Case History</span>
+
+        </a>
+        <a href="analytics.html" class="nav-item">
+
+           <i class="fa-solid fa-chart-line"></i>
+
+           <span>Analytics</span>
+
+        </a>
+
+        <a href="ai-assistant.html" class="nav-item">
+
+            <i class="fa-solid fa-robot"></i>
+            <span>AI Assistant</span>
+
+        </a>
+        <a href="voice-case.html" class="nav-item">
+
+            <i class="fa-solid fa-microphone"></i>
+
+            <span>Voice Case Taking</span>
+
+        </a>
+
+
+        
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+        <a href="profile.html" class="nav-item">
+
+            <i class="fa-solid fa-gear"></i>
+
+            <span>System & Settings</span>
+
+        </a>
+
+
+        <a href="index.html" class="nav-item logout">
+
+            <i class="fa-solid fa-right-from-bracket"></i>
+
+            <span>Logout</span>
+
+        </a>
+
+    </div>
+
+</aside>
+
+
+<!-- ================= MAIN CONTENT ================= -->
+
+<main class="main-content">
+
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+        <div class="topbar-left">
+
+            <button
+                class="menu-toggle"
+                id="menuToggle"
+            >
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div>
+
+                <p class="breadcrumb">
+                    Dashboard / Case History
+                </p>
+
+                <h1>
+                    Case History
+                </h1>
+
+            </div>
+
+        </div>
+
+
+        <div class="topbar-right">
+
+            <button class="icon-btn">
+
+                <i class="fa-regular fa-bell"></i>
+
+            </button>
+
+
+            <div class="doctor-profile">
+
+                <div class="doctor-avatar">
+                    DS
+                </div>
+
+                <div class="doctor-info">
+
+                    <h4>
+                        Dr. Sharma
+                    </h4>
+
+                    <p>
+                        Doctor / Practitioner
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= CASE HISTORY ================= -->
+
+    <section class="case-history-container">
+
+
+        <!-- PAGE HEADER -->
+
+        <div class="history-page-header">
+
+            <div>
+
+                <h2>
+                    Patient Case Records
+                </h2>
+
+                <p>
+                    Search, filter and review previously recorded patient cases.
+                </p>
+
+            </div>
+
+
+            <a
+                href="case-taking.html"
+                class="new-case-history-btn"
+            >
+
+                <i class="fa-solid fa-plus"></i>
+
+                New Case
+
+            </a>
+
+        </div>
+
+
+        <!-- ================= STAT CARDS ================= -->
+
+        <div class="case-history-stats">
+
+
+            <div class="history-stat-card">
+
+                <div class="history-stat-icon">
+
+                    <i class="fa-solid fa-file-medical"></i>
+
+                </div>
+
+
+                <div>
+
+                    <p>Total Cases</p>
+
+                    <h3 id="totalCases">
+                        0
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="history-stat-card">
+
+                <div class="history-stat-icon">
+
+                    <i class="fa-solid fa-calendar-day"></i>
+
+                </div>
+
+
+                <div>
+
+                    <p>Today's Cases</p>
+
+                    <h3 id="todayCases">
+                        0
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="history-stat-card">
+
+                <div class="history-stat-icon">
+
+                    <i class="fa-solid fa-clock"></i>
+
+                </div>
+
+
+                <div>
+
+                    <p>Follow-ups</p>
+
+                    <h3 id="followUpCases">
+                        0
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="history-stat-card">
+
+                <div class="history-stat-icon">
+
+                    <i class="fa-solid fa-check"></i>
+
+                </div>
+
+
+                <div>
+
+                    <p>Completed</p>
+
+                    <h3 id="completedCases">
+                        0
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ================= FILTER SECTION ================= -->
+
+        <div class="case-filter-card">
+
+
+            <div class="case-search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    id="caseSearch"
+                    placeholder="Search by patient name, Case ID or complaint..."
+                >
+
+            </div>
+
+
+            <select
+                id="caseStatusFilter"
+            >
+
+                <option value="all">
+                    All Status
+                </option>
+
+                <option value="Active">
+                    Active
+                </option>
+
+                <option value="Follow-up">
+                    Follow-up
+                </option>
+
+                <option value="Completed">
+                    Completed
+                </option>
+
+            </select>
+
+
+            <select
+                id="prakritiFilter"
+            >
+
+                <option value="all">
+                    All Prakriti
+                </option>
+
+                <option value="Vata">
+                    Vata
+                </option>
+
+                <option value="Pitta">
+                    Pitta
+                </option>
+
+                <option value="Kapha">
+                    Kapha
+                </option>
+
+            </select>
+
+
+            <button
+                id="clearCaseFilters"
+                type="button"
+            >
+
+                <i class="fa-solid fa-rotate-left"></i>
+
+                Reset
+
+            </button>
+
+
+        </div>
+
+
+        <!-- ================= CASE TABLE ================= -->
+
+        <div class="case-table-card">
+
+
+            <div class="case-table-header">
+
+                <div>
+
+                    <h3>
+                        All Patient Cases
+                    </h3>
+
+                    <p>
+                        Latest recorded patient cases.
+                    </p>
+
+                </div>
+
+
+                <span
+                    class="case-result-count"
+                    id="caseResultCount"
+                >
+
+                    0 Cases
+
+                </span>
+
+            </div>
+
+
+            <div class="case-table-wrapper">
+
+
+                <table class="case-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Case ID
+                            </th>
+
+                            <th>
+                                Patient
+                            </th>
+
+                            <th>
+                                Chief Complaint
+                            </th>
+
+                            <th>
+                                Date
+                            </th>
+
+                            <th>
+                                Prakriti
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody
+                        id="caseTableBody"
+                    >
+
+                    </tbody>
+
+
+                </table>
+
+            </div>
+
+
+            <!-- EMPTY STATE -->
+
+            <div
+                class="case-empty-state"
+                id="caseEmptyState"
+            >
+
+                <i class="fa-solid fa-folder-open"></i>
+
+                <h3>
+                    No Cases Found
+                </h3>
+
+                <p>
+                    No patient cases match your search criteria.
+                </p>
+
+
+                <a
+                    href="case-taking.html"
+                >
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    Create New Case
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+<!-- ================= CASE DETAILS MODAL ================= -->
+
+<div
+    class="case-details-modal"
+    id="caseDetailsModal"
+>
+
+
+    <div class="case-details-content">
+
+
+        <button
+            class="close-case-modal"
+            id="closeCaseModal"
+        >
+
+            <i class="fa-solid fa-xmark"></i>
+
+        </button>
+
+
+        <div
+            id="caseDetailsContent"
+        >
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<script src="js/storage/clinical-storage.js"></script>
+<script src="js/services/speech-service.js"></script>
+<script src="js/services/i18n-service.js"></script>
+<script src="js/services/demo-service.js"></script>
+<script src="js/case-history.js"></script>
+</body>
+</html>

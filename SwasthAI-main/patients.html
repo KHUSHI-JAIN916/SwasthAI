@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Patients | SWASTHAI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/clinical-system.css">
+</head>
+
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo">
+            <div>
+                <h2>SWASTHAI</h2>
+                <span>From Voice to Insight</span>
+            </div>
+        </div>
+
+        <div class="menu-title">
+            MAIN MENU
+        </div>
+
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>Dashboard</span>
+            </a>
+
+
+            <a href="patients.html" class="nav-item active">
+                <i class="fa-solid fa-users"></i>
+                <span>Patients</span>
+            </a>
+
+
+            <a href="add-patient.html" class="nav-item">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Add Patient</span>
+            </a>
+
+
+            <a href="case-taking.html" class="nav-item">
+                <i class="fa-solid fa-file-medical"></i>
+                <span>New Case</span>
+            </a>
+
+            <a href="practitioner-review.html" class="nav-item">
+                <i class="fa-solid fa-user-doctor"></i>
+                <span>Review Workspace</span>
+            </a>
+
+            <a href="case-history.html" class="nav-item">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>Case History</span>
+            </a>
+
+            <a href="analytics.html" class="nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+
+            <a href="ai-assistant.html" class="nav-item">
+                <i class="fa-solid fa-robot"></i>
+                <span>AI Assistant</span>
+            </a>
+            <a href="voice-case.html" class="nav-item">
+
+                <i class="fa-solid fa-microphone"></i>
+
+                <span>Voice Case Taking</span>
+
+            </a>
+
+
+
+          
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="profile.html" class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>System & Settings</span>
+            </a>
+
+            <a href="index.html" class="nav-item logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <div>
+
+                    <p class="breadcrumb">
+                        Dashboard / Patients
+                    </p>
+
+                    <h1>
+                        Patient Management
+                    </h1>
+
+                </div>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <!-- Language Switcher -->
+                <div id="globalLanguageSwitcherContainer" class="lang-switcher-wrapper">
+                    <i class="fa-solid fa-language" style="color: #1f7a57;"></i>
+                    <select class="lang-dropdown global-lang-select notranslate">
+                        <option value="hi">🇮🇳 हिंदी (Hindi)</option>
+                        <option value="hinglish">🗣️ Hinglish</option>
+                        <option value="en">🇬🇧 English</option>
+                    </select>
+                </div>
+
+                <button class="icon-btn notification-btn">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notification-dot"></span>
+                </button>
+
+
+                <div class="doctor-profile">
+
+                    <div class="doctor-avatar">
+                        DS
+                    </div>
+
+                    <div class="doctor-info">
+
+                        <h4>Dr. Sharma</h4>
+
+                        <p>Doctor / Practitioner</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PATIENT PAGE -->
+
+        <section class="patients-container">
+
+
+            <!-- PAGE HEADER -->
+
+            <div class="page-header">
+
+                <div>
+
+                    <h2>
+                        All Patients
+                    </h2>
+
+                    <p>
+                        Manage and view all registered patient records.
+                    </p>
+
+                </div>
+
+
+                <a href="add-patient.html" class="add-patient-btn">
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    Add New Patient
+
+                </a>
+
+            </div>
+
+
+            <!-- PATIENT STATS -->
+
+            <div class="patient-mini-stats">
+
+                <div class="mini-stat">
+
+                    <div>
+
+                        <p>Total Patients</p>
+
+                        <h3>1,248</h3>
+
+                    </div>
+
+                    <i class="fa-solid fa-users"></i>
+
+                </div>
+
+
+                <div class="mini-stat">
+
+                    <div>
+
+                        <p>New This Month</p>
+
+                        <h3>84</h3>
+
+                    </div>
+
+                    <i class="fa-solid fa-user-plus"></i>
+
+                </div>
+
+
+                <div class="mini-stat">
+
+                    <div>
+
+                        <p>Follow-ups</p>
+
+                        <h3>32</h3>
+
+                    </div>
+
+                    <i class="fa-solid fa-calendar-check"></i>
+
+                </div>
+
+            </div>
+
+
+            <!-- PATIENT LIST CARD -->
+
+            <div class="patients-card">
+
+
+                <!-- SEARCH -->
+
+                <div class="patient-tools">
+
+
+                    <div class="search-box">
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        <input
+                            type="text"
+                            id="patientSearch"
+                            placeholder="Search by patient name or ID..."
+                        >
+
+                    </div>
+
+
+                    <div class="filter-group">
+
+                        <select id="statusFilter">
+
+                            <option value="all">
+                                All Status
+                            </option>
+
+                            <option value="active">
+                                Active
+                            </option>
+
+                            <option value="follow-up">
+                                Follow-up
+                            </option>
+
+                            <option value="new">
+                                New
+                            </option>
+
+                        </select>
+
+
+                        <button class="filter-btn">
+
+                            <i class="fa-solid fa-filter"></i>
+
+                            Filter
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TABLE -->
+
+                <div class="patients-table-wrapper">
+
+                    <table class="patients-table">
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Patient</th>
+
+                                <th>Patient ID</th>
+
+                                <th>Age / Gender</th>
+
+                                <th>Last Visit</th>
+
+                                <th>Status</th>
+
+                                <th>Action</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="patientTableBody">
+
+
+                            <tr data-status="active">
+
+                                <td>
+
+                                    <div class="patient-name">
+
+                                        <div class="patient-avatar avatar-1">
+                                            RK
+                                        </div>
+
+                                        <div>
+
+                                            <h4>Rahul Kumar</h4>
+
+                                            <p>rahul@email.com</p>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>AYU-2026-001</td>
+
+                                <td>32 / Male</td>
+
+                                <td>Today</td>
+
+                                <td>
+
+                                    <span class="status active-status">
+                                        Active
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    <button class="view-btn">
+                                        View
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr data-status="follow-up">
+
+                                <td>
+
+                                    <div class="patient-name">
+
+                                        <div class="patient-avatar avatar-2">
+                                            PS
+                                        </div>
+
+                                        <div>
+
+                                            <h4>Priya Sharma</h4>
+
+                                            <p>priya@email.com</p>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>AYU-2026-002</td>
+
+                                <td>28 / Female</td>
+
+                                <td>Yesterday</td>
+
+                                <td>
+
+                                    <span class="status follow-status">
+                                        Follow-up
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    <button class="view-btn">
+                                        View
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr data-status="new">
+
+                                <td>
+
+                                    <div class="patient-name">
+
+                                        <div class="patient-avatar avatar-3">
+                                            AS
+                                        </div>
+
+                                        <div>
+
+                                            <h4>Amit Singh</h4>
+
+                                            <p>amit@email.com</p>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>AYU-2026-003</td>
+
+                                <td>45 / Male</td>
+
+                                <td>Aug 30, 2026</td>
+
+                                <td>
+
+                                    <span class="status new-status">
+                                        New
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    <button class="view-btn">
+                                        View
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr data-status="active">
+
+                                <td>
+
+                                    <div class="patient-name">
+
+                                        <div class="patient-avatar avatar-2">
+                                            SK
+                                        </div>
+
+                                        <div>
+
+                                            <h4>Sneha Kapoor</h4>
+
+                                            <p>sneha@email.com</p>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>AYU-2026-004</td>
+
+                                <td>35 / Female</td>
+
+                                <td>Aug 29, 2026</td>
+
+                                <td>
+
+                                    <span class="status active-status">
+                                        Active
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    <button class="view-btn">
+                                        View
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr data-status="follow-up">
+
+                                <td>
+
+                                    <div class="patient-name">
+
+                                        <div class="patient-avatar avatar-1">
+                                            VS
+                                        </div>
+
+                                        <div>
+
+                                            <h4>Vikram Singh</h4>
+
+                                            <p>vikram@email.com</p>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>AYU-2026-005</td>
+
+                                <td>52 / Male</td>
+
+                                <td>Aug 28, 2026</td>
+
+                                <td>
+
+                                    <span class="status follow-status">
+                                        Follow-up
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    <button class="view-btn">
+                                        View
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- PAGINATION -->
+
+                <div class="pagination">
+
+                    <span>
+                        Showing 1–5 of 1,248 patients
+                    </span>
+
+
+                    <div class="pagination-buttons">
+
+                        <button>
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+
+                        <button class="page-active">
+                            1
+                        </button>
+
+                        <button>2</button>
+
+                        <button>3</button>
+
+                        <button>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ================= PATIENT FULL DOSSIER MODAL ================= -->
+    <div class="clinical-modal" id="patientDossierModal">
+        <div class="clinical-modal-content" style="max-width: 780px;">
+            <div class="clinical-modal-header">
+                <div>
+                    <h3 id="dossierPatientName" style="margin: 0; font-size: 18px; font-weight: 800; color: #1f7a57;">
+                        <i class="fa-solid fa-id-card-clip"></i> Rajesh Patel (AYU-2026-DEMO)
+                    </h3>
+                    <span id="dossierSubtitle" style="font-size: 12px; color: #64748b;">Comprehensive Patient Clinical Dossier</span>
+                </div>
+                <button type="button" class="sih-close-btn" onclick="closePatientDossierModal()">&times;</button>
+            </div>
+            <div class="clinical-modal-body" style="max-height: 75vh; overflow-y: auto;">
+                <!-- Demographics Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                    <div><span style="font-size: 11px; color: #64748b;">Age / Gender:</span> <strong id="dossierAgeGender" style="display: block; font-size: 13px;">58y / Male</strong></div>
+                    <div><span style="font-size: 11px; color: #64748b;">Blood Group:</span> <strong id="dossierBloodGroup" style="display: block; font-size: 13px;">B+</strong></div>
+                    <div><span style="font-size: 11px; color: #64748b;">Phone:</span> <strong id="dossierPhone" style="display: block; font-size: 13px;">+91 98765 43210</strong></div>
+                    <div><span style="font-size: 11px; color: #64748b;">Allergies:</span> <strong id="dossierAllergies" style="display: block; font-size: 13px; color: #dc2626;">Penicillin (Severe)</strong></div>
+                </div>
+
+                <!-- Patient Reported Diseases -->
+                <div style="margin-bottom: 16px;">
+                    <h4 style="font-size: 14px; font-weight: 800; color: #166534; margin: 0 0 8px 0;">
+                        <i class="fa-solid fa-virus"></i> Patient-Reported Diseases & Current Symptoms (मरीज़ द्वारा बताई गई बीमारी)
+                    </h4>
+                    <div id="dossierReportedDiseases" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Past Doctor Records -->
+                <div style="margin-bottom: 16px;">
+                    <h4 style="font-size: 14px; font-weight: 800; color: #0284c7; margin: 0 0 8px 0;">
+                        <i class="fa-solid fa-book-medical"></i> Past Doctor Consultations & Old Clinic Data (पुराने डॉक्टर का डेटा)
+                    </h4>
+                    <div id="dossierPastDoctorRecords" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Timeline & Cases Summary -->
+                <div>
+                    <h4 style="font-size: 14px; font-weight: 800; color: #475569; margin: 0 0 8px 0;">
+                        <i class="fa-solid fa-timeline"></i> Clinical Timeline & Verified Cases
+                    </h4>
+                    <div id="dossierTimelineList" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+            </div>
+            <div class="clinical-modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <span id="dossierLoginCreds" style="font-size: 12px; color: #166534; font-weight: 700; background: #dcfce7; padding: 4px 10px; border-radius: 6px;">Patient Portal Login: ID: AYU-2026-DEMO | Pass: 123456</span>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" onclick="closePatientDossierModal()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                        Close
+                    </button>
+                    <a id="dossierStartCaseBtn" href="case-taking.html" style="font-size: 13px; text-decoration: none; padding: 8px 18px; background: #1f7a57; color: white; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-stethoscope"></i> Start Case Taking
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="js/models/clinical-state.js"></script>
+    <script src="js/storage/clinical-storage.js"></script>
+    <script src="js/services/speech-service.js"></script>
+    <script src="js/services/i18n-service.js"></script>
+    <script src="js/services/demo-service.js"></script>
+    <script src="js/patients.js"></script>
+</body>
+</html>
