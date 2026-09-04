@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>New Case | SWASTHAI</title>
+
+
+    <!-- GOOGLE FONT -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- FONT AWESOME -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <!-- CSS -->
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+    <link
+        rel="stylesheet"
+        href="css/clinical-system.css"
+    >
+</head>
+
+
+<body>
+
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo">
+        <div>
+            <h2>SWASTHAI</h2>
+            <span>From Voice to Insight</span>
+        </div>
+    </div>
+
+    <div class="menu-title">
+        MAIN MENU
+    </div>
+
+    <nav class="nav-menu">
+        <a href="patient-portal.html" class="nav-item" style="color: #16a34a; font-weight: 700;">
+            <i class="fa-solid fa-hands-holding-child"></i>
+            <span>Patient Portal</span>
+        </a>
+
+        <a
+            href="dashboard.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-house"></i>
+
+            <span>Dashboard</span>
+
+        </a>
+
+
+        <a
+            href="patients.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-users"></i>
+
+            <span>Patients</span>
+
+        </a>
+
+
+        <a
+            href="add-patient.html"
+            class="nav-item"
+        >
+
+            <i class="fa-solid fa-user-plus"></i>
+
+            <span>Add Patient</span>
+
+        </a>
+
+
+        <a
+            href="case-taking.html"
+            class="nav-item active"
+        >
+
+            <i class="fa-solid fa-file-medical"></i>
+
+            <span>New Case</span>
+
+        </a>
+
+
+        <a href="#" class="nav-item">
+
+            <i class="fa-solid fa-clock-rotate-left"></i>
+
+            <span>Case History</span>
+
+        </a>
+
+
+        <a href="#" class="nav-item">
+
+            <i class="fa-solid fa-chart-line"></i>
+
+            <span>Analytics</span>
+
+        </a>
+
+        <a href="ai-assistant.html" class="nav-item">
+            <i class="fa-solid fa-robot"></i>
+            <span>AI Assistant</span >
+
+        </a>
+
+    </nav>
+
+    
+
+
+    <div class="sidebar-bottom">
+
+        <a href="#" class="nav-item">
+
+            <i class="fa-solid fa-gear"></i>
+
+            <span>Settings</span>
+
+        </a>
+
+
+        <a href="#" class="nav-item logout">
+
+            <i class="fa-solid fa-right-from-bracket"></i>
+
+            <span>Logout</span>
+
+        </a>
+        <a href="voice-case.html" class="nav-item">
+
+             <i class="fa-solid fa-microphone"></i>
+
+             <span>Voice Case Taking</span>
+
+        </a>
+
+    </div>
+
+</aside>
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="main-content">
+
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+        <div class="topbar-left">
+
+            <button
+                class="menu-toggle"
+                id="menuToggle"
+            >
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div>
+
+                <p class="breadcrumb">
+
+                    Dashboard / New Case
+
+                </p>
+
+
+                <h1>
+                    Intelligent Case Taking
+                </h1>
+
+            </div>
+
+        </div>
+
+
+        <div class="topbar-right">
+
+            <button class="icon-btn">
+
+                <i class="fa-regular fa-bell"></i>
+
+            </button>
+
+
+            <div class="doctor-profile">
+
+                <div class="doctor-avatar">
+                    DS
+                </div>
+
+
+                <div class="doctor-info">
+
+                    <h4>Dr. Sharma</h4>
+
+                    <p>Doctor / Practitioner</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= CASE CONTENT ================= -->
+
+    <section class="case-container">
+
+
+        <!-- HEADER -->
+        <div class="case-page-header">
+            <div>
+                <h2>New Patient Case Documentation</h2>
+                <p>Interactive AI-assisted case taking for AYUSH practitioners. Patient answers guide dynamic clinical inquiry.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="sih-btn primary" id="loadDemoPatientBtn" style="font-size: 12px; padding: 6px 12px;">
+                    <i class="fa-solid fa-user-check"></i> Load Demo: Rajesh Patel
+                </button>
+                <div class="case-ai-badge">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    AI Adaptive Case Taking
+                </div>
+            </div>
+        </div>
+
+        <!-- MODE SWITCHER & ACCESSIBILITY BAR -->
+        <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="sih-btn primary" id="modeAdaptiveBtn" style="font-size: 13px; padding: 8px 16px;">
+                    <i class="fa-solid fa-comments"></i> AI Adaptive Interview
+                </button>
+                <button type="button" class="sih-btn" id="modeFormBtn" style="font-size: 13px; padding: 8px 16px; color: #374151; background: #f3f4f6;">
+                    <i class="fa-solid fa-list-check"></i> 8-Step Form Mode
+                </button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                <!-- Language Selector -->
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+                    <i class="fa-solid fa-language" style="color: #1f7a57;"></i>
+                    <select id="interviewLanguageSelect" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #d1d5db; font-size: 13px;">
+                        <option value="hinglish">Hinglish (हिन्दी-English)</option>
+                        <option value="hi">हिंदी (Hindi)</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+
+                <!-- Elderly-Friendly Mode Toggle -->
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; cursor: pointer; color: #166534; background: #f0fdf4; padding: 6px 12px; border-radius: 20px; border: 1px solid #bbf7d0;">
+                    <input type="checkbox" id="elderlyModeToggle">
+                    👴 Elderly Mode (सुगम मोड)
+                </label>
+
+                <!-- Document Upload -->
+                <button type="button" class="sih-btn" id="uploadReportModalBtn" style="color: #374151; background: #f3f4f6; font-size: 12px;">
+                    <i class="fa-solid fa-file-arrow-up"></i> Upload Report
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= SECTION A: AI ADAPTIVE INTERVIEW ================= -->
+        <div id="adaptiveInterviewWrapper">
+            <!-- CAREGIVER CONSENT NOTICE -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+                <span><i class="fa-solid fa-shield-halved" style="color: #1f7a57;"></i> Privacy Notice: Data collected solely for consultation documentation. Practitioner remains final decision maker.</span>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="caregiverConsentCheck" checked>
+                    Caregiver Assisting (Meena Patel)
+                </label>
+            </div>
+
+            <!-- RED FLAG LIVE ALERT CONTAINER -->
+            <div id="liveRedFlagAlertContainer"></div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px;">
+                <!-- CHAT STREAM -->
+                <div class="chat-interview-container">
+                    <div class="chat-interview-header">
+                        <h3><i class="fa-solid fa-robot" style="color: #1f7a57;"></i> SwasthAI Clinical Conversational Engine</h3>
+                        <div class="chat-controls-group">
+                            <span id="speechRecognitionStatus" class="conf-badge conf-high"><i class="fa-solid fa-signal"></i> Ready</span>
+                        </div>
+                    </div>
+
+                    <!-- ELDERLY VOICE HELPER BAR -->
+                    <div class="elderly-action-bar" id="elderlyActionBar" style="padding: 8px 16px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; display: none; align-items: center; gap: 10px;">
+                        <button type="button" class="elderly-tts-btn" id="readAloudBtn"><i class="fa-solid fa-volume-high"></i> Read Question</button>
+                        <button type="button" class="elderly-tts-btn" id="repeatQuestionBtn"><i class="fa-solid fa-rotate-right"></i> Repeat</button>
+                        <button type="button" class="elderly-tts-btn" id="slowSpeechBtn"><i class="fa-solid fa-tortoise"></i> Slow Speech</button>
+                    </div>
+
+                    <!-- CHAT MESSAGES BODY -->
+                    <div class="chat-stream-body" id="chatStreamBody">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <!-- PATIENT CORRECTION NOTIFICATION CARD (Req 18) -->
+                    <div id="patientCorrectionCard" style="display: none; padding: 10px 16px; background: #fefce8; border-top: 1px solid #fef08a; font-size: 13px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span id="correctionPromptText">AI understood: ... Is this accurate?</span>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" class="sih-btn primary" id="confirmCorrectionBtn" style="font-size: 11px;">Yes, Correct</button>
+                                <button type="button" class="sih-btn" id="editCorrectionBtn" style="font-size: 11px; background: #e5e7eb; color: #374151;">Edit</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CHAT INPUT FOOTER -->
+                    <div class="chat-input-footer">
+                        <form class="chat-input-form" id="chatInputForm">
+                            <button type="button" class="chat-mic-btn" id="adaptiveMicBtn" title="Speak instead of typing">
+                                <i class="fa-solid fa-microphone"></i>
+                            </button>
+                            <input type="text" id="adaptiveTextInput" placeholder="Speak or type patient's symptoms (e.g. 'Mujhe 2 din se pet ke right side me dard hai')..." autocomplete="off">
+                            <button type="submit" class="chat-send-btn" id="adaptiveSendBtn">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- RIGHT SIDE: LIVE CLINICAL SLOTS TRACKER -->
+                <div>
+                    <div class="case-card" style="padding: 18px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h4 style="font-size: 14px; font-weight: 700; color: #111827;">
+                                <i class="fa-solid fa-list-check" style="color: #1f7a57;"></i> Clinical State Tracker
+                            </h4>
+                            <span class="conf-badge conf-high" id="slotsStatusBadge">Interviewing</span>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;" id="clinicalSlotsList">
+                            <div style="display: flex; justify-content: space-between; padding: 6px 8px; background: #f9fafb; border-radius: 4px;">
+                                <span>Chief Complaint:</span>
+                                <strong id="slotChiefComplaint" style="color: #9ca3af;">Pending</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 8px; background: #f9fafb; border-radius: 4px;">
+                                <span>Duration / Onset:</span>
+                                <strong id="slotDuration" style="color: #9ca3af;">Pending</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 8px; background: #f9fafb; border-radius: 4px;">
+                                <span>Location:</span>
+                                <strong id="slotLocation" style="color: #9ca3af;">Pending</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 8px; background: #f9fafb; border-radius: 4px;">
+                                <span>Severity:</span>
+                                <strong id="slotSeverity" style="color: #9ca3af;">Pending</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 8px; background: #f9fafb; border-radius: 4px;">
+                                <span>Medications:</span>
+                                <strong id="slotMedications" style="color: #9ca3af;">Pending</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 8px; background: #f9fafb; border-radius: 4px;">
+                                <span>Allergies:</span>
+                                <strong id="slotAllergies" style="color: #9ca3af;">Pending</strong>
+                            </div>
+                        </div>
+
+                        <!-- CASE SUFFICIENCY BANNER -->
+                        <div id="caseSufficientBanner" style="display: none; margin-top: 16px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 14px; text-align: center;">
+                            <div style="font-weight: 700; color: #166534; font-size: 14px; margin-bottom: 6px;">
+                                <i class="fa-solid fa-circle-check"></i> Case Information Sufficient!
+                            </div>
+                            <p style="font-size: 12px; color: #15803d; margin-bottom: 10px;">All essential clinical domains have been collected. Ready for practitioner review.</p>
+                            <a href="practitioner-review.html" class="primary-btn" id="proceedToReviewBtn" style="font-size: 13px; padding: 8px 16px; display: inline-block; text-decoration: none;">
+                                Open in Review Workspace <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- QUICK VOICE TIP -->
+                    <div class="case-card" style="padding: 14px; font-size: 12px; color: #6b7280; line-height: 1.5;">
+                        <i class="fa-solid fa-lightbulb" style="color: #eab308;"></i>
+                        <strong>Tip for Judges:</strong> Click the microphone or type natural statements in Hinglish like <em>"Mujhe 2 din se pet ke right side me bahut dard hai aur bukhar bhi hai"</em> to see real-time follow-ups and red-flag urgency detection!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SECTION B: 8-STEP FORM (Preserved & Toggleable) ================= -->
+        <div id="formBasedSection" style="display: none;">
+            <!-- PROGRESS -->
+            <div class="case-progress-wrapper">
+                <div class="case-progress">
+                    <div class="case-progress-fill"></div>
+                </div>
+                <div class="case-step-labels">
+                    <span>Patient</span>
+                    <span>Complaint</span>
+                    <span>Illness</span>
+                    <span>Medical</span>
+                    <span>Family</span>
+                    <span>Lifestyle</span>
+                    <span>AYUSH</span>
+                    <span>Review</span>
+                </div>
+            </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= FORM ================= -->
+
+        <form id="caseForm">
+
+
+            <!-- STEP 1 -->
+
+            <div class="case-form-step active-case-step">
+
+                <div class="case-card">
+
+                    <div class="case-card-header">
+
+                        <div class="case-number">
+                            01
+                        </div>
+
+
+                        <div>
+
+                            <h3>
+                                Select Patient
+                            </h3>
+
+                            <p>
+                                Choose an existing patient or register a new one.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="patient-selection-grid">
+
+
+                        <div class="select-patient-card selected-patient-option">
+
+                            <div class="selection-icon">
+
+                                <i class="fa-solid fa-users"></i>
+
+                            </div>
+
+
+                            <h3>
+                                Existing Patient
+                            </h3>
+
+
+                            <p>
+                                Select a patient from your registered records.
+                            </p>
+
+
+                            <select
+                                id="casePatient"
+                                required
+                            >
+
+                                <option value="">
+                                    Select Patient
+                                </option>
+
+                                <option>
+                                    Rahul Kumar — AYU-2026-001
+                                </option>
+
+                                <option>
+                                    Priya Sharma — AYU-2026-002
+                                </option>
+
+                                <option>
+                                    Amit Singh — AYU-2026-003
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <a
+                            href="add-patient.html"
+                            class="select-patient-card new-patient-option"
+                        >
+
+                            <div class="selection-icon">
+
+                                <i class="fa-solid fa-user-plus"></i>
+
+                            </div>
+
+
+                            <h3>
+                                New Patient
+                            </h3>
+
+
+                            <p>
+                                Register a new patient before starting a case.
+                            </p>
+
+
+                            <span>
+                                Add Patient
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STEP 2 -->
+
+            <div class="case-form-step">
+
+                <div class="case-card">
+
+                    <div class="case-card-header">
+
+                        <div class="case-number">
+                            02
+                        </div>
+
+
+                        <div>
+
+                            <h3>
+                                Chief Complaint
+                            </h3>
+
+                            <p>
+                                Record the main reason for the patient's visit.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="case-input-group">
+
+                        <label>
+                            Primary Complaint *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="chiefComplaint"
+                            placeholder="Example: Headache, stomach pain, fatigue..."
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="case-input-group">
+
+                        <label>
+                            Describe the Complaint *
+                        </label>
+
+                        <textarea
+                            id="complaintDescription"
+                            placeholder="Describe the symptoms in the patient's own words..."
+                            required
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="symptom-chips">
+
+                        <span>Common Symptoms:</span>
+
+                        <button type="button">
+                            Headache
+                        </button>
+
+                        <button type="button">
+                            Fever
+                        </button>
+
+                        <button type="button">
+                            Fatigue
+                        </button>
+
+                        <button type="button">
+                            Cough
+                        </button>
+
+                        <button type="button">
+                            Joint Pain
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STEP 3 -->
+
+            <div class="case-form-step">
+
+                <div class="case-card">
+
+                    <div class="case-card-header">
+
+                        <div class="case-number">
+                            03
+                        </div>
+
+
+                        <div>
+
+                            <h3>
+                                History of Present Illness
+                            </h3>
+
+                            <p>
+                                Understand when and how the symptoms developed.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="case-grid">
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                When did symptoms start?
+                            </label>
+
+                            <input
+                                type="text"
+                                id="symptomStart"
+                                placeholder="Example: 3 days ago"
+                            >
+
+                        </div>
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                Symptom Severity
+                            </label>
+
+                            <select id="severity">
+
+                                <option value="">
+                                    Select Severity
+                                </option>
+
+                                <option>Mild</option>
+
+                                <option>Moderate</option>
+
+                                <option>Severe</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                Symptom Pattern
+                            </label>
+
+                            <select id="symptomPattern">
+
+                                <option value="">
+                                    Select Pattern
+                                </option>
+
+                                <option>Continuous</option>
+
+                                <option>Intermittent</option>
+
+                                <option>Progressively Increasing</option>
+
+                                <option>Improving</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                What makes it worse?
+                            </label>
+
+                            <input
+                                type="text"
+                                id="aggravatingFactors"
+                                placeholder="Example: Cold weather, movement"
+                            >
+
+                        </div>
+
+
+                        <div class="case-input-group full-case-width">
+
+                            <label>
+                                Present Illness Notes
+                            </label>
+
+                            <textarea
+                                id="presentIllnessNotes"
+                                placeholder="Additional observations..."
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STEP 4 -->
+
+            <div class="case-form-step">
+
+                <div class="case-card">
+
+                    <div class="case-card-header">
+
+                        <div class="case-number">
+                            04
+                        </div>
+
+
+                        <div>
+
+                            <h3>
+                                Medical History
+                            </h3>
+
+                            <p>
+                                Record relevant previous medical information.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="case-grid">
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                Previous Illnesses
+                            </label>
+
+                            <input
+                                type="text"
+                                id="previousIllnesses"
+                                placeholder="Example: Diabetes, asthma"
+                            >
+
+                        </div>
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                Previous Surgeries
+                            </label>
+
+                            <input
+                                type="text"
+                                id="previousSurgeries"
+                                placeholder="Enter previous surgeries"
+                            >
+
+                        </div>
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                Current Medication
+                            </label>
+
+                            <input
+                                type="text"
+                                id="currentMedication"
+                                placeholder="Enter medication"
+                            >
+
+                        </div>
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                Known Allergies
+                            </label>
+
+                            <input
+                                type="text"
+                                id="knownAllergies"
+                                placeholder="Example: Penicillin"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STEP 5 -->
+
+            <div class="case-form-step">
+
+                <div class="case-card">
+
+                    <div class="case-card-header">
+
+                        <div class="case-number">
+                            05
+                        </div>
+
+
+                        <div>
+
+                            <h3>
+                                Family History
+                            </h3>
+
+                            <p>
+                                Record hereditary and family-related conditions.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="family-options">
+
+                        <label class="family-option">
+
+                            <input
+                                type="checkbox"
+                                value="Diabetes"
+                            >
+
+                            Diabetes
+
+                        </label>
+
+
+                        <label class="family-option">
+
+                            <input
+                                type="checkbox"
+                                value="Hypertension"
+                            >
+
+                            Hypertension
+
+                        </label>
+
+
+                        <label class="family-option">
+
+                            <input
+                                type="checkbox"
+                                value="Heart Disease"
+                            >
+
+                            Heart Disease
+
+                        </label>
+
+
+                        <label class="family-option">
+
+                            <input
+                                type="checkbox"
+                                value="Cancer"
+                            >
+
+                            Cancer
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="case-input-group">
+
+                        <label>
+                            Additional Family History
+                        </label>
+
+                        <textarea
+                            id="familyNotes"
+                            placeholder="Enter additional family health information..."
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STEP 6 -->
+
+            <div class="case-form-step">
+
+                <div class="case-card">
+
+                    <div class="case-card-header">
+
+                        <div class="case-number">
+                            06
+                        </div>
+
+
+                        <div>
+
+                            <h3>
+                                Lifestyle Assessment
+                            </h3>
+
+                            <p>
+                                Understand habits and lifestyle factors.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="case-grid">
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                Sleep Duration
+                            </label>
+
+                            <select id="sleep">
+
+                                <option value="">
+                                    Select
+                                </option>
+
+                                <option>Less than 5 hours</option>
+
+                                <option>5–6 hours</option>
+
+                                <option>7–8 hours</option>
+
+                                <option>More than 8 hours</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                Physical Activity
+                            </label>
+
+                            <select id="activity">
+
+                                <option value="">
+                                    Select
+                                </option>
+
+                                <option>Low</option>
+
+                                <option>Moderate</option>
+
+                                <option>High</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                Stress Level
+                            </label>
+
+                            <select id="stress">
+
+                                <option value="">
+                                    Select
+                                </option>
+
+                                <option>Low</option>
+
+                                <option>Moderate</option>
+
+                                <option>High</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="case-input-group">
+
+                            <label>
+                                Dietary Preference
+                            </label>
+
+                            <select id="diet">
+
+                                <option value="">
+                                    Select
+                                </option>
+
+                                <option>Vegetarian</option>
+
+                                <option>Non-Vegetarian</option>
+
+                                <option>Vegan</option>
+
+                                <option>Mixed</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STEP 7 -->
+
+            <div class="case-form-step">
+
+                <div class="case-card">
+
+                    <div class="case-card-header">
+
+                        <div class="case-number">
+                            07
+                        </div>
+
+
+                        <div>
+
+                            <h3>
+                                AYUSH Assessment
+                            </h3>
+
+                            <p>
+                                Record traditional AYUSH observations.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="prakriti-grid">
+
+
+                        <label class="prakriti-card">
+
+                            <input
+                                type="radio"
+                                name="prakriti"
+                                value="Vata"
+                            >
+
+                            <span class="prakriti-name">
+                                Vata
+                            </span>
+
+                            <small>
+                                Movement & energy characteristics
+                            </small>
+
+                        </label>
+
+
+                        <label class="prakriti-card">
+
+                            <input
+                                type="radio"
+                                name="prakriti"
+                                value="Pitta"
+                            >
+
+                            <span class="prakriti-name">
+                                Pitta
+                            </span>
+
+                            <small>
+                                Metabolism & transformation characteristics
+                            </small>
+
+                        </label>
+
+
+                        <label class="prakriti-card">
+
+                            <input
+                                type="radio"
+                                name="prakriti"
+                                value="Kapha"
+                            >
+
+                            <span class="prakriti-name">
+                                Kapha
+                            </span>
+
+                            <small>
+                                Structure & stability characteristics
+                            </small>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="case-input-group">
+
+                        <label>
+                            Practitioner Observations
+                        </label>
+
+                        <textarea
+                            id="ayushObservations"
+                            placeholder="Enter AYUSH-based observations..."
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STEP 8 -->
+
+            <div class="case-form-step">
+
+                <div class="case-card ai-review-card">
+
+
+                    <div class="ai-review-header">
+
+                        <div>
+
+                            <span class="ai-label">
+
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                                AI GENERATED
+
+                            </span>
+
+
+                            <h2>
+                                Case Summary
+                            </h2>
+
+
+                            <p>
+                                Review the structured summary generated from
+                                the case information.
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            id="generateSummaryBtn"
+                            class="generate-summary-btn"
+                        >
+
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                            Generate Summary
+
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="aiCaseSummary"
+                        class="ai-case-summary"
+                    >
+
+                        <div class="summary-placeholder">
+
+                            <i class="fa-solid fa-robot"></i>
+
+                            <h3>
+                                AI Summary Ready
+                            </h3>
+
+                            <p>
+                                Click Generate Summary to create a structured
+                                case overview.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="case-disclaimer">
+
+                        <i class="fa-solid fa-circle-info"></i>
+
+                        This AI-assisted summary is for clinical documentation
+                        support and must be reviewed by a qualified practitioner.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= NAVIGATION ================= -->
+
+            <div class="case-navigation">
+
+
+                <button
+                    type="button"
+                    class="case-back-btn"
+                    id="casePrevBtn"
+                >
+
+                    <i class="fa-solid fa-arrow-left"></i>
+
+                    Previous
+
+                </button>
+
+
+                <div class="case-step-counter">
+
+                    Step
+
+                    <strong id="currentCaseStep">
+                        1
+                    </strong>
+
+                    of 8
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="case-next-btn"
+                    id="caseNextBtn"
+                >
+
+                    Next
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="case-submit-btn"
+                    id="caseSubmitBtn"
+                >
+
+                    <i class="fa-solid fa-check"></i>
+
+                    Save Case
+
+                </button>
+
+            </div>
+
+
+        </form>
+        </div><!-- End formBasedSection -->
+
+    </section>
+
+</main>
+
+<!-- SUCCESS MODAL -->
+<div
+    class="case-success-modal"
+    id="caseSuccessModal"
+>
+    <div class="case-success-content">
+        <div class="case-success-icon">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <h2>Case Saved Successfully!</h2>
+        <p>The patient case has been recorded and is ready for clinical review.</p>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 14px;">
+            <a href="practitioner-review.html" class="primary-btn" style="text-decoration: none; padding: 10px 18px;">
+                Open in Review Workspace
+            </a>
+            <button id="goToDashboard" class="secondary-btn" style="padding: 10px 18px;">
+                Back to Dashboard
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="js/models/clinical-state.js"></script>
+<script src="js/storage/clinical-storage.js"></script>
+<script src="js/services/ai-service.js"></script>
+<script src="js/services/speech-service.js"></script>
+<script src="js/services/document-service.js"></script>
+<script src="js/services/i18n-service.js"></script>
+<script src="js/services/demo-service.js"></script>
+<script src="js/case-taking.js"></script>
+
+</body>
+</html>

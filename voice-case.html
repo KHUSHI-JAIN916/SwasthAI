@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Voice Case Taking | SWASTHAI</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/clinical-system.css">
+</head>
+
+
+<body>
+
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+
+    <div class="logo">
+        <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo">
+        <div>
+            <h2>SWASTHAI</h2>
+            <span>From Voice to Insight</span>
+        </div>
+    </div>
+
+    <div class="menu-title">
+        MAIN MENU
+    </div>
+
+    <nav class="nav-menu">
+        <a href="patient-portal.html" class="nav-item" style="color: #16a34a; font-weight: 700;">
+            <i class="fa-solid fa-hands-holding-child"></i>
+            <span>Patient Portal</span>
+        </a>
+
+        <a href="dashboard.html" class="nav-item">
+
+            <i class="fa-solid fa-house"></i>
+
+            <span>Dashboard</span>
+
+        </a>
+
+
+        <a href="patients.html" class="nav-item">
+
+            <i class="fa-solid fa-users"></i>
+
+            <span>Patients</span>
+
+        </a>
+
+
+        <a href="add-patient.html" class="nav-item">
+
+            <i class="fa-solid fa-user-plus"></i>
+
+            <span>Add Patient</span>
+
+        </a>
+
+
+        <a href="case-taking.html" class="nav-item">
+
+            <i class="fa-solid fa-file-medical"></i>
+
+            <span>New Case</span>
+
+        </a>
+
+
+        <a href="practitioner-review.html" class="nav-item">
+            <i class="fa-solid fa-user-doctor"></i>
+            <span>Review Workspace</span>
+        </a>
+
+        <a href="case-history.html" class="nav-item">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Case History</span>
+        </a>
+
+
+        <a href="analytics.html" class="nav-item">
+
+            <i class="fa-solid fa-chart-line"></i>
+
+            <span>Analytics</span>
+
+        </a>
+
+
+        <a href="ai-assistant.html" class="nav-item">
+
+            <i class="fa-solid fa-robot"></i>
+
+            <span>AI Assistant</span>
+
+        </a>
+
+
+        <!-- VOICE CASE -->
+
+        <a href="voice-case.html" class="nav-item active">
+
+            <i class="fa-solid fa-microphone"></i>
+
+            <span>Voice Case Taking</span>
+
+        </a>
+
+
+    </nav>
+
+
+</aside>
+
+
+
+<!-- MAIN CONTENT -->
+
+<main class="main-content">
+
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+
+        <div class="topbar-left">
+
+
+            <button class="menu-toggle" id="menuToggle">
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div>
+
+                <p class="breadcrumb">
+                    Dashboard / Voice Case Taking
+                </p>
+
+                <h1>
+                    Voice-Based Case Taking
+                </h1>
+
+            </div>
+
+
+        </div>
+
+
+    </header>
+
+
+
+    <!-- VOICE CONTENT -->
+
+    <section class="voice-container">
+
+
+        <!-- HERO -->
+
+        <div class="voice-hero">
+
+
+            <div class="voice-hero-icon">
+
+                <i class="fa-solid fa-microphone-lines"></i>
+
+            </div>
+
+
+            <div>
+
+                <h2>
+                    Speak. Record. Structure.
+                </h2>
+
+                <p>
+                    Use voice input to quickly document patient case information.
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- LANGUAGE -->
+
+        <div class="voice-card">
+
+
+            <h3>
+                Select Language
+            </h3>
+
+
+            <p>
+                Choose the language before starting voice recognition.
+            </p>
+
+
+            <select id="languageSelect">
+
+                <option value="en-IN">
+                    English
+                </option>
+
+                <option value="hi-IN">
+                    Hindi
+                </option>
+
+            </select>
+
+
+        </div>
+
+
+
+        <!-- RECORDING AREA -->
+
+        <div class="voice-record-card">
+
+
+            <div class="voice-circle" id="voiceCircle">
+
+                <i class="fa-solid fa-microphone"></i>
+
+            </div>
+
+
+            <h2 id="voiceStatus">
+                Ready to listen
+            </h2>
+
+
+            <p id="voiceHint">
+                Click the button below and start speaking.
+            </p>
+
+
+            <button
+                class="voice-record-btn"
+                id="voiceRecordBtn"
+            >
+
+                <i class="fa-solid fa-microphone"></i>
+
+                Start Recording
+
+            </button>
+
+
+        </div>
+
+
+
+        <!-- TRANSCRIPT -->
+
+        <div class="voice-card transcript-card">
+
+
+            <div class="voice-card-header">
+
+                <div>
+
+                    <h3>
+                        Voice Transcript
+                    </h3>
+
+                    <p>
+                        Your spoken case information will appear here.
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="clear-transcript-btn"
+                    id="clearTranscriptBtn"
+                >
+
+                    <i class="fa-solid fa-trash"></i>
+
+                    Clear
+
+                </button>
+
+
+            </div>
+
+
+            <textarea
+                id="voiceTranscript"
+                placeholder="Your voice transcript will appear here..."
+            ></textarea>
+
+
+        </div>
+
+
+
+        <!-- ACTIONS -->
+
+        <div class="voice-actions">
+
+
+            <button
+                class="voice-action-btn secondary"
+                id="copyTranscriptBtn"
+            >
+
+                <i class="fa-solid fa-copy"></i>
+
+                Copy Text
+
+            </button>
+
+
+            <button
+                class="voice-action-btn primary"
+                id="sendToCaseBtn"
+            >
+
+                <i class="fa-solid fa-file-medical"></i>
+
+                Use in New Case
+
+            </button>
+
+
+        </div>
+
+
+        <!-- INFO -->
+
+        <div class="voice-info">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            <p>
+
+                Voice recognition depends on browser support.
+                Always review and correct the generated transcript
+                before using it in patient documentation.
+
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+
+<script src="js/models/clinical-state.js"></script>
+<script src="js/storage/clinical-storage.js"></script>
+<script src="js/services/speech-service.js"></script>
+<script src="js/services/i18n-service.js"></script>
+<script src="js/services/demo-service.js"></script>
+<script src="js/voice-case.js"></script>
+</body>
+</html>

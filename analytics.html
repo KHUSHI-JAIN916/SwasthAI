@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Analytics | SWASTHAI</title>
+
+    <!-- Google Font -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Font Awesome -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/clinical-system.css">
+
+    <!-- Chart.js -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+
+<body>
+
+
+<!-- ================= SIDEBAR ================= -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo">
+        <div>
+            <h2>SWASTHAI</h2>
+            <span>From Voice to Insight</span>
+        </div>
+    </div>
+
+    <div class="menu-title">
+        MAIN MENU
+    </div>
+
+    <nav class="nav-menu">
+        <a href="patient-portal.html" class="nav-item" style="color: #16a34a; font-weight: 700;">
+            <i class="fa-solid fa-hands-holding-child"></i>
+            <span>Patient Portal</span>
+        </a>
+
+        <a href="dashboard.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span>Dashboard</span>
+        </a>
+
+
+        <a href="patients.html" class="nav-item">
+            <i class="fa-solid fa-users"></i>
+            <span>Patients</span>
+        </a>
+
+
+        <a href="add-patient.html" class="nav-item">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add Patient</span>
+        </a>
+
+
+        <a href="case-taking.html" class="nav-item">
+            <i class="fa-solid fa-file-medical"></i>
+            <span>New Case</span>
+        </a>
+
+        <a href="practitioner-review.html" class="nav-item">
+            <i class="fa-solid fa-user-doctor"></i>
+            <span>Review Workspace</span>
+        </a>
+
+        <a href="case-history.html" class="nav-item">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Case History</span>
+        </a>
+
+
+        <!-- ACTIVE ANALYTICS PAGE -->
+
+        <a href="analytics.html" class="nav-item active">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Analytics</span>
+        </a>
+        <a href="voice-case.html" class="nav-item">
+
+            <i class="fa-solid fa-microphone"></i>
+
+            <span>Voice Case Taking</span>
+
+        </a>
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+        <a href="#" class="nav-item">
+            <i class="fa-solid fa-gear"></i>
+            <span>Settings</span>
+        </a>
+
+
+        <a href="#" class="nav-item logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Logout</span>
+        </a>
+
+    </div>
+
+</aside>
+
+
+<!-- ================= MAIN CONTENT ================= -->
+
+<main class="main-content">
+
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+        <div class="topbar-left">
+
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+
+            <div>
+
+                <p class="breadcrumb">
+                    Dashboard / Analytics
+                </p>
+
+                <h1>
+                    Analytics Dashboard
+                </h1>
+
+            </div>
+
+        </div>
+
+
+        <div class="topbar-right">
+
+            <button class="icon-btn">
+                <i class="fa-regular fa-bell"></i>
+            </button>
+
+
+            <div class="doctor-profile">
+
+                <div class="doctor-avatar">
+                    DS
+                </div>
+
+                <div class="doctor-info">
+
+                    <h4>
+                        Dr. Sharma
+                    </h4>
+
+                    <p>
+                        Doctor / Practitioner
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= ANALYTICS ================= -->
+
+    <section class="analytics-container">
+
+
+        <div class="analytics-header">
+
+            <div>
+
+                <h2>
+                    Healthcare Insights
+                </h2>
+
+                <p>
+                    Analyze patient cases and AYUSH assessment patterns.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= KPI CARDS ================= -->
+
+        <div class="analytics-kpi-grid">
+
+
+            <div class="analytics-kpi-card">
+
+                <div class="analytics-kpi-icon">
+
+                    <i class="fa-solid fa-users"></i>
+
+                </div>
+
+
+                <div>
+
+                    <p>Total Patients</p>
+
+                    <h3>
+                        248
+                    </h3>
+
+                    <span>
+                        <i class="fa-solid fa-arrow-up"></i>
+                        12% this month
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="analytics-kpi-card">
+
+                <div class="analytics-kpi-icon">
+
+                    <i class="fa-solid fa-file-medical"></i>
+
+                </div>
+
+
+                <div>
+
+                    <p>Total Cases</p>
+
+                    <h3>
+                        412
+                    </h3>
+
+                    <span>
+                        <i class="fa-solid fa-arrow-up"></i>
+                        18% this month
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="analytics-kpi-card">
+
+                <div class="analytics-kpi-icon">
+
+                    <i class="fa-solid fa-calendar-check"></i>
+
+                </div>
+
+
+                <div>
+
+                    <p>Follow-ups</p>
+
+                    <h3>
+                        86
+                    </h3>
+
+                    <span>
+                        Scheduled patients
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="analytics-kpi-card">
+
+                <div class="analytics-kpi-icon">
+
+                    <i class="fa-solid fa-check-double"></i>
+
+                </div>
+
+
+                <div>
+
+                    <p>Completed Cases</p>
+
+                    <h3>
+                        326
+                    </h3>
+
+                    <span>
+                        79% completion rate
+                    </span>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ================= CHARTS ================= -->
+
+        <div class="analytics-chart-grid">
+
+
+            <!-- CASE TREND -->
+
+            <div class="analytics-chart-card large-chart">
+
+                <div class="chart-card-header">
+
+                    <div>
+
+                        <h3>
+                            Patient Case Trends
+                        </h3>
+
+                        <p>
+                            Monthly patient case records
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-wrapper">
+
+                    <canvas id="caseTrendChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- PRAKRITI -->
+
+            <div class="analytics-chart-card">
+
+                <div class="chart-card-header">
+
+                    <div>
+
+                        <h3>
+                            Prakriti Distribution
+                        </h3>
+
+                        <p>
+                            AYUSH patient constitution
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-wrapper">
+
+                    <canvas id="prakritiChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ================= SECOND ROW ================= -->
+
+        <div class="analytics-chart-grid second-row">
+
+
+            <!-- COMPLAINTS -->
+
+            <div class="analytics-chart-card">
+
+                <div class="chart-card-header">
+
+                    <div>
+
+                        <h3>
+                            Common Complaints
+                        </h3>
+
+                        <p>
+                            Frequently reported conditions
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-wrapper">
+
+                    <canvas id="complaintChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- AI INSIGHTS -->
+
+            <div class="ai-insight-card">
+
+                <div class="ai-insight-header">
+
+                    <div class="ai-insight-icon">
+
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3>
+                            AI Insights
+                        </h3>
+
+                        <p>
+                            Pattern analysis from patient data
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="ai-insight-list">
+
+
+                    <div class="ai-insight-item">
+
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+
+                        <p>
+
+                            Patient case registrations have increased
+                            compared to the previous month.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="ai-insight-item">
+
+                        <i class="fa-solid fa-leaf"></i>
+
+                        <p>
+
+                            Vata-related assessments appear frequently
+                            among recent patient records.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="ai-insight-item">
+
+                        <i class="fa-solid fa-clock"></i>
+
+                        <p>
+
+                            Follow-up scheduling can improve patient
+                            monitoring and case continuity.
+
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+                <button class="generate-insight-btn">
+
+                    <i class="fa-solid fa-robot"></i>
+
+                    Generate AI Insight
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+<script src="js/models/clinical-state.js"></script>
+<script src="js/storage/clinical-storage.js"></script>
+<script src="js/services/speech-service.js"></script>
+<script src="js/services/i18n-service.js"></script>
+<script src="js/services/demo-service.js"></script>
+<script src="js/analytics.js"></script>
+</body>
+</html>

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SWASTHAI | Dashboard</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/clinical-system.css">
+</head>
+
+<body>
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo">
+            <div>
+                <h2>SWASTHAI</h2>
+                <span>From Voice to Insight</span>
+            </div>
+        </div>
+
+        <div class="menu-title">
+            MAIN MENU
+        </div>
+
+        <nav class="nav-menu">
+            <a href="patient-portal.html" class="nav-item" style="color: #16a34a; font-weight: 700;">
+                <i class="fa-solid fa-hands-holding-child"></i>
+                <span>Patient Portal</span>
+            </a>
+
+            <a href="dashboard.html" class="nav-item active">
+                <i class="fa-solid fa-house"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="patients.html" class="nav-item">
+                <i class="fa-solid fa-users"></i>
+                <span>Patients</span>
+            </a>
+
+            <a href="add-patient.html" class="nav-item">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Add Patient</span>
+            </a>
+
+            <a href="case-taking.html" class="nav-item">
+                <i class="fa-solid fa-file-medical"></i>
+                <span>New Case</span>
+            </a>
+
+            <a href="practitioner-review.html" class="nav-item">
+                <i class="fa-solid fa-user-doctor"></i>
+                <span>Review Workspace</span>
+            </a>
+
+            <a href="case-history.html" class="nav-item">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>Case History</span>
+            </a>
+
+            <a href="analytics.html" class="nav-item">
+               <i class="fa-solid fa-chart-line"></i>
+               <span>Analytics</span>
+            </a>
+
+            <a href="ai-assistant.html" class="nav-item">
+                <i class="fa-solid fa-robot"></i>
+                <span>AI Assistant</span>
+            </a>
+
+            <a href="voice-case.html" class="nav-item">
+                <i class="fa-solid fa-microphone"></i>
+                <span>Voice Case Taking</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+
+            <a href="#" class="nav-item logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+
+        <!-- TOP NAVBAR -->
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <div>
+                    <p class="breadcrumb">
+                        Dashboard / Overview
+                    </p>
+
+                    <h1 id="dashboardGreeting">Good Morning, Doctor 👋</h1>
+                </div>
+
+            </div>
+
+
+            <div class="topbar-right">
+                <!-- Role Switcher -->
+                <select id="roleSelector" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #d1d5db; font-size: 12px; font-weight: 600;">
+                    <option value="practitioner">Role: Practitioner</option>
+                    <option value="patient">Role: Patient</option>
+                    <option value="admin">Role: Admin</option>
+                </select>
+
+                <!-- Demo Mode Button -->
+                <button type="button" class="sih-btn primary" id="launchSihDemoBtn" style="font-weight: 700; padding: 7px 14px; background: #1f7a57; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    <i class="fa-solid fa-award"></i> START DEMO
+                </button>
+
+                <button class="icon-btn notification-btn">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notification-dot"></span>
+                </button>
+
+                <div class="doctor-profile">
+                    <div class="doctor-avatar" id="currentDoctorAvatar">
+                        DS
+                    </div>
+
+                    <div class="doctor-info">
+                        <h4 id="currentDoctorName">Dr. Sharma</h4>
+                        <p id="currentDoctorRole">Doctor / Practitioner</p>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>
+        </header>
+
+
+        <!-- DASHBOARD CONTENT -->
+
+        <section class="dashboard-container">
+
+
+            <!-- WELCOME CARD -->
+
+            <div class="welcome-card">
+
+                <div class="welcome-text">
+
+                    <p class="welcome-tag">
+                        🌿 AYUSH DIGITAL HEALTHCARE
+                    </p>
+
+                    <h2>
+                        Manage Patient Cases <br>
+                        Smarter with AI
+                    </h2>
+
+                    <p>
+                        Digitize patient case-taking, organize clinical
+                        records and get intelligent assistance throughout
+                        the consultation process.
+                    </p>
+
+                    <div class="welcome-buttons">
+
+                        <a href="case-taking.html" class="primary-btn">
+                            <i class="fa-solid fa-plus"></i>
+                            Start New Case
+                        </a>
+
+                        <a href="patients.html" class="secondary-btn">
+                            View Patients
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <div class="welcome-illustration">
+
+                    <div class="medical-circle circle-1"></div>
+                    <div class="medical-circle circle-2"></div>
+
+                    <div class="ai-icon">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATISTICS -->
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Overview</h2>
+                    <p>Quick insights about your patients and cases.</p>
+                </div>
+
+                <select class="date-select">
+                    <option>This Month</option>
+                    <option>This Week</option>
+                    <option>Today</option>
+                </select>
+
+            </div>
+
+
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+
+                <div class="stat-card">
+                    <div class="stat-icon patients-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p>Total Patients</p>
+                        <h2 id="patientCount">6</h2>
+                        <span class="positive"><i class="fa-solid fa-user-check"></i> Registered</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon case-icon">
+                        <i class="fa-solid fa-file-medical"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p>Cases Today</p>
+                        <h2 id="casesTodayCount">3</h2>
+                        <span class="positive"><i class="fa-solid fa-clock"></i> Active</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon follow-icon" style="background: #fef3c7; color: #d97706;">
+                        <i class="fa-solid fa-user-doctor"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p>Pending Review</p>
+                        <h2 id="pendingReviewCount">2</h2>
+                        <span class="neutral" style="color: #d97706;"><i class="fa-solid fa-hourglass-half"></i> Awaiting Dr.</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon ai-case-icon">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p>Completed Cases</p>
+                        <h2 id="completedCasesCount">1</h2>
+                        <span class="positive"><i class="fa-solid fa-certificate"></i> Verified</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="border-left: 4px solid #dc2626;">
+                    <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p>Urgent Red Flags</p>
+                        <h2 id="redFlagCount" style="color: #dc2626;">1</h2>
+                        <span style="color: #dc2626; font-weight: 700; font-size: 11px;">Immediate Attention</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="border-left: 4px solid #d97706;">
+                    <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p>Needs Attention</p>
+                        <h2 id="attentionCount" style="color: #d97706;">3</h2>
+                        <span style="color: #d97706; font-weight: 700; font-size: 11px;">Verification Queue</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e0f2fe; color: #0369a1;">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p>Follow-ups Due</p>
+                        <h2 id="followupsDueCount">2</h2>
+                        <span class="positive"><i class="fa-solid fa-calendar"></i> Scheduled</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #f3f4f6; color: #4b5563;">
+                        <i class="fa-solid fa-shield-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p>System Accuracy</p>
+                        <h2 id="systemAccuracyRate">94%</h2>
+                        <span class="positive"><i class="fa-solid fa-check-double"></i> Verified</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= PRACTITIONER ATTENTION QUEUE (Req 26) ================= -->
+            <div class="section-heading" style="margin-top: 32px;">
+                <div>
+                    <h2><i class="fa-solid fa-bell-concierge" style="color: #1f7a57;"></i> Practitioner Attention Queue</h2>
+                    <p>Prioritized case triage: Urgent review, missing dosage clarification, and allergy verification.</p>
+                </div>
+                <a href="practitioner-review.html" class="sih-btn primary" style="padding: 6px 14px;">
+                    Open Workspace <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="attention-queue-grid" id="attentionQueueContainer">
+                <!-- Populated dynamically via dashboard.js -->
+            </div>
+
+
+            <!-- LOWER GRID -->
+
+            <div class="content-grid">
+
+
+                <!-- RECENT PATIENTS -->
+
+                <div class="recent-patients">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h2>Recent Patients</h2>
+                            <p>Recently added patient records.</p>
+                        </div>
+
+                        <a href="patients.html">
+                            View All
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Age</th>
+                                    <th>Last Visit</th>
+                                    <th>Status</th>
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                <tr>
+
+                                    <td>
+
+                                        <div class="patient-name">
+
+                                            <div class="patient-avatar avatar-1">
+                                                RK
+                                            </div>
+
+                                            <div>
+                                                <h4>Rahul Kumar</h4>
+                                                <p>AYU-2026-001</p>
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+                                    <td>32</td>
+
+                                    <td>Today</td>
+
+                                    <td>
+                                        <span class="status active-status">
+                                            Active
+                                        </span>
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td>
+
+                                        <div class="patient-name">
+
+                                            <div class="patient-avatar avatar-2">
+                                                PS
+                                            </div>
+
+                                            <div>
+                                                <h4>Priya Sharma</h4>
+                                                <p>AYU-2026-002</p>
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+                                    <td>28</td>
+
+                                    <td>Yesterday</td>
+
+                                    <td>
+                                        <span class="status follow-status">
+                                            Follow-up
+                                        </span>
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td>
+
+                                        <div class="patient-name">
+
+                                            <div class="patient-avatar avatar-3">
+                                                AS
+                                            </div>
+
+                                            <div>
+                                                <h4>Amit Singh</h4>
+                                                <p>AYU-2026-003</p>
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+                                    <td>45</td>
+
+                                    <td>Aug 30, 2026</td>
+
+                                    <td>
+                                        <span class="status new-status">
+                                            New
+                                        </span>
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- AI ASSISTANT -->
+
+                <div class="ai-assistant-card">
+
+                    <div class="ai-header">
+
+                        <div class="ai-title">
+
+                            <div class="ai-small-icon">
+                                <i class="fa-solid fa-sparkles"></i>
+                            </div>
+
+                            <div>
+                                <h3>AYUSH AI Assistant</h3>
+                                <p>
+                                    Ready to assist you
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <span class="online-status">
+                            ● Online
+                        </span>
+
+                    </div>
+
+
+                    <div class="ai-message">
+
+                        <div class="bot-avatar">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+
+                        <p>
+                            Hello Doctor! 👋 I can help you structure
+                            patient cases and suggest relevant questions.
+                        </p>
+
+                    </div>
+
+
+                    <div class="suggestion-title">
+                        Suggested actions
+                    </div>
+
+
+                    <button class="suggestion-btn">
+                        <i class="fa-solid fa-microphone"></i>
+                        Start voice case-taking
+                    </button>
+
+
+                    <button class="suggestion-btn">
+                        <i class="fa-solid fa-file-lines"></i>
+                        Generate case summary
+                    </button>
+
+
+                    <button class="suggestion-btn">
+                        <i class="fa-solid fa-circle-question"></i>
+                        Get suggested questions
+                    </button>
+
+
+                    <a href="case-taking.html" class="ai-main-btn">
+                        Open AI Assistant
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="js/models/clinical-state.js"></script>
+    <script src="js/storage/clinical-storage.js"></script>
+    <script src="js/services/ai-service.js"></script>
+    <script src="js/services/speech-service.js"></script>
+    <script src="js/services/i18n-service.js"></script>
+    <script src="js/services/demo-service.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
