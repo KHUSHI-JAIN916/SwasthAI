@@ -1056,6 +1056,14 @@ const ClinicalStorage = (() => {
         logAudit("Switched System Role", role, "RBAC", "N/A", `Active view changed to ${role.toUpperCase()}`);
     }
 
+    function logoutUser() {
+        logAudit("User Logged Out", getActiveRole(), "Authentication", "N/A", "User signed out of system");
+        localStorage.removeItem(KEYS.CURRENT_USER);
+        localStorage.removeItem("swasthai_active_patient_id");
+        localStorage.removeItem("swasthai_current_hospital");
+        window.location.href = "index.html";
+    }
+
     /* =========================================================================
        ATTENTION QUEUE & STATS
        ========================================================================= */
@@ -1171,6 +1179,7 @@ const ClinicalStorage = (() => {
         clearOfflineDraft,
         getActiveRole,
         setActiveRole,
+        logoutUser,
         getAttentionQueue,
         getDashboardMetrics,
         authenticatePatient,
@@ -1179,3 +1188,22 @@ const ClinicalStorage = (() => {
         searchPatientFullProfile
     };
 })();
+
+// Universal Auto Logout Listener for all pages
+document.addEventListener("DOMContentLoaded", () => {
+    const logoutElements = document.querySelectorAll(".logout, .nav-item.logout, #patientLogoutBtn, #logoutBtn, .logout-btn");
+    logoutElements.forEach(el => {
+        el.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (typeof ClinicalStorage !== "undefined" && ClinicalStorage.logoutUser) {
+                ClinicalStorage.logoutUser();
+            } else {
+                localStorage.removeItem("ayushCurrentUser");
+                localStorage.removeItem("swasthai_active_patient_id");
+                localStorage.removeItem("swasthai_current_hospital");
+                window.location.href = "index.html";
+            }
+        });
+    });
+});
+

@@ -99,9 +99,9 @@ const PatientPortal = (() => {
 
         const logoutBtn = document.getElementById("patientLogoutBtn");
         if (logoutBtn) {
-            logoutBtn.addEventListener("click", () => {
-                localStorage.removeItem("swasthai_active_patient_id");
-                window.location.href = "patient-login.html";
+            logoutBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                ClinicalStorage.logoutUser();
             });
         }
     }

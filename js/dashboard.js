@@ -1,4 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Global Logout Handler for sidebars and topbars
+    const logoutBtns = document.querySelectorAll(".logout, .nav-item.logout, #logoutBtn");
+    logoutBtns.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (typeof ClinicalStorage !== "undefined") {
+                ClinicalStorage.logoutUser();
+            } else {
+                localStorage.removeItem("ayushCurrentUser");
+                localStorage.removeItem("swasthai_active_patient_id");
+                window.location.href = "index.html";
+            }
+        });
+    });
+
     // Dynamic Time-Based Greeting
     function updateGreeting() {
         const greetingEl = document.getElementById("dashboardGreeting") || document.querySelector(".topbar-left h1");
@@ -54,9 +69,14 @@ document.addEventListener("DOMContentLoaded", () => {
             if (doctorName) doctorName.textContent = "System Admin";
             if (doctorRole) doctorRole.textContent = "Clinical Administrator";
         } else {
-            if (doctorAvatar) doctorAvatar.textContent = "DS";
-            if (doctorName) doctorName.textContent = "Dr. Sharma";
-            if (doctorRole) doctorRole.textContent = "Doctor / Practitioner";
+            const currentDoc = JSON.parse(localStorage.getItem("ayushCurrentUser")) || {};
+            const hospName = localStorage.getItem("swasthai_current_hospital") || "AIIMS Partner Hospital";
+            const docNameStr = currentDoc.name || "Dr. Sharma";
+            const initials = docNameStr.replace("Dr.", "").trim().split(" ").map(n => n[0]).join("").toUpperCase() || "DS";
+
+            if (doctorAvatar) doctorAvatar.textContent = initials;
+            if (doctorName) doctorName.textContent = docNameStr;
+            if (doctorRole) doctorRole.textContent = hospName;
         }
     }
 
