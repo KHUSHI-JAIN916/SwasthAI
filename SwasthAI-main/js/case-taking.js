@@ -67,31 +67,43 @@ document.addEventListener("DOMContentLoaded", () => {
         casePatientSelect.innerHTML = `<option value="">Select Patient</option>`;
         patients.forEach(p => {
             const opt = document.createElement("option");
-            opt.value = p.fullName;
+            opt.value = p.id;
             opt.textContent = `${p.fullName} — ${p.id} (${p.gender}, ${p.age}y)`;
             casePatientSelect.appendChild(opt);
+        });
+
+        casePatientSelect.addEventListener("change", (e) => {
+            const val = e.target.value;
+            if (!val) return;
+            const patients = ClinicalStorage.getPatients();
+            const selected = patients.find(p => p.id === val || p.fullName === val);
+            if (selected) {
+                setPatient(selected);
+            }
         });
     }
 
     function checkIncomingUrlParams() {
         const urlParams = new URLSearchParams(window.location.search);
-        const patientId = urlParams.get("patientId");
+        const patientId = urlParams.get("patientId") || localStorage.getItem("swasthai_active_patient_id");
         if (patientId) {
             const p = ClinicalStorage.getPatientById(patientId);
             if (p) {
                 setPatient(p);
+                return;
             }
-        } else {
-            // Default to demo patient for showcase
-            const demoPatient = ClinicalStorage.getPatientById("AYU-2026-DEMO");
-            if (demoPatient) setPatient(demoPatient);
         }
+        // Fallback to first active patient or demo patient
+        const demoPatient = ClinicalStorage.getPatientById("AYU-2026-DEMO") || (ClinicalStorage.getPatients() || [])[0];
+        if (demoPatient) setPatient(demoPatient);
     }
 
     function setPatient(patient) {
         activeCaseState.patientId = patient.id;
         activeCaseState.patientName = patient.fullName;
-        if (casePatientSelect) casePatientSelect.value = patient.fullName;
+        if (casePatientSelect) casePatientSelect.value = patient.id;
+
+        localStorage.setItem("swasthai_active_patient_id", patient.id);
 
         // Auto-seed patient history into case state
         if (patient.conditions) activeCaseState.medicalHistory = [patient.conditions];
@@ -101,6 +113,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         updateSlotTracker();
+
+        if (typeof DigitalTwin !== "undefined") {
+            DigitalTwin.renderPanel("digitalTwinContainer", "doctor", patient.id);
+        }
     }
 
     function checkIncomingVoiceTranscript() {

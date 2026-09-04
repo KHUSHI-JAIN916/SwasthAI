@@ -327,17 +327,21 @@ const DigitalTwin = (() => {
         if (!container) return;
 
         // Load patient
-        const resolvedPatientId = patientId
-            || localStorage.getItem("swasthai_active_patient_id")
-            || "AYU-2026-DEMO";
+        let resolvedPatientId = patientId || localStorage.getItem("swasthai_active_patient_id");
 
         let patient = null;
         if (typeof ClinicalStorage !== "undefined") {
-            patient = ClinicalStorage.getPatientById(resolvedPatientId);
-            if (!patient) patient = (ClinicalStorage.getPatients() || [])[0];
+            if (resolvedPatientId) {
+                patient = ClinicalStorage.getPatientById(resolvedPatientId);
+            }
+            if (!patient) {
+                patient = (ClinicalStorage.getPatients() || [])[0];
+            }
         }
 
-        if (!patient) {
+        if (patient) {
+            localStorage.setItem("swasthai_active_patient_id", patient.id);
+        } else {
             container.innerHTML = "";
             return;
         }

@@ -53,6 +53,9 @@ const PractitionerReview = (() => {
         }
 
         currentPatient = ClinicalStorage.getPatientById(currentCase.patientId);
+        if (currentPatient) {
+            localStorage.setItem("swasthai_active_patient_id", currentPatient.id);
+        }
 
         renderPatientHeader();
         renderRedFlagBanner();
@@ -64,6 +67,10 @@ const PractitionerReview = (() => {
         renderTimeline();
         renderMedReconciliation();
         renderReportComparison();
+
+        if (typeof DigitalTwin !== "undefined" && currentPatient) {
+            DigitalTwin.renderPanel("digitalTwinContainer", "doctor", currentPatient.id, currentCase.id);
+        }
     }
 
     function renderPatientHeader() {

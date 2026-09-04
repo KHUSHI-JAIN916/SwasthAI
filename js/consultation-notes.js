@@ -191,16 +191,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentSelectedPatient = patients.find(p => p.id === val);
             }
 
-            if (currentSelectedPatient && patientQuickDetails) {
-                patientQuickDetails.style.display = "inline-block";
-                displayPatientId.textContent = currentSelectedPatient.id;
-                displayPatientAge.textContent = currentSelectedPatient.age ? `${currentSelectedPatient.age}y` : "--";
-                displayPatientGender.textContent = currentSelectedPatient.gender || "--";
+            if (currentSelectedPatient) {
+                localStorage.setItem("swasthai_active_patient_id", currentSelectedPatient.id);
+
+                if (patientQuickDetails) {
+                    patientQuickDetails.style.display = "inline-block";
+                    displayPatientId.textContent = currentSelectedPatient.id;
+                    displayPatientAge.textContent = currentSelectedPatient.age ? `${currentSelectedPatient.age}y` : "--";
+                    displayPatientGender.textContent = currentSelectedPatient.gender || "--";
+                }
+
+                if (typeof DigitalTwin !== "undefined") {
+                    DigitalTwin.renderPanel("digitalTwinContainer", "doctor", currentSelectedPatient.id);
+                }
             }
         });
 
-        // Auto-select first patient for demonstration
-        if (patients.length > 0) {
+        // Auto-select initial active patient if available
+        const savedPatientId = localStorage.getItem("swasthai_active_patient_id");
+        if (savedPatientId && patients.some(p => p.id === savedPatientId)) {
+            patientSelect.value = savedPatientId;
+            patientSelect.dispatchEvent(new Event("change"));
+        } else if (patients.length > 0) {
             patientSelect.value = patients[0].id;
             patientSelect.dispatchEvent(new Event("change"));
         }

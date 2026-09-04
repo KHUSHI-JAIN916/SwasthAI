@@ -4684,6 +4684,11 @@ const I18nService = (() => {
         currentLang = lang;
         localStorage.setItem(STORAGE_KEY, lang);
         
+        // Set googtrans cookie for global language translation fallback
+        const targetCode = lang === "hinglish" ? "hi" : lang;
+        document.cookie = "googtrans=/en/" + targetCode + "; path=/;";
+        document.cookie = "googtrans=/en/" + targetCode + "; domain=" + window.location.hostname + "; path=/;";
+
         // Disconnect observer briefly to prevent loops during translation
         if (observer) observer.disconnect();
 
@@ -4838,10 +4843,9 @@ const I18nService = (() => {
             const raw = node.textContent;
             const trimmed = raw.trim();
             if (trimmed && trimmed.length > 0) {
-                // Skip if parent or ancestor is explicitly excluded or has data-i18n
+                // Skip if parent or ancestor is explicitly excluded
                 if (node.parentElement) {
                     if (node.parentElement.closest(".notranslate")) return;
-                    if (node.parentElement.closest("[data-i18n]")) return;
                 }
 
                 // Save pristine source text permanently (never overwritten once recorded)

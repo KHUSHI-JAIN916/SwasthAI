@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${statusBadge}</td>
                 <td>
                     <div style="display: flex; gap: 6px;">
-                        <a href="case-taking.html?patientId=${p.id}" class="action-btn" style="background: #1f7a57; color: white; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600;">
+                        <a href="case-taking.html?patientId=${p.id}" onclick="localStorage.setItem('swasthai_active_patient_id', '${p.id}')" class="action-btn" style="background: #1f7a57; color: white; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600;">
                             <i class="fa-solid fa-plus"></i> New Case
                         </a>
                         <button class="action-btn" onclick="showPatientCard('${p.id}')" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700;">
@@ -98,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.showPatientCard = function(patientId) {
+        localStorage.setItem("swasthai_active_patient_id", patientId);
         const fullProfile = ClinicalStorage.searchPatientFullProfile(patientId);
         if (!fullProfile) return;
 

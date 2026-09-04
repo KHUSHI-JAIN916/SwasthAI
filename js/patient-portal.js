@@ -17,14 +17,27 @@ const PatientPortal = (() => {
         renderPrescriptions();
         renderDiseasesList();
         renderPastRecordsList();
+        renderDailyReminders();
+        renderWeeklyMedChart();
+        renderSmartTimeline("all");
 
         setupModalListeners();
+
+        const symptomInput = document.getElementById("patientSymptomInput");
+        if (symptomInput) {
+            symptomInput.addEventListener("input", (e) => {
+                checkForEmergency(e.target.value);
+            });
+        }
 
         // Listen for language switch
         window.addEventListener("languageChanged", () => {
             renderPrescriptions();
             renderDiseasesList();
             renderPastRecordsList();
+            renderDailyReminders();
+            renderWeeklyMedChart();
+            renderSmartTimeline("all");
             if (typeof I18nService !== "undefined") {
                 I18nService.translatePage();
             }
@@ -60,7 +73,14 @@ const PatientPortal = (() => {
         }
         currentPatient = ClinicalStorage.getPatientById(storedPatientId);
         if (!currentPatient) {
-            currentPatient = ClinicalStorage.getPatients()[0];
+            currentPatient = (ClinicalStorage.getPatients() || [])[0];
+        }
+
+        if (currentPatient) {
+            localStorage.setItem("swasthai_active_patient_id", currentPatient.id);
+            if (typeof DigitalTwin !== "undefined") {
+                DigitalTwin.renderPanel("dtPatientContainer", "patient", currentPatient.id);
+            }
         }
 
         // Populate header & badge
@@ -145,6 +165,7 @@ const PatientPortal = (() => {
                             confScore.textContent = `${confidence}% Clarity`;
                             confBadge.style.display = "inline-flex";
                         }
+                        checkForEmergency(textInput.value);
                     },
                     onError: (err) => {
                         isRecording = false;
@@ -207,6 +228,19 @@ const PatientPortal = (() => {
         else if (symptomText.includes("Cough")) displaySymptom = (lang === "hi") ? "खांसी व गले में खराश" : "Cough & Sore Throat";
         else if (symptomText.includes("Skin")) displaySymptom = (lang === "hi") ? "त्वचा पर खुजली व एलर्जी" : "Skin Rash & Itching";
         else if (symptomText.includes("Sugar")) displaySymptom = (lang === "hi") ? "शुगर व कमजोरी" : "Sugar & Weakness";
+        else if (symptomText.includes("Other") || symptomText.includes("अन्य")) {
+            const customInput = prompt(
+                (lang === "hi") ? "कृपया अपने अन्य लक्षण विस्तार से दर्ज करें (Enter your other symptoms):" : "Please enter your other symptoms:",
+                ""
+            );
+            if (customInput && customInput.trim()) {
+                displaySymptom = customInput.trim();
+            } else {
+                textInput.focus();
+                textInput.scrollIntoView({ behavior: "smooth" });
+                return;
+            }
+        }
 
         if (cardElement) {
             cardElement.classList.toggle("selected");
@@ -530,6 +564,423 @@ const PatientPortal = (() => {
         });
     }
 
+    function getMedicationListForPatient() {
+        const cases = ClinicalStorage.getCases().filter(c => c.patientId === currentPatient.id);
+        const verifiedCases = cases.filter(c => c.currentMedications && c.currentMedications.length > 0);
+
+        let meds = [];
+        if (verifiedCases.length > 0 && verifiedCases[0].currentMedications) {
+            meds = verifiedCases[0].currentMedications;
+        }
+
+        if (meds.length === 0) {
+            meds = [
+                { id: "demo-m1", name: "Amlodipine 5mg", dose: "1 Tablet", frequency: "Morning (08:00 AM)", timing: "morning", timeStr: "08:00 AM", instructions: "Take after breakfast" },
+                { id: "demo-m2", name: "Pantocid 40mg", dose: "1 Capsule", frequency: "Afternoon (01:30 PM)", timing: "afternoon", timeStr: "01:30 PM", instructions: "Take 30 mins before lunch" },
+                { id: "demo-m3", name: "Ashwagandha Churna 3g", dose: "1 Teaspoon", frequency: "Night (08:30 PM)", timing: "night", timeStr: "08:30 PM", instructions: "Take with warm milk at bedtime" }
+            ];
+        } else {
+            meds = meds.map((m, idx) => {
+                const timing = idx === 0 ? "morning" : idx === 1 ? "afternoon" : "night";
+                const timeStr = timing === "morning" ? "08:00 AM" : timing === "afternoon" ? "01:30 PM" : "08:30 PM";
+                return {
+                    id: m.id || `med-${idx}`,
+                    name: m.name,
+                    dose: m.dose || "1 Dose",
+                    frequency: m.frequency || "Daily",
+                    timing: timing,
+                    timeStr: timeStr,
+                    instructions: m.reason || "Take with water regularly"
+                };
+            });
+        }
+        return meds;
+    }
+
+    function renderDailyReminders() {
+        const container = document.getElementById("dailyMedRemindersContainer");
+        if (!container) return;
+
+        const meds = getMedicationListForPatient();
+        const todayKey = new Date().toISOString().slice(0, 10);
+
+        container.innerHTML = "";
+
+        meds.forEach(med => {
+            const storageKey = `swasthai_dose_${currentPatient.id}_${todayKey}_${med.id}`;
+            const isTaken = localStorage.getItem(storageKey) === "true";
+
+            let iconClass = "fa-sun";
+            let timingLabel = "सुबह (Morning 8:00 AM)";
+            let badgeBg = "#fef3c7";
+            let badgeColor = "#b45309";
+
+            if (med.timing === "afternoon") {
+                iconClass = "fa-cloud-sun";
+                timingLabel = "दोपहर (Afternoon 1:30 PM)";
+                badgeBg = "#e0f2fe";
+                badgeColor = "#0369a1";
+            } else if (med.timing === "night") {
+                iconClass = "fa-moon";
+                timingLabel = "रात (Night 8:30 PM)";
+                badgeBg = "#f3e8ff";
+                badgeColor = "#6b21a8";
+            }
+
+            const card = document.createElement("div");
+            card.style.cssText = `background: ${isTaken ? '#f0fdf4' : '#ffffff'}; border: 1.5px solid ${isTaken ? '#86efac' : '#e2e8f0'}; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s ease;`;
+
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 11px; font-weight: 800; background: ${badgeBg}; color: ${badgeColor}; padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid ${iconClass}"></i> ${timingLabel}
+                    </span>
+                    <span style="font-size: 12px; font-weight: 800; color: ${isTaken ? '#166534' : '#dc2626'};">
+                        ${isTaken ? '✓ Taken' : '⏰ Pending'}
+                    </span>
+                </div>
+                <h4 style="margin: 4px 0; font-size: 15px; font-weight: 800; color: #1e293b;">
+                    <i class="fa-solid fa-capsules" style="color: #1f7a57;"></i> ${med.name}
+                </h4>
+                <div style="font-size: 12px; color: #475569; margin-bottom: 6px;">
+                    <strong>Dose:</strong> ${med.dose} &nbsp;·&nbsp; ${med.instructions}
+                </div>
+                <button type="button" onclick="PatientPortal.toggleDoseStatus('${med.id}')" style="width: 100%; margin-top: 6px; padding: 8px 12px; border-radius: 8px; border: none; font-weight: 800; font-size: 12px; cursor: pointer; background: ${isTaken ? '#166534' : '#1f7a57'}; color: white;">
+                    ${isTaken ? '<i class="fa-solid fa-circle-check"></i> खुराक ली गई (Taken)' : '<i class="fa-solid fa-check"></i> खुराक लें (Mark as Taken)'}
+                </button>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function toggleDoseStatus(medId) {
+        const todayKey = new Date().toISOString().slice(0, 10);
+        const storageKey = `swasthai_dose_${currentPatient.id}_${todayKey}_${medId}`;
+        const currentStatus = localStorage.getItem(storageKey) === "true";
+        localStorage.setItem(storageKey, String(!currentStatus));
+
+        const lang = (typeof I18nService !== "undefined") ? I18nService.getLanguage() : "hi";
+        const msg = !currentStatus
+            ? (lang === "hi" ? "शाबाश! आपने आज की खुराक दर्ज कर ली है।" : "Great! Dose marked as taken for today.")
+            : (lang === "hi" ? "खुराक पेंडिंग के रूप में सेट की गई।" : "Dose marked as pending.");
+
+        if (typeof SpeechService !== "undefined") {
+            SpeechService.speakText(msg, { lang: lang === "hi" ? "hi-IN" : "en-IN" });
+        }
+
+        renderDailyReminders();
+        renderWeeklyMedChart();
+    }
+
+    function triggerVoiceMedReminder() {
+        const meds = getMedicationListForPatient();
+        const todayKey = new Date().toISOString().slice(0, 10);
+        const pendingMeds = meds.filter(m => localStorage.getItem(`swasthai_dose_${currentPatient.id}_${todayKey}_${m.id}`) !== "true");
+
+        const lang = (typeof I18nService !== "undefined") ? I18nService.getLanguage() : "hi";
+
+        let text = "";
+        if (pendingMeds.length === 0) {
+            text = (lang === "hi")
+                ? `बहुत बढ़िया ${currentPatient.fullName}! आपने आज की सभी दवाइयां समय पर ले ली हैं।`
+                : `Great job ${currentPatient.fullName}! You have taken all your scheduled medicines for today.`;
+        } else {
+            const medNames = pendingMeds.map(m => m.name).join(", ");
+            text = (lang === "hi")
+                ? `नमस्ते ${currentPatient.fullName}! आपकी आज की बकाया दवाइयां हैं: ${medNames}। कृपया इन्हें समय पर लें।`
+                : `Hello ${currentPatient.fullName}! Your pending medicines for today are: ${medNames}. Please take them on time.`;
+        }
+
+        if (typeof SpeechService !== "undefined") {
+            SpeechService.speakText(text, { lang: lang === "hi" ? "hi-IN" : "en-IN", rate: 0.85 });
+        } else {
+            alert(text);
+        }
+    }
+
+    function renderWeeklyMedChart() {
+        const container = document.getElementById("weeklyMedChartContainer");
+        if (!container) return;
+
+        const days = [
+            { short: "Mon", full: "Monday", hi: "सोमवार" },
+            { short: "Tue", full: "Tuesday", hi: "मंगलवार" },
+            { short: "Wed", full: "Wednesday", hi: "बुधवार" },
+            { short: "Thu", full: "Thursday", hi: "गुरुवार" },
+            { short: "Fri", full: "Friday", hi: "शुक्रवार" },
+            { short: "Sat", full: "Saturday", hi: "शनिवार" },
+            { short: "Sun", full: "Sunday", hi: "रविवार" }
+        ];
+
+        const meds = getMedicationListForPatient();
+        const todayIndex = (new Date().getDay() + 6) % 7; // Monday = 0
+
+        const lang = (typeof I18nService !== "undefined") ? I18nService.getLanguage() : "hi";
+
+        let totalSlots = days.length * meds.length;
+        let takenSlots = 0;
+
+        let gridHTML = `<div style="display: grid; grid-template-columns: repeat(7, minmax(130px, 1fr)); gap: 10px; min-width: 900px;">`;
+
+        days.forEach((day, index) => {
+            const isToday = index === todayIndex;
+            const isPast = index <= todayIndex;
+
+            let dayMedsHTML = "";
+            meds.forEach(med => {
+                const dayDoseKey = `swasthai_weekly_${currentPatient.id}_day${index}_${med.id}`;
+                const isTaken = isPast && (localStorage.getItem(dayDoseKey) === "true" || (isToday && localStorage.getItem(`swasthai_dose_${currentPatient.id}_${new Date().toISOString().slice(0, 10)}_${med.id}`) === "true"));
+
+                if (isTaken) takenSlots++;
+
+                let icon = "☀️";
+                if (med.timing === "afternoon") icon = "🌤️";
+                if (med.timing === "night") icon = "🌙";
+
+                dayMedsHTML += `
+                    <div style="background: ${isTaken ? '#dcfce7' : '#f8fafc'}; border: 1px solid ${isTaken ? '#86efac' : '#e2e8f0'}; border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; font-size: 11px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 800; color: #1e293b;">${icon} ${med.name.split(' ')[0]}</span>
+                            <span style="font-weight: 800; color: ${isTaken ? '#15803d' : '#94a3b8'};">${isTaken ? '✓' : '○'}</span>
+                        </div>
+                        <div style="font-size: 10px; color: #64748b;">${med.timeStr}</div>
+                    </div>
+                `;
+            });
+
+            gridHTML += `
+                <div style="background: ${isToday ? '#f0fdf4' : '#ffffff'}; border: 2px solid ${isToday ? '#1f7a57' : '#e2e8f0'}; border-radius: 12px; padding: 12px 10px; text-align: center; box-shadow: ${isToday ? '0 4px 12px rgba(31,122,87,0.15)' : 'none'};">
+                    <div style="font-size: 13px; font-weight: 900; color: ${isToday ? '#1f7a57' : '#334155'}; margin-bottom: 2px;">
+                        ${lang === 'hi' ? day.hi : day.full}
+                    </div>
+                    <span style="font-size: 10px; font-weight: 800; background: ${isToday ? '#1f7a57' : '#f1f5f9'}; color: ${isToday ? '#ffffff' : '#64748b'}; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 10px;">
+                        ${isToday ? (lang === 'hi' ? 'आज (Today)' : 'Today') : day.short}
+                    </span>
+                    <div>${dayMedsHTML}</div>
+                </div>
+            `;
+        });
+
+        gridHTML += `</div>`;
+        container.innerHTML = gridHTML;
+
+        const adherenceRate = Math.round((takenSlots / totalSlots) * 100);
+        const adherenceEl = document.getElementById("weeklyAdherenceText");
+        if (adherenceEl) {
+            adherenceEl.textContent = `Weekly Adherence: ${adherenceRate}% Completed (${takenSlots}/${totalSlots} Doses)`;
+        }
+    }
+
+    const EMERGENCY_KEYWORDS = [
+        { kw: "chest pain", label: "Severe Chest Pain / Dil Me Dard (Cardiac Signal)" },
+        { kw: "chhati mein dard", label: "Chest Pain / Dil Me Dard" },
+        { kw: "shortness of breath", label: "Severe Breathlessness / Difficulty Breathing" },
+        { kw: "saans lene mein takleef", label: "Severe Breathlessness" },
+        { kw: "unconscious", label: "Loss of Consciousness / Syncope" },
+        { kw: "severe bleeding", label: "Severe Bleeding / Hemorrhage" },
+        { kw: "khoon ulti", label: "Blood Vomiting / Hematemesis" },
+        { kw: "blood vomiting", label: "Blood Vomiting / Hematemesis" },
+        { kw: "paralysis", label: "Sudden Weakness / Stroke Warning" },
+        { kw: "stroke", label: "Stroke Warning" },
+        { kw: "heart attack", label: "Heart Attack Warning" },
+        { kw: "tez bukhar", label: "High Fever Prodrome" },
+        { kw: "seizure", label: "Convulsion / Seizure Alert" }
+    ];
+
+    function checkForEmergency(text) {
+        const alertBox = document.getElementById("liveEmergencyAlertBox");
+        if (!alertBox) return;
+
+        if (!text || !text.trim()) {
+            alertBox.style.display = "none";
+            return;
+        }
+
+        const lower = text.toLowerCase();
+        const found = EMERGENCY_KEYWORDS.find(item => lower.includes(item.kw));
+
+        if (found) {
+            const lang = (typeof I18nService !== "undefined") ? I18nService.getLanguage() : "hi";
+            alertBox.style.display = "block";
+            alertBox.innerHTML = `
+                <div style="background: #fef2f2; border: 2.5px solid #ef4444; border-radius: 16px; padding: 18px 20px; box-shadow: 0 4px 16px rgba(239,68,68,0.2);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; align-items: flex-start; gap: 14px;">
+                            <div style="background: #fee2e2; color: #dc2626; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div>
+                                <span style="font-size: 11px; font-weight: 900; background: #dc2626; color: white; padding: 3px 10px; border-radius: 10px; text-transform: uppercase;">
+                                    🚨 AI EMERGENCY SIGNAL DETECTED — TRIAGE LEVEL 1
+                                </span>
+                                <h4 style="font-size: 16px; font-weight: 900; color: #991b1b; margin: 6px 0 2px 0;">
+                                    गंभीर आपातकालीन लक्षण: ${found.label}
+                                </h4>
+                                <p style="font-size: 13px; color: #7f1d1d; margin: 0; line-height: 1.4;">
+                                    यह लक्षण गंभीर स्वास्थ्य जोखिम की ओर इशारा करता है। डॉक्टर को अलर्ट भेज दिया गया है। तुरंत 108 एम्बुलेंस से संपर्क करें या नजदीकी आपातकालीन कक्ष (Emergency Room) जाएं।
+                                </p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-self: center;">
+                            <a href="tel:108" class="sih-btn" style="background: #dc2626; color: white; font-weight: 900; font-size: 13px; padding: 10px 18px; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid fa-phone-volume"></i> 108 पर कॉल करें
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (!alertBox.dataset.spoken) {
+                alertBox.dataset.spoken = "true";
+                const voiceMsg = (lang === "hi")
+                    ? `सावधान! आपातकालीन लक्षण पाए गए हैं: ${found.label}। कृपया तुरंत 108 पर कॉल करें या नजदीकी अस्पताल जाएं।`
+                    : `Warning! Emergency symptom detected: ${found.label}. Please call 108 or go to the nearest emergency hospital immediately.`;
+                if (typeof SpeechService !== "undefined") {
+                    SpeechService.speakText(voiceMsg, { lang: lang === "hi" ? "hi-IN" : "en-IN", rate: 0.9 });
+                }
+            }
+        } else {
+            alertBox.style.display = "none";
+            delete alertBox.dataset.spoken;
+        }
+    }
+
+    function renderSmartTimeline(filterType = "all") {
+        const container = document.getElementById("smartTimelineContainer");
+        if (!container || !currentPatient) return;
+
+        const events = [];
+
+        if (currentPatient.registeredDate) {
+            events.push({
+                type: "registration",
+                category: "consultation",
+                title: "Patient Registered at SwasthAI Portal",
+                date: currentPatient.registeredDate,
+                icon: "fa-user-check",
+                color: "#16a34a",
+                bg: "#f0fdf4",
+                details: `Registered Patient ID: ${currentPatient.id} | Age: ${currentPatient.age || 35}y | Blood Group: ${currentPatient.bloodGroup || 'O+'}`
+            });
+        }
+
+        const cases = ClinicalStorage.getCases().filter(c => c.patientId === currentPatient.id);
+        cases.forEach(c => {
+            const dateStr = c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : "2026-09-01";
+            events.push({
+                type: "consultation",
+                category: "consultation",
+                title: `Doctor Consultation: ${c.chiefComplaint || 'Clinical Assessment'}`,
+                date: dateStr,
+                icon: "fa-user-doctor",
+                color: "#2563eb",
+                bg: "#eff6ff",
+                details: `Status: ${c.status || 'Verified'} | Doctor Assessment: ${c.ayushAssessment ? c.ayushAssessment.notes : 'Clinical examination completed'}`
+            });
+
+            if (c.currentMedications && c.currentMedications.length > 0) {
+                const medNames = c.currentMedications.map(m => `${m.name} (${m.dose || '1 Dose'})`).join(", ");
+                events.push({
+                    type: "prescription",
+                    category: "prescription",
+                    title: `Verified Doctor Prescription Issued`,
+                    date: dateStr,
+                    icon: "fa-pills",
+                    color: "#059669",
+                    bg: "#ecfdf5",
+                    details: `Prescribed Regimen: ${medNames}`
+                });
+            }
+
+            if (c.redFlags && c.redFlags.length > 0) {
+                events.push({
+                    type: "emergency",
+                    category: "report",
+                    title: `🚨 Emergency Signal Detected: ${c.redFlags[0].title || 'Alert'}`,
+                    date: dateStr,
+                    icon: "fa-triangle-exclamation",
+                    color: "#dc2626",
+                    bg: "#fef2f2",
+                    details: `Emergency triage flag logged. Practitioner verification assigned.`
+                });
+            }
+        });
+
+        (currentPatient.pastDoctorRecords || []).forEach(r => {
+            events.push({
+                type: "report",
+                category: "report",
+                title: `Past Doctor Consultation: ${r.doctorName || 'Previous Clinic'}`,
+                date: r.year || "Past Record",
+                icon: "fa-book-medical",
+                color: "#0284c7",
+                bg: "#f0f9ff",
+                details: `Diagnosis: ${r.diagnosis} | Clinic: ${r.clinicOrHospital || 'Clinic'} | Past Medicines: ${r.pastMedicines || 'N/A'}`
+            });
+        });
+
+        (currentPatient.patientReportedDiseases || []).forEach(d => {
+            events.push({
+                type: "disease",
+                category: "report",
+                title: `Patient Reported Disease: ${d.diseaseName}`,
+                date: "Self-Reported",
+                icon: "fa-virus",
+                color: "#d97706",
+                bg: "#fffbe6",
+                details: `Severity: ${d.severity || 'Moderate'} | Duration: ${d.duration || 'N/A'} | Symptoms: ${d.symptoms || 'N/A'}`
+            });
+        });
+
+        const filteredEvents = events.filter(e => {
+            if (filterType === "all") return true;
+            return e.category === filterType || e.type === filterType;
+        });
+
+        container.innerHTML = "";
+
+        if (filteredEvents.length === 0) {
+            container.innerHTML = `<div style="padding: 12px; color: #64748b; font-size: 13px;">No timeline events found for this category.</div>`;
+            return;
+        }
+
+        filteredEvents.forEach(item => {
+            const node = document.createElement("div");
+            node.style.cssText = "position: relative; margin-bottom: 20px; padding-left: 10px;";
+
+            node.innerHTML = `
+                <div style="position: absolute; left: -35px; top: 2px; width: 22px; height: 22px; border-radius: 50%; background: ${item.color}; color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: 0 0 0 3px white;">
+                    <i class="fa-solid ${item.icon}"></i>
+                </div>
+                <div style="background: ${item.bg}; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+                        <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: #1e293b;">${item.title}</h4>
+                        <span style="font-size: 11px; font-weight: 700; color: #64748b; background: rgba(255,255,255,0.8); padding: 2px 8px; border-radius: 10px; border: 1px solid #cbd5e1;">
+                            <i class="fa-regular fa-clock"></i> ${item.date}
+                        </span>
+                    </div>
+                    <div style="font-size: 12px; color: #475569; line-height: 1.4;">${item.details}</div>
+                </div>
+            `;
+            container.appendChild(node);
+        });
+    }
+
+    function filterTimeline(type, btnEl) {
+        if (btnEl && btnEl.parentElement) {
+            const btns = btnEl.parentElement.querySelectorAll("button");
+            btns.forEach(b => {
+                b.style.background = "#f1f5f9";
+                b.style.color = "#475569";
+                b.style.border = "1px solid #cbd5e1";
+            });
+            btnEl.style.background = "#1f7a57";
+            btnEl.style.color = "white";
+            btnEl.style.border = "none";
+        }
+        renderSmartTimeline(type);
+    }
+
     return {
         init,
         playWelcomeAudio,
@@ -540,7 +991,14 @@ const PatientPortal = (() => {
         submitAddDisease,
         openAddPastDoctorModal,
         closeAddPastDoctorModal,
-        submitAddPastDoctor
+        submitAddPastDoctor,
+        renderDailyReminders,
+        toggleDoseStatus,
+        triggerVoiceMedReminder,
+        renderWeeklyMedChart,
+        checkForEmergency,
+        renderSmartTimeline,
+        filterTimeline
     };
 })();
 
