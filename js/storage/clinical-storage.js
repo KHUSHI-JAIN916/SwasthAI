@@ -1333,6 +1333,7 @@ const ClinicalStorage = (() => {
         updateCaseStatus,
         getTimelineForPatient,
         addTimelineEvent,
+        logTimelineEvent: addTimelineEvent,
         getAuditLogs,
         logAudit,
         getFollowups,

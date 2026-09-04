@@ -93,6 +93,10 @@
                     <option class="lang-option" value="hi">🇮🇳 हिंदी (Hindi)</option>
                     <option class="lang-option" value="hinglish">🗣️ Hinglish</option>
                     <option class="lang-option" value="en">🇬🇧 English</option>
+                    <option class="lang-option" value="mr">🇮🇳 मराठी (Marathi)</option>
+                    <option class="lang-option" value="bn">🇮🇳 বাংলা (Bengali)</option>
+                    <option class="lang-option" value="ta">🇮🇳 தமிழ் (Tamil)</option>
+                    <option class="lang-option" value="te">🇮🇳 తెలుగు (Telugu)</option>
                 </select>
             </div>
 
@@ -219,6 +223,9 @@
                 <span style="font-size: 11px; font-weight: 800; background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 12px;">Doctor Verified Safety Record</span>
             </div>
         </div>
+
+        <!-- ================= LIVE AI EMERGENCY DETECTION ALERT BOX ================= -->
+        <div id="liveEmergencyAlertBox" style="display: none; margin-bottom: 24px;"></div>
 
         <!-- ================= 1. VOICE-FIRST SYMPTOM ASSISTANT ================= -->
         <section class="patient-voice-hero">
@@ -466,7 +473,31 @@
             </div>
         </div>
 
-        <!-- ================= 5C. MY VERIFIED PRESCRIPTIONS & DOCTOR NOTES ================= -->
+        <!-- ================= 5C. SMART TIMELINE FOR PATIENT HISTORY ================= -->
+        <div class="profile-card" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 18px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 900; color: #0f172a;">
+                        <i class="fa-solid fa-timeline" style="color: #1f7a57; margin-right: 6px;"></i> स्मार्ट पेशेंट हिस्ट्री टाइमलाइन (Smart Patient History Timeline)
+                    </h3>
+                    <p style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                        पंजीकरण, डॉक्टर विज़िट, रिपोर्ट्स व पर्चों की कालानुक्रमिक समय-रेखा (Chronological Milestones)
+                    </p>
+                </div>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;" id="timelineFilterBar">
+                    <button type="button" class="sih-btn active" onclick="PatientPortal.filterTimeline('all', this)" style="background: #1f7a57; color: white; border: none; padding: 5px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer;">All Events</button>
+                    <button type="button" class="sih-btn" onclick="PatientPortal.filterTimeline('prescription', this)" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer;">Prescriptions</button>
+                    <button type="button" class="sih-btn" onclick="PatientPortal.filterTimeline('report', this)" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer;">Reports & Records</button>
+                    <button type="button" class="sih-btn" onclick="PatientPortal.filterTimeline('consultation', this)" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer;">Consultations</button>
+                </div>
+            </div>
+
+            <div id="smartTimelineContainer" style="position: relative; padding-left: 24px; border-left: 3px solid #cbd5e1; margin-left: 12px; min-height: 120px;">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+
+        <!-- ================= 5D. MY VERIFIED PRESCRIPTIONS & DOCTOR NOTES ================= -->
         <div class="profile-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div>
@@ -596,6 +627,7 @@
     <script src="js/storage/clinical-storage.js"></script>
     <script src="js/services/speech-service.js"></script>
     <script src="js/services/document-service.js"></script>
+    <script src="js/services/prescription-service.js"></script>
     <script src="js/services/i18n-service.js"></script>
     <script src="js/ai-digital-twin.js"></script>
     <script src="js/patient-portal.js"></script>

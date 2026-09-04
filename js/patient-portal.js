@@ -42,6 +42,18 @@ const PatientPortal = (() => {
                 I18nService.translatePage();
             }
         });
+
+        // Listen for real-time doctor prescription issuance
+        window.addEventListener("prescriptionIssued", () => {
+            loadPatientData();
+            renderPrescriptions();
+            renderDailyReminders();
+            renderWeeklyMedChart();
+            renderSmartTimeline("all");
+            if (typeof I18nService !== "undefined") {
+                I18nService.translatePage();
+            }
+        });
     }
 
     function setupModalListeners() {

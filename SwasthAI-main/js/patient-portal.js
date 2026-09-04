@@ -19,8 +19,16 @@ const PatientPortal = (() => {
         renderPastRecordsList();
         renderDailyReminders();
         renderWeeklyMedChart();
+        renderSmartTimeline("all");
 
         setupModalListeners();
+
+        const symptomInput = document.getElementById("patientSymptomInput");
+        if (symptomInput) {
+            symptomInput.addEventListener("input", (e) => {
+                checkForEmergency(e.target.value);
+            });
+        }
 
         // Listen for language switch
         window.addEventListener("languageChanged", () => {
@@ -29,6 +37,19 @@ const PatientPortal = (() => {
             renderPastRecordsList();
             renderDailyReminders();
             renderWeeklyMedChart();
+            renderSmartTimeline("all");
+            if (typeof I18nService !== "undefined") {
+                I18nService.translatePage();
+            }
+        });
+
+        // Listen for real-time doctor prescription issuance
+        window.addEventListener("prescriptionIssued", () => {
+            loadPatientData();
+            renderPrescriptions();
+            renderDailyReminders();
+            renderWeeklyMedChart();
+            renderSmartTimeline("all");
             if (typeof I18nService !== "undefined") {
                 I18nService.translatePage();
             }
@@ -110,9 +131,9 @@ const PatientPortal = (() => {
 
         const logoutBtn = document.getElementById("patientLogoutBtn");
         if (logoutBtn) {
-            logoutBtn.addEventListener("click", () => {
-                localStorage.removeItem("swasthai_active_patient_id");
-                window.location.href = "patient-login.html";
+            logoutBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                ClinicalStorage.logoutUser();
             });
         }
     }
@@ -156,6 +177,7 @@ const PatientPortal = (() => {
                             confScore.textContent = `${confidence}% Clarity`;
                             confBadge.style.display = "inline-flex";
                         }
+                        checkForEmergency(textInput.value);
                     },
                     onError: (err) => {
                         isRecording = false;

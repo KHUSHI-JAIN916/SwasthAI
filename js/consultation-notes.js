@@ -149,65 +149,87 @@ document.addEventListener("DOMContentLoaded", () => {
         if (doctorRole) doctorRole.textContent = hospName;
     }
 
+    let isPatientSelectListenerAdded = false;
+
     function populatePatients() {
         if (!patientSelect) return;
         let patients = [];
-        if (typeof ClinicalStorage !== "undefined") {
+        if (typeof ClinicalStorage !== "undefined" && typeof ClinicalStorage.getPatients === "function") {
             patients = ClinicalStorage.getPatients();
         }
+        
+        if (!patients || patients.length === 0) {
+            patients = [
+                { id: "AYU-2026-DEMO", fullName: "Rajesh Patel", age: 58, gender: "Male" },
+                { id: "AYU-2026-001", fullName: "Rahul Kumar", age: 32, gender: "Male" },
+                { id: "AYU-2026-002", fullName: "Priya Sharma", age: 28, gender: "Female" },
+                { id: "AYU-2026-003", fullName: "Amit Singh", age: 45, gender: "Male" },
+                { id: "AYU-2026-004", fullName: "Neha Verma", age: 39, gender: "Female" },
+                { id: "AYU-2026-005", fullName: "Vikram Singh", age: 52, gender: "Male" }
+            ];
+        }
 
-        patientSelect.innerHTML = '<option value="">-- Select Registered Patient --</option>';
+        // If HTML select already has options loaded, synchronize with patients array
+        const existingValues = Array.from(patientSelect.options).map(opt => opt.value);
+        
         patients.forEach(p => {
-            const opt = document.createElement("option");
-            opt.value = p.id;
-            opt.textContent = `${p.fullName} (${p.id} - ${p.gender}, ${p.age}y)`;
-            patientSelect.appendChild(opt);
-        });
-
-        // Add an option to enter guest / custom patient
-        const guestOpt = document.createElement("option");
-        guestOpt.value = "custom";
-        guestOpt.textContent = "+ Walk-in / New Patient";
-        patientSelect.appendChild(guestOpt);
-
-        patientSelect.addEventListener("change", (e) => {
-            const val = e.target.value;
-            if (!val) {
-                currentSelectedPatient = null;
-                if (patientQuickDetails) patientQuickDetails.style.display = "none";
-                return;
-            }
-
-            if (val === "custom") {
-                const customName = prompt("Enter Patient Full Name:", "Guest Patient") || "Walk-in Patient";
-                const customId = "AYU-" + Date.now().toString().slice(-4);
-                currentSelectedPatient = {
-                    id: customId,
-                    fullName: customName,
-                    age: "Unspecified",
-                    gender: "Unspecified"
-                };
-            } else {
-                currentSelectedPatient = patients.find(p => p.id === val);
-            }
-
-            if (currentSelectedPatient) {
-                localStorage.setItem("swasthai_active_patient_id", currentSelectedPatient.id);
-
-                if (patientQuickDetails) {
-                    patientQuickDetails.style.display = "inline-block";
-                    displayPatientId.textContent = currentSelectedPatient.id;
-                    displayPatientAge.textContent = currentSelectedPatient.age ? `${currentSelectedPatient.age}y` : "--";
-                    displayPatientGender.textContent = currentSelectedPatient.gender || "--";
-                }
-
-                if (typeof DigitalTwin !== "undefined") {
-                    DigitalTwin.renderPanel("digitalTwinContainer", "doctor", currentSelectedPatient.id);
-                }
+            if (!existingValues.includes(p.id)) {
+                const opt = document.createElement("option");
+                opt.value = p.id;
+                opt.className = "notranslate";
+                opt.textContent = `${p.fullName} (${p.id} - ${p.gender || 'Gen'}, ${p.age || '--'}y)`;
+                patientSelect.appendChild(opt);
             }
         });
 
-        // Auto-select initial active patient if available
+        if (!existingValues.includes("custom")) {
+            const guestOpt = document.createElement("option");
+            guestOpt.value = "custom";
+            guestOpt.className = "notranslate";
+            guestOpt.textContent = "+ Walk-in / New Patient";
+            patientSelect.appendChild(guestOpt);
+        }
+
+        if (!isPatientSelectListenerAdded) {
+            isPatientSelectListenerAdded = true;
+            patientSelect.addEventListener("change", (e) => {
+                const val = e.target.value;
+                if (!val) {
+                    currentSelectedPatient = null;
+                    if (patientQuickDetails) patientQuickDetails.style.display = "none";
+                    return;
+                }
+
+                if (val === "custom") {
+                    const customName = prompt("Enter Patient Full Name:", "Guest Patient") || "Walk-in Patient";
+                    const customId = "AYU-" + Date.now().toString().slice(-4);
+                    currentSelectedPatient = {
+                        id: customId,
+                        fullName: customName,
+                        age: "Unspecified",
+                        gender: "Unspecified"
+                    };
+                } else {
+                    currentSelectedPatient = patients.find(p => p.id === val);
+                }
+
+                if (currentSelectedPatient) {
+                    localStorage.setItem("swasthai_active_patient_id", currentSelectedPatient.id);
+
+                    if (patientQuickDetails) {
+                        patientQuickDetails.style.display = "inline-block";
+                        displayPatientId.textContent = currentSelectedPatient.id;
+                        displayPatientAge.textContent = currentSelectedPatient.age ? `${currentSelectedPatient.age}y` : "--";
+                        displayPatientGender.textContent = currentSelectedPatient.gender || "--";
+                    }
+
+                    if (typeof DigitalTwin !== "undefined") {
+                        DigitalTwin.renderPanel("digitalTwinContainer", "doctor", currentSelectedPatient.id);
+                    }
+                }
+            });
+        }
+
         const savedPatientId = localStorage.getItem("swasthai_active_patient_id");
         if (savedPatientId && patients.some(p => p.id === savedPatientId)) {
             patientSelect.value = savedPatientId;

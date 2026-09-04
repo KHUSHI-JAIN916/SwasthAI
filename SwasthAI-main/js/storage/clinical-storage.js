@@ -13,7 +13,8 @@ const ClinicalStorage = (() => {
         OFFLINE_DRAFTS: "ayushOfflineDrafts",
         USERS: "ayushUsers",
         CURRENT_USER: "ayushCurrentUser",
-        ACTIVE_ROLE: "ayushActiveRole" // 'practitioner' | 'patient' | 'admin'
+        ACTIVE_ROLE: "ayushActiveRole", // 'practitioner' | 'patient' | 'admin'
+        CONSULTATION_NOTES: "ayushConsultationNotes"
     };
 
     // Realistic seed patients
@@ -663,6 +664,87 @@ const ClinicalStorage = (() => {
         }
     ];
 
+    // Seed realistic consultation notes
+    const DEFAULT_CONSULTATION_NOTES = [
+        {
+            id: "CN-2026-001",
+            patientId: "AYU-2026-001",
+            patientName: "Rahul Kumar",
+            doctorName: "Dr. Sharma",
+            doctorId: "DOC-2026-001",
+            date: "2026-09-22T10:30:00.000Z",
+            formattedDate: "Sep 22, 2026, 10:30 AM",
+            status: "Completed",
+            durationSeconds: 195,
+            rawTranscriptText: "Doctor: Good morning, Rahul. What problem are you facing today?\nPatient: Good morning doctor. I have been having a severe headache and mild fever for the last three days.\nDoctor: I see. Do you have a cough or chest congestion?\nPatient: No, no cough at all.\nDoctor: Any history of high BP, diabetes, or medication allergies?\nPatient: No allergies. I had work stress recently. No regular medicines right now.\nDoctor: Let me check your vitals. Blood pressure is 120/80 mmHg, temperature is 99.4 F, pulse is 76 bpm.\nDoctor: It looks like tension-type headache with viral prodrome. I am prescribing Paracetamol 650mg SOS after meals, and Brahmi Vati 1 tablet twice daily. Drink plenty of water and rest. Follow up in 3 days if fever persists.",
+            generatedNotes: {
+                complaint: {
+                    main: "Headache and mild fever",
+                    duration: "3 days",
+                    severity: "Severe headache, mild fever"
+                },
+                symptoms: {
+                    present: "Headache, mild fever",
+                    negative: "No cough, no chest congestion"
+                },
+                history: {
+                    conditions: "Work stress reported",
+                    surgeries: "Not mentioned",
+                    allergies: "No known drug allergies",
+                    medications: "No regular medications"
+                },
+                vitals: {
+                    bloodPressure: "120/80 mmHg",
+                    heartRate: "76 bpm",
+                    temperature: "99.4 °F",
+                    spO2: "Not mentioned",
+                    weight: "Not mentioned"
+                },
+                assessment: "Tension-type headache associated with mild viral prodrome. No acute red flags observed.",
+                plan: {
+                    medicines: "Paracetamol 650mg SOS post-meals; Brahmi Vati 1 tablet BID",
+                    tests: "Not mentioned",
+                    lifestyle: "Adequate hydration, proper rest, stress reduction",
+                    followUp: "Follow up in 3 days if fever persists"
+                },
+                doctorNotes: "Patient was coherent and responsive. Alert to worsening symptoms."
+            },
+            finalNotes: {
+                complaint: {
+                    main: "Headache and mild fever",
+                    duration: "3 days",
+                    severity: "Severe headache, mild fever"
+                },
+                symptoms: {
+                    present: "Headache, mild fever",
+                    negative: "No cough, no chest congestion"
+                },
+                history: {
+                    conditions: "Work stress reported",
+                    surgeries: "Not mentioned",
+                    allergies: "No known drug allergies",
+                    medications: "No regular medications"
+                },
+                vitals: {
+                    bloodPressure: "120/80 mmHg",
+                    heartRate: "76 bpm",
+                    temperature: "99.4 °F",
+                    spO2: "Not mentioned",
+                    weight: "Not mentioned"
+                },
+                assessment: "Tension-type headache associated with mild viral prodrome. No acute red flags observed.",
+                plan: {
+                    medicines: "Paracetamol 650mg SOS post-meals; Brahmi Vati 1 tablet BID",
+                    tests: "Not mentioned",
+                    lifestyle: "Adequate hydration, proper rest, stress reduction",
+                    followUp: "Follow up in 3 days if fever persists"
+                },
+                doctorNotes: "Patient was coherent and responsive. Alert to worsening symptoms."
+            },
+            isAiDraft: true
+        }
+    ];
+
     /* Initialization */
     function initialize() {
         if (!localStorage.getItem(KEYS.PATIENTS)) {
@@ -682,6 +764,9 @@ const ClinicalStorage = (() => {
         }
         if (!localStorage.getItem(KEYS.ACTIVE_ROLE)) {
             localStorage.setItem(KEYS.ACTIVE_ROLE, "practitioner");
+        }
+        if (!localStorage.getItem(KEYS.CONSULTATION_NOTES)) {
+            localStorage.setItem(KEYS.CONSULTATION_NOTES, JSON.stringify(DEFAULT_CONSULTATION_NOTES));
         }
     }
 
@@ -1056,6 +1141,14 @@ const ClinicalStorage = (() => {
         logAudit("Switched System Role", role, "RBAC", "N/A", `Active view changed to ${role.toUpperCase()}`);
     }
 
+    function logoutUser() {
+        logAudit("User Logged Out", getActiveRole(), "Authentication", "N/A", "User signed out of system");
+        localStorage.removeItem(KEYS.CURRENT_USER);
+        localStorage.removeItem("swasthai_active_patient_id");
+        localStorage.removeItem("swasthai_current_hospital");
+        window.location.href = "index.html";
+    }
+
     /* =========================================================================
        ATTENTION QUEUE & STATS
        ========================================================================= */
@@ -1123,80 +1216,108 @@ const ClinicalStorage = (() => {
         };
     }
 
-    function getDashboardMetrics(timeframe = "month") {
+    function getDashboardMetrics() {
         const patients = getPatients();
         const cases = getCases();
         const followups = getFollowups();
         const queue = getAttentionQueue();
 
-        const now = new Date();
-        const todayStr = now.toISOString().split("T")[0];
-
-        function isWithinTimeframe(dateStr) {
-            if (!dateStr) return false;
-            const d = new Date(dateStr);
-            if (isNaN(d.getTime())) return false;
-
-            if (timeframe === "today") {
-                const isSameDay = d.toISOString().split("T")[0] === todayStr;
-                const diffHours = (now - d) / (1000 * 60 * 60);
-                return isSameDay || (diffHours >= 0 && diffHours <= 24);
-            } else if (timeframe === "week") {
-                const diffDays = (now - d) / (1000 * 60 * 60 * 24);
-                return diffDays >= 0 && diffDays <= 7;
-            } else { // "month"
-                const isSameMonth = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-                const diffDays = (now - d) / (1000 * 60 * 60 * 24);
-                return isSameMonth || (diffDays >= 0 && diffDays <= 31);
-            }
-        }
-
-        const casesInPeriod = cases.filter(c => isWithinTimeframe(c.createdAt || c.updatedAt));
-        const patientsInPeriod = patients.filter(p => isWithinTimeframe(p.registeredDate));
-
-        let totalPatients, casesCount, pendingReview, completed, redFlagCount, requiringAttention, followupsDue, systemAccuracyRate;
-
-        if (timeframe === "today") {
-            casesCount = casesInPeriod.length || 3;
-            totalPatients = patientsInPeriod.length || Math.min(2, patients.length);
-            pendingReview = cases.filter(c => (c.status === "PRACTITIONER REVIEW" || c.status === "AI REVIEW") && isWithinTimeframe(c.updatedAt || c.createdAt)).length || 1;
-            completed = cases.filter(c => (c.status === "VERIFIED" || c.status === "COMPLETED") && isWithinTimeframe(c.updatedAt || c.createdAt)).length || 1;
-            redFlagCount = cases.filter(c => c.redFlags && c.redFlags.length > 0 && isWithinTimeframe(c.createdAt)).length || 1;
-            requiringAttention = Math.min(2, queue.totalAttention || 2);
-            followupsDue = followups.filter(f => f.date === todayStr).length || 2;
-            systemAccuracyRate = "98%";
-        } else if (timeframe === "week") {
-            casesCount = casesInPeriod.length || 5;
-            totalPatients = patientsInPeriod.length || Math.min(4, patients.length);
-            pendingReview = cases.filter(c => (c.status === "PRACTITIONER REVIEW" || c.status === "AI REVIEW") && isWithinTimeframe(c.updatedAt || c.createdAt)).length || 2;
-            completed = cases.filter(c => (c.status === "VERIFIED" || c.status === "COMPLETED") && isWithinTimeframe(c.updatedAt || c.createdAt)).length || 3;
-            redFlagCount = cases.filter(c => c.redFlags && c.redFlags.length > 0 && isWithinTimeframe(c.createdAt)).length || 2;
-            requiringAttention = Math.min(3, queue.totalAttention || 3);
-            followupsDue = followups.filter(f => isWithinTimeframe(f.date)).length || 3;
-            systemAccuracyRate = "96%";
-        } else { // "month" or default
-            casesCount = casesInPeriod.length || Math.max(cases.length, 8);
-            totalPatients = patients.length;
-            pendingReview = cases.filter(c => c.status === "PRACTITIONER REVIEW" || c.status === "AI REVIEW").length || 2;
-            completed = cases.filter(c => c.status === "VERIFIED" || c.status === "COMPLETED").length || 4;
-            redFlagCount = cases.filter(c => c.redFlags && c.redFlags.length > 0).length || 1;
-            requiringAttention = queue.totalAttention || 3;
-            followupsDue = followups.length || 4;
-            systemAccuracyRate = "94%";
-        }
+        const todayStr = new Date().toISOString().split("T")[0];
+        const casesToday = cases.filter(c => c.createdAt && c.createdAt.startsWith(todayStr)).length;
+        const pendingReview = cases.filter(c => c.status === "PRACTITIONER REVIEW" || c.status === "AI REVIEW").length;
+        const completed = cases.filter(c => c.status === "VERIFIED" || c.status === "COMPLETED").length;
+        const lowConfidenceCount = cases.filter(c => c.fieldConfidence && Object.values(c.fieldConfidence).some(v => v < 60)).length;
+        const redFlagCount = cases.filter(c => c.redFlags && c.redFlags.length > 0).length;
+        const followupsDue = followups.filter(f => f.date <= todayStr).length;
 
         return {
-            timeframe,
-            totalPatients,
-            casesToday: casesCount, // backward compatibility
-            casesCount,
-            pendingReview,
-            completed,
-            requiringAttention,
-            redFlagCount,
-            followupsDue,
-            systemAccuracyRate
+            totalPatients: patients.length,
+            casesToday: casesToday || 3, // Realistic fallback if today is fresh
+            pendingReview: pendingReview,
+            completed: completed,
+            requiringAttention: queue.totalAttention,
+            lowConfidenceCount: lowConfidenceCount,
+            redFlagCount: redFlagCount,
+            followupsDue: followupsDue || followups.length
         };
+    }
+
+    /* =========================================================================
+       CONSULTATION NOTES METHODS (AI Medical Scribe)
+       ========================================================================= */
+    function getConsultationNotes() {
+        try {
+            const raw = localStorage.getItem(KEYS.CONSULTATION_NOTES);
+            if (!raw) {
+                localStorage.setItem(KEYS.CONSULTATION_NOTES, JSON.stringify(DEFAULT_CONSULTATION_NOTES));
+                return DEFAULT_CONSULTATION_NOTES;
+            }
+            return JSON.parse(raw) || [];
+        } catch (e) {
+            console.error("Error reading consultation notes", e);
+            return DEFAULT_CONSULTATION_NOTES;
+        }
+    }
+
+    function saveConsultationNotes(notes) {
+        localStorage.setItem(KEYS.CONSULTATION_NOTES, JSON.stringify(notes));
+    }
+
+    function getConsultationNoteById(id) {
+        return getConsultationNotes().find(n => n.id === id);
+    }
+
+    function saveConsultationNote(noteData) {
+        const notes = getConsultationNotes();
+        if (!noteData.id) {
+            const nextNum = (notes.length + 1).toString().padStart(3, "0");
+            noteData.id = `CN-${new Date().getFullYear()}-${nextNum}`;
+        }
+        if (!noteData.date) {
+            noteData.date = new Date().toISOString();
+        }
+        if (!noteData.formattedDate) {
+            noteData.formattedDate = new Date(noteData.date).toLocaleString([], {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        const existingIndex = notes.findIndex(n => n.id === noteData.id);
+        if (existingIndex >= 0) {
+            notes[existingIndex] = { ...notes[existingIndex], ...noteData, updatedAt: new Date().toISOString() };
+        } else {
+            notes.unshift(noteData);
+        }
+
+        saveConsultationNotes(notes);
+
+        // Also add timeline event for patient if patientId exists
+        if (noteData.patientId) {
+            addTimelineEvent({
+                patientId: noteData.patientId,
+                date: noteData.date.split("T")[0],
+                category: "Consultation",
+                title: "AI Consultation Note Recorded",
+                details: `Dr. consultation completed: ${noteData.finalNotes?.complaint?.main || noteData.generatedNotes?.complaint?.main || "General Consultation"}.`,
+                icon: "fa-notes-medical",
+                tag: "Scribe Note"
+            });
+        }
+
+        logAudit("Saved Consultation Note", getActiveRole(), "Consultation Note", noteData.id, `Saved note for ${noteData.patientName} (${noteData.patientId})`);
+
+        return noteData;
+    }
+
+    function deleteConsultationNote(id) {
+        const notes = getConsultationNotes().filter(n => n.id !== id);
+        saveConsultationNotes(notes);
+        logAudit("Deleted Consultation Note", getActiveRole(), "Consultation Note", id, `Deleted note ID ${id}`);
+        return true;
     }
 
     return {
@@ -1212,6 +1333,7 @@ const ClinicalStorage = (() => {
         updateCaseStatus,
         getTimelineForPatient,
         addTimelineEvent,
+        logTimelineEvent: addTimelineEvent,
         getAuditLogs,
         logAudit,
         getFollowups,
@@ -1221,11 +1343,35 @@ const ClinicalStorage = (() => {
         clearOfflineDraft,
         getActiveRole,
         setActiveRole,
+        logoutUser,
         getAttentionQueue,
         getDashboardMetrics,
         authenticatePatient,
         addPastDoctorRecord,
         addPatientReportedDisease,
-        searchPatientFullProfile
+        searchPatientFullProfile,
+        getConsultationNotes,
+        getConsultationNoteById,
+        saveConsultationNote,
+        deleteConsultationNote
     };
 })();
+
+// Universal Auto Logout Listener for all pages
+document.addEventListener("DOMContentLoaded", () => {
+    const logoutElements = document.querySelectorAll(".logout, .nav-item.logout, #patientLogoutBtn, #logoutBtn, .logout-btn");
+    logoutElements.forEach(el => {
+        el.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (typeof ClinicalStorage !== "undefined" && ClinicalStorage.logoutUser) {
+                ClinicalStorage.logoutUser();
+            } else {
+                localStorage.removeItem("ayushCurrentUser");
+                localStorage.removeItem("swasthai_active_patient_id");
+                localStorage.removeItem("swasthai_current_hospital");
+                window.location.href = "index.html";
+            }
+        });
+    });
+});
+

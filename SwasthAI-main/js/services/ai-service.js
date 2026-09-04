@@ -28,9 +28,11 @@ const AIService = (() => {
         { patterns: [/center/i, /beech me/i, /epigastric/i, /naabhi ke aas paas/i], field: "location", value: "Epigastric / Periumbilical Region" },
 
         // Temporal / Duration
-        { patterns: [/(\d+)\s*(?:din|days?)\s*(?:pehle|ago|se)/i, /(?:since|for)\s*(\d+)\s*days?/i], field: "duration", extractor: m => `${m[1]} days` },
-        { patterns: [/(\d+)\s*(?:hafte|weeks?)\s*(?:pehle|ago|se)/i, /(?:since|for)\s*(\d+)\s*weeks?/i], field: "duration", extractor: m => `${m[1]} weeks` },
-        { patterns: [/(\d+)\s*(?:mahine|months?)\s*(?:pehle|ago|se)/i, /(?:since|for)\s*(\d+)\s*months?/i], field: "duration", extractor: m => `${m[1]} months` },
+        { patterns: [/(\d+)\s*(?:din|days?|d|day|dino)\b/i, /(?:since|for)\s*(\d+)\s*(?:days?|din)/i], field: "duration", extractor: m => `${m[1]} days` },
+        { patterns: [/(\d+)\s*(?:ghante|hours?|hrs?|hr)\b/i, /(?:since|for)\s*(\d+)\s*(?:hours?|hrs?|hr)/i], field: "duration", extractor: m => `${m[1]} hours` },
+        { patterns: [/(\d+)\s*(?:hafte|weeks?|wk|wks)\b/i, /(?:since|for)\s*(\d+)\s*(?:weeks?|wks)/i], field: "duration", extractor: m => `${m[1]} weeks` },
+        { patterns: [/(\d+)\s*(?:mahine|months?|m|mon)\b/i, /(?:since|for)\s*(\d+)\s*(?:months?|mon)/i], field: "duration", extractor: m => `${m[1]} months` },
+        { patterns: [/^\s*(\d+)\s*$/i], field: "duration", extractor: m => `${m[1]} days` },
         { patterns: [/kal se/i, /since yesterday/i, /started yesterday/i], field: "duration", value: "1 day (since yesterday)" },
         { patterns: [/aaj subah se/i, /since today morning/i], field: "duration", value: "Few hours (since morning)" },
 
@@ -243,6 +245,33 @@ const AIService = (() => {
                 }
             });
         });
+
+        // Smart context-aware fallback slot filling if patient responds to specific prompt
+        const lastAiText = (caseState.transcript.slice().reverse().find(t => t.speaker === "ai")?.text || "").toLowerCase();
+        
+        if (lastAiText.includes("kab") || lastAiText.includes("dino") || lastAiText.includes("ghanto") || lastAiText.includes("duration") || lastAiText.includes("when")) {
+            if (!caseState.duration) {
+                caseState.duration = text.trim();
+                caseState.onset = text.trim();
+                recordTraceability(caseState, "duration", text, timestamp, 85);
+            }
+        } else if (lastAiText.includes("jagah") || lastAiText.includes("location") || lastAiText.includes("kahan")) {
+            if (!caseState.location) {
+                caseState.location = text.trim();
+                recordTraceability(caseState, "location", text, timestamp, 85);
+            }
+        } else if (lastAiText.includes("tez") || lastAiText.includes("intensity") || lastAiText.includes("severity")) {
+            if (!caseState.severity) {
+                caseState.severity = text.trim();
+                recordTraceability(caseState, "severity", text, timestamp, 85);
+            }
+        }
+
+        // Fallback catch-all for Chief Complaint if not set by lexicon
+        if (!caseState.chiefComplaint && text.length > 2) {
+            caseState.chiefComplaint = text.trim();
+            recordTraceability(caseState, "chiefComplaint", text, timestamp, 80);
+        }
 
         // Lifestyle clues
         if (/sleep|neend|so|ghante/i.test(text)) {

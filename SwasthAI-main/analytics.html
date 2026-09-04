@@ -91,28 +91,27 @@
             <i class="fa-solid fa-chart-line"></i>
             <span>Analytics</span>
         </a>
-
-        <a href="ai-assistant.html" class="nav-item">
-            <i class="fa-solid fa-robot"></i>
-            <span>AI Assistant</span>
-        </a>
-
         <a href="voice-case.html" class="nav-item">
             <i class="fa-solid fa-microphone"></i>
             <span>Voice Case Taking</span>
         </a>
 
+        <a href="consultation-notes.html" class="nav-item">
+            <i class="fa-solid fa-notes-medical"></i>
+            <span data-i18n="navConsultationNotes">AI Consultation Notes</span>
+        </a>
     </nav>
 
 
     <div class="sidebar-bottom">
 
-        <a href="profile.html" class="nav-item">
+        <a href="#" class="nav-item">
             <i class="fa-solid fa-gear"></i>
-            <span>System & Settings</span>
+            <span>Settings</span>
         </a>
 
-        <a href="index.html" class="nav-item logout">
+
+        <a href="#" class="nav-item logout">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Logout</span>
         </a>
@@ -155,66 +154,29 @@
 
         <div class="topbar-right">
 
-            <a href="dashboard.html" class="sih-btn" style="font-weight: 700; padding: 7px 12px; background: #f0fdf4; color: #166534; border: 1.5px solid #86efac; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
-                <i class="fa-solid fa-house"></i> Dashboard
-            </a>
-
             <button class="icon-btn">
                 <i class="fa-regular fa-bell"></i>
             </button>
 
-            <div class="doctor-profile-dropdown" style="position: relative;">
-                <div class="doctor-profile" id="doctorProfileBtn" style="cursor: pointer;" title="Click to switch System View (Doctor, System Admin, Patient)">
-                    <div class="doctor-avatar" id="currentDoctorAvatar">
-                        DS
-                    </div>
 
-                    <div class="doctor-info">
-                        <h4 id="currentDoctorName">Dr. Sharma</h4>
-                        <p id="currentDoctorRole">Doctor / Practitioner</p>
-                    </div>
+            <div class="doctor-profile">
 
-                    <i class="fa-solid fa-chevron-down"></i>
+                <div class="doctor-avatar">
+                    DS
                 </div>
 
-                <!-- Role Switcher Menu -->
-                <div class="role-dropdown-menu" id="roleDropdownMenu" style="display: none; position: absolute; right: 0; top: calc(100% + 8px); background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); width: 230px; z-index: 1000; overflow: hidden;">
-                    <div style="padding: 10px 14px; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f4f6;">
-                        Switch System View
-                    </div>
-                    <a href="javascript:void(0)" class="role-option" data-role="practitioner" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; text-decoration: none; color: #1f2937; font-size: 13px; font-weight: 600; transition: background 0.15s;">
-                        <i class="fa-solid fa-user-doctor" style="color: #1f7a57; width: 18px;"></i>
-                        <div>
-                            <div style="color: #111827;">Doctor / Practitioner</div>
-                            <span style="font-size: 11px; color: #6b7280;">Clinical Workspace</span>
-                        </div>
-                    </a>
-                    <a href="javascript:void(0)" class="role-option" data-role="admin" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; text-decoration: none; color: #1f2937; font-size: 13px; font-weight: 600; transition: background 0.15s;">
-                        <i class="fa-solid fa-shield-halved" style="color: #2563eb; width: 18px;"></i>
-                        <div>
-                            <div style="color: #111827;">System Admin</div>
-                            <span style="font-size: 11px; color: #6b7280;">Governance & Controls</span>
-                        </div>
-                    </a>
-                    <a href="javascript:void(0)" class="role-option" data-role="patient" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; text-decoration: none; color: #1f2937; font-size: 13px; font-weight: 600; transition: background 0.15s; border-bottom: 1px solid #f3f4f6;">
-                        <i class="fa-solid fa-hospital-user" style="color: #d97706; width: 18px;"></i>
-                        <div>
-                            <div style="color: #111827;">Patient / Caregiver</div>
-                            <span style="font-size: 11px; color: #6b7280;">Health Records Portal</span>
-                        </div>
-                    </a>
-                    <a href="profile.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; text-decoration: none; color: #4b5563; font-size: 12px; font-weight: 600; background: #f9fafb;">
-                        <i class="fa-solid fa-gear" style="color: #6b7280; width: 18px;"></i>
-                        <span>System Settings & Profile</span>
-                    </a>
+                <div class="doctor-info">
+
+                    <h4>
+                        Dr. Sharma
+                    </h4>
+
+                    <p>
+                        Doctor / Practitioner
+                    </p>
+
                 </div>
 
-                <!-- Hidden role selector for JS sync -->
-                <select id="roleSelector" style="display: none;">
-                    <option value="practitioner">Doctor / Practitioner</option>
-                    <option value="admin">System Admin</option>
-                    <option value="patient">Patient / Caregiver</option>
-                </select>
             </div>
 
         </div>
@@ -227,7 +189,7 @@
     <section class="analytics-container">
 
 
-        <div class="analytics-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+        <div class="analytics-header">
 
             <div>
 
@@ -240,12 +202,6 @@
                 </p>
 
             </div>
-
-            <select class="date-select" id="analyticsTimeframe" aria-label="Select timeframe for analytics">
-                <option value="month" selected>This Month</option>
-                <option value="week">This Week</option>
-                <option value="today">Today</option>
-            </select>
 
         </div>
 
@@ -268,13 +224,13 @@
 
                     <p>Total Patients</p>
 
-                    <h3 id="analyticsTotalPatients">
-                        6
+                    <h3>
+                        248
                     </h3>
 
-                    <span id="analyticsPatientsSubtitle">
+                    <span>
                         <i class="fa-solid fa-arrow-up"></i>
-                        Active patients
+                        12% this month
                     </span>
 
                 </div>
@@ -293,15 +249,15 @@
 
                 <div>
 
-                    <p id="analyticsCasesLabel">Total Cases</p>
+                    <p>Total Cases</p>
 
-                    <h3 id="analyticsTotalCases">
-                        8
+                    <h3>
+                        412
                     </h3>
 
-                    <span id="analyticsCasesSubtitle">
+                    <span>
                         <i class="fa-solid fa-arrow-up"></i>
-                        This month
+                        18% this month
                     </span>
 
                 </div>
@@ -322,8 +278,8 @@
 
                     <p>Follow-ups</p>
 
-                    <h3 id="analyticsFollowups">
-                        4
+                    <h3>
+                        86
                     </h3>
 
                     <span>
@@ -348,12 +304,12 @@
 
                     <p>Completed Cases</p>
 
-                    <h3 id="analyticsCompletedCases">
-                        4
+                    <h3>
+                        326
                     </h3>
 
-                    <span id="analyticsCompletedSubtitle">
-                        Verified cases
+                    <span>
+                        79% completion rate
                     </span>
 
                 </div>

@@ -65,6 +65,10 @@
                 <i class="fa-solid fa-microphone"></i>
                 <span>Voice Case Taking</span>
             </a>
+            <a href="consultation-notes.html" class="nav-item">
+                <i class="fa-solid fa-notes-medical"></i>
+                <span data-i18n="navConsultationNotes">AI Consultation Notes</span>
+            </a>
         </nav>
 
         <div class="sidebar-bottom">
@@ -141,7 +145,10 @@
                         </div>
                     </div>
 
-                    <div style="display: flex; gap: 10px;" class="no-print">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;" class="no-print">
+                        <button type="button" class="primary-btn" onclick="PrescriptionService.openModal()" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white; border: none; padding: 10px 18px; font-weight: 800; border-radius: 10px; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3); cursor: pointer;">
+                            <i class="fa-solid fa-file-prescription"></i> Write Doctor Prescription (दवाइयां लिखें)
+                        </button>
                         <button class="primary-btn" id="finalizeCaseBtn" style="background: #16a34a; border: none; padding: 10px 18px; font-weight: 700;">
                             <i class="fa-solid fa-clipboard-check"></i> Finalize Case
                         </button>
@@ -488,6 +495,7 @@
     <script src="js/services/ai-service.js"></script>
     <script src="js/services/speech-service.js"></script>
     <script src="js/services/document-service.js"></script>
+    <script src="js/services/prescription-service.js"></script>
     <script src="js/services/i18n-service.js"></script>
     <script src="js/services/demo-service.js"></script>
     <script src="js/ai-digital-twin.js"></script>

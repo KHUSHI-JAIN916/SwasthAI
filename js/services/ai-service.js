@@ -28,9 +28,11 @@ const AIService = (() => {
         { patterns: [/center/i, /beech me/i, /epigastric/i, /naabhi ke aas paas/i], field: "location", value: "Epigastric / Periumbilical Region" },
 
         // Temporal / Duration
-        { patterns: [/(\d+)\s*(?:din|days?)\s*(?:pehle|ago|se)/i, /(?:since|for)\s*(\d+)\s*days?/i], field: "duration", extractor: m => `${m[1]} days` },
-        { patterns: [/(\d+)\s*(?:hafte|weeks?)\s*(?:pehle|ago|se)/i, /(?:since|for)\s*(\d+)\s*weeks?/i], field: "duration", extractor: m => `${m[1]} weeks` },
-        { patterns: [/(\d+)\s*(?:mahine|months?)\s*(?:pehle|ago|se)/i, /(?:since|for)\s*(\d+)\s*months?/i], field: "duration", extractor: m => `${m[1]} months` },
+        { patterns: [/(\d+)\s*(?:din|days?|d|day|dino)\b/i, /(?:since|for)\s*(\d+)\s*(?:days?|din)/i], field: "duration", extractor: m => `${m[1]} days` },
+        { patterns: [/(\d+)\s*(?:ghante|hours?|hrs?|hr)\b/i, /(?:since|for)\s*(\d+)\s*(?:hours?|hrs?|hr)/i], field: "duration", extractor: m => `${m[1]} hours` },
+        { patterns: [/(\d+)\s*(?:hafte|weeks?|wk|wks)\b/i, /(?:since|for)\s*(\d+)\s*(?:weeks?|wks)/i], field: "duration", extractor: m => `${m[1]} weeks` },
+        { patterns: [/(\d+)\s*(?:mahine|months?|m|mon)\b/i, /(?:since|for)\s*(\d+)\s*(?:months?|mon)/i], field: "duration", extractor: m => `${m[1]} months` },
+        { patterns: [/^\s*(\d+)\s*$/i], field: "duration", extractor: m => `${m[1]} days` },
         { patterns: [/kal se/i, /since yesterday/i, /started yesterday/i], field: "duration", value: "1 day (since yesterday)" },
         { patterns: [/aaj subah se/i, /since today morning/i], field: "duration", value: "Few hours (since morning)" },
 
@@ -244,6 +246,33 @@ const AIService = (() => {
             });
         });
 
+        // Smart context-aware fallback slot filling if patient responds to specific prompt
+        const lastAiText = (caseState.transcript.slice().reverse().find(t => t.speaker === "ai")?.text || "").toLowerCase();
+        
+        if (lastAiText.includes("kab") || lastAiText.includes("dino") || lastAiText.includes("ghanto") || lastAiText.includes("duration") || lastAiText.includes("when")) {
+            if (!caseState.duration) {
+                caseState.duration = text.trim();
+                caseState.onset = text.trim();
+                recordTraceability(caseState, "duration", text, timestamp, 85);
+            }
+        } else if (lastAiText.includes("jagah") || lastAiText.includes("location") || lastAiText.includes("kahan")) {
+            if (!caseState.location) {
+                caseState.location = text.trim();
+                recordTraceability(caseState, "location", text, timestamp, 85);
+            }
+        } else if (lastAiText.includes("tez") || lastAiText.includes("intensity") || lastAiText.includes("severity")) {
+            if (!caseState.severity) {
+                caseState.severity = text.trim();
+                recordTraceability(caseState, "severity", text, timestamp, 85);
+            }
+        }
+
+        // Fallback catch-all for Chief Complaint if not set by lexicon
+        if (!caseState.chiefComplaint && text.length > 2) {
+            caseState.chiefComplaint = text.trim();
+            recordTraceability(caseState, "chiefComplaint", text, timestamp, 80);
+        }
+
         // Lifestyle clues
         if (/sleep|neend|so|ghante/i.test(text)) {
             const sleepMatch = text.match(/(\d+)\s*(?:ghante|hours?)/i);
@@ -449,68 +478,87 @@ const AIService = (() => {
      * Determines the next dynamic question in the adaptive interview (Req 1).
      */
     function determineNextQuestion(caseState, language) {
-        // Priority 1: Chief complaint
-        if (!caseState.chiefComplaint) {
-            return { key: "CHIEF_COMPLAINT", text: getQuestionText("CHIEF_COMPLAINT", language), isComplete: false };
-        }
+        const lastAiUtterance = caseState.transcript.slice().reverse().find(t => t.speaker === "ai")?.text || "";
 
-        // Priority 2: Duration / Onset
-        if (!caseState.duration) {
-            return { key: "DURATION", text: getQuestionText("DURATION", language), isComplete: false };
-        }
-
-        // Priority 3: Anatomical Location (if pain complaint)
-        if (caseState.chiefComplaint.toLowerCase().includes("pain") && !caseState.location) {
-            return { key: "LOCATION", text: getQuestionText("LOCATION", language), isComplete: false };
-        }
-
-        // Priority 4: Severity
-        if (!caseState.severity) {
-            return { key: "SEVERITY", text: getQuestionText("SEVERITY", language), isComplete: false };
-        }
-
-        // Priority 5: Associated acute symptoms (GI vs Headache vs General)
-        const hasAskedAssociated = caseState.transcript.some(t => t.speaker === "ai" && (t.text.includes("fever") || t.text.includes("bukhar") || t.text.includes("ulti")));
-        if (!hasAskedAssociated) {
-            if (caseState.chiefComplaint.toLowerCase().includes("headache") || caseState.chiefComplaint.toLowerCase().includes("sar")) {
-                return { key: "ASSOCIATED_HEADACHE", text: getQuestionText("ASSOCIATED_HEADACHE", language), isComplete: false };
+        const getCandidate = () => {
+            // Priority 1: Chief complaint
+            if (!caseState.chiefComplaint) {
+                return { key: "CHIEF_COMPLAINT", text: getQuestionText("CHIEF_COMPLAINT", language), isComplete: false };
             }
-            return { key: "ASSOCIATED_GI", text: getQuestionText("ASSOCIATED_GI", language), isComplete: false };
-        }
 
-        // Priority 6: Clarify medicine dose if medicine has unspecified dose
-        const medWithMissingDose = caseState.currentMedications.find(m => !m.dose || m.dose.includes("Unknown"));
-        const hasAskedMedClarification = caseState.transcript.some(t => t.speaker === "ai" && (t.text.includes("dose") || t.text.includes("khurak") || t.text.includes("strength")));
-        if (medWithMissingDose && !hasAskedMedClarification) {
-            return { key: "MED_DOSE_CLARIFICATION", text: getQuestionText("MED_DOSE_CLARIFICATION", language), isComplete: false };
-        }
-
-        // Priority 7: Medications in general
-        const hasAskedMeds = caseState.transcript.some(t => t.speaker === "ai" && (t.text.includes("medicine") || t.text.includes("dawai")));
-        if (!hasAskedMeds && caseState.currentMedications.length === 0) {
-            return { key: "MEDICATIONS", text: getQuestionText("MEDICATIONS", language), isComplete: false };
-        }
-
-        // Priority 8: Allergies
-        const hasAskedAllergy = caseState.transcript.some(t => t.speaker === "ai" && (t.text.includes("allergy") || t.text.includes("reaction")));
-        if (!hasAskedAllergy && caseState.allergyStatus === "unknown") {
-            return { key: "ALLERGIES", text: getQuestionText("ALLERGIES", language), isComplete: false };
-        }
-
-        // Priority 9: Lifestyle
-        if (!caseState.lifestyle.sleep) {
-            const hasAskedLifestyle = caseState.transcript.some(t => t.speaker === "ai" && (t.text.includes("sleep") || t.text.includes("neend")));
-            if (!hasAskedLifestyle) {
-                return { key: "LIFESTYLE", text: getQuestionText("LIFESTYLE", language), isComplete: false };
+            // Priority 2: Duration / Onset
+            if (!caseState.duration) {
+                return { key: "DURATION", text: getQuestionText("DURATION", language), isComplete: false };
             }
-        }
 
-        // Sufficient information reached!
-        return {
-            key: "SUFFICIENT",
-            text: getQuestionText("SUFFICIENT", language),
-            isComplete: true
+            // Priority 3: Anatomical Location (if pain complaint)
+            if (caseState.chiefComplaint.toLowerCase().includes("pain") && !caseState.location) {
+                return { key: "LOCATION", text: getQuestionText("LOCATION", language), isComplete: false };
+            }
+
+            // Priority 4: Severity
+            if (!caseState.severity) {
+                return { key: "SEVERITY", text: getQuestionText("SEVERITY", language), isComplete: false };
+            }
+
+            // Priority 5: Associated acute symptoms (GI vs Headache vs General)
+            const hasAskedAssociated = caseState.transcript.some(t => t.speaker === "ai" && (t.text.includes("fever") || t.text.includes("bukhar") || t.text.includes("ulti")));
+            if (!hasAskedAssociated) {
+                if (caseState.chiefComplaint.toLowerCase().includes("headache") || caseState.chiefComplaint.toLowerCase().includes("sar")) {
+                    return { key: "ASSOCIATED_HEADACHE", text: getQuestionText("ASSOCIATED_HEADACHE", language), isComplete: false };
+                }
+                return { key: "ASSOCIATED_GI", text: getQuestionText("ASSOCIATED_GI", language), isComplete: false };
+            }
+
+            // Priority 6: Clarify medicine dose if medicine has unspecified dose
+            const medWithMissingDose = caseState.currentMedications.find(m => !m.dose || m.dose.includes("Unknown"));
+            const hasAskedMedClarification = caseState.transcript.some(t => t.speaker === "ai" && (t.text.includes("dose") || t.text.includes("khurak") || t.text.includes("strength")));
+            if (medWithMissingDose && !hasAskedMedClarification) {
+                return { key: "MED_DOSE_CLARIFICATION", text: getQuestionText("MED_DOSE_CLARIFICATION", language), isComplete: false };
+            }
+
+            // Priority 7: Medications in general
+            const hasAskedMeds = caseState.transcript.some(t => t.speaker === "ai" && (t.text.includes("medicine") || t.text.includes("dawai")));
+            if (!hasAskedMeds && caseState.currentMedications.length === 0) {
+                return { key: "MEDICATIONS", text: getQuestionText("MEDICATIONS", language), isComplete: false };
+            }
+
+            // Priority 8: Allergies
+            const hasAskedAllergy = caseState.transcript.some(t => t.speaker === "ai" && (t.text.includes("allergy") || t.text.includes("reaction")));
+            if (!hasAskedAllergy && caseState.allergyStatus === "unknown") {
+                return { key: "ALLERGIES", text: getQuestionText("ALLERGIES", language), isComplete: false };
+            }
+
+            // Priority 9: Lifestyle
+            if (!caseState.lifestyle.sleep) {
+                const hasAskedLifestyle = caseState.transcript.some(t => t.speaker === "ai" && (t.text.includes("sleep") || t.text.includes("neend")));
+                if (!hasAskedLifestyle) {
+                    return { key: "LIFESTYLE", text: getQuestionText("LIFESTYLE", language), isComplete: false };
+                }
+            }
+
+            // Sufficient information reached!
+            return {
+                key: "SUFFICIENT",
+                text: getQuestionText("SUFFICIENT", language),
+                isComplete: true
+            };
         };
+
+        let candidate = getCandidate();
+
+        // Anti-repetition check: If candidate question matches the last AI utterance, fallback to DURATION or SEVERITY
+        if (candidate.text === lastAiUtterance && !candidate.isComplete) {
+            if (!caseState.duration) {
+                candidate = { key: "DURATION", text: getQuestionText("DURATION", language), isComplete: false };
+            } else if (!caseState.severity) {
+                candidate = { key: "SEVERITY", text: getQuestionText("SEVERITY", language), isComplete: false };
+            } else {
+                candidate = { key: "ASSOCIATED_GENERAL", text: getQuestionText("ASSOCIATED_GENERAL", language), isComplete: false };
+            }
+        }
+
+        return candidate;
     }
 
     function getQuestionText(key, language) {

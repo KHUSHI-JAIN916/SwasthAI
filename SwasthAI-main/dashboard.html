@@ -79,17 +79,22 @@
                 <span>Voice Case Taking</span>
             </a>
 
+            <a href="consultation-notes.html" class="nav-item">
+                <i class="fa-solid fa-notes-medical"></i>
+                <span>AI Consultation Notes</span>
+            </a>
+
         </nav>
 
 
         <div class="sidebar-bottom">
 
-            <a href="profile.html" class="nav-item">
+            <a href="#" class="nav-item">
                 <i class="fa-solid fa-gear"></i>
-                <span>System & Settings</span>
+                <span>Settings</span>
             </a>
 
-            <a href="index.html" class="nav-item logout">
+            <a href="javascript:void(0)" onclick="if(typeof ClinicalStorage !== 'undefined'){ ClinicalStorage.logoutUser(); } else { window.location.href='index.html'; }" class="nav-item logout">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Logout</span>
             </a>
@@ -131,67 +136,22 @@
                     <i class="fa-solid fa-award"></i> START DEMO
                 </button>
 
-                <a href="analytics.html" class="sih-btn" style="font-weight: 700; padding: 7px 12px; background: #f0fdf4; color: #166534; border: 1.5px solid #86efac; border-radius: 6px; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" title="Open Analytics">
-                    <i class="fa-solid fa-chart-line"></i> Analytics
-                </a>
-
                 <button class="icon-btn notification-btn">
                     <i class="fa-regular fa-bell"></i>
                     <span class="notification-dot"></span>
                 </button>
 
-                <div class="doctor-profile-dropdown" style="position: relative;">
-                    <div class="doctor-profile" id="doctorProfileBtn" style="cursor: pointer;" title="Click to switch System View (Doctor, System Admin, Patient)">
-                        <div class="doctor-avatar" id="currentDoctorAvatar">
-                            DS
-                        </div>
-
-                        <div class="doctor-info">
-                            <h4 id="currentDoctorName">Dr. Sharma</h4>
-                            <p id="currentDoctorRole">Doctor / Practitioner</p>
-                        </div>
-
-                        <i class="fa-solid fa-chevron-down"></i>
+                <div class="doctor-profile">
+                    <div class="doctor-avatar" id="currentDoctorAvatar">
+                        DS
                     </div>
 
-                    <!-- Role Switcher Menu -->
-                    <div class="role-dropdown-menu" id="roleDropdownMenu" style="display: none; position: absolute; right: 0; top: calc(100% + 8px); background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); width: 230px; z-index: 1000; overflow: hidden;">
-                        <div style="padding: 10px 14px; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f4f6;">
-                            Switch System View
-                        </div>
-                        <a href="javascript:void(0)" class="role-option" data-role="practitioner" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; text-decoration: none; color: #1f2937; font-size: 13px; font-weight: 600; transition: background 0.15s;">
-                            <i class="fa-solid fa-user-doctor" style="color: #1f7a57; width: 18px;"></i>
-                            <div>
-                                <div style="color: #111827;">Doctor / Practitioner</div>
-                                <span style="font-size: 11px; color: #6b7280;">Clinical Workspace</span>
-                            </div>
-                        </a>
-                        <a href="javascript:void(0)" class="role-option" data-role="admin" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; text-decoration: none; color: #1f2937; font-size: 13px; font-weight: 600; transition: background 0.15s;">
-                            <i class="fa-solid fa-shield-halved" style="color: #2563eb; width: 18px;"></i>
-                            <div>
-                                <div style="color: #111827;">System Admin</div>
-                                <span style="font-size: 11px; color: #6b7280;">Governance & Controls</span>
-                            </div>
-                        </a>
-                        <a href="javascript:void(0)" class="role-option" data-role="patient" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; text-decoration: none; color: #1f2937; font-size: 13px; font-weight: 600; transition: background 0.15s; border-bottom: 1px solid #f3f4f6;">
-                            <i class="fa-solid fa-hospital-user" style="color: #d97706; width: 18px;"></i>
-                            <div>
-                                <div style="color: #111827;">Patient / Caregiver</div>
-                                <span style="font-size: 11px; color: #6b7280;">Health Records Portal</span>
-                            </div>
-                        </a>
-                        <a href="profile.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; text-decoration: none; color: #4b5563; font-size: 12px; font-weight: 600; background: #f9fafb;">
-                            <i class="fa-solid fa-gear" style="color: #6b7280; width: 18px;"></i>
-                            <span>System Settings & Profile</span>
-                        </a>
+                    <div class="doctor-info">
+                        <h4 id="currentDoctorName">Dr. Sharma</h4>
+                        <p id="currentDoctorRole" style="font-size: 11px; color: #2563eb; font-weight: 700;">AIIMS Partner Hospital</p>
                     </div>
 
-                    <!-- Hidden role selector for JS sync -->
-                    <select id="roleSelector" style="display: none;">
-                        <option value="practitioner">Doctor / Practitioner</option>
-                        <option value="admin">System Admin</option>
-                        <option value="patient">Patient / Caregiver</option>
-                    </select>
+                    <i class="fa-solid fa-chevron-down"></i>
                 </div>
             </div>
         </header>
@@ -230,6 +190,11 @@
                             Start New Case
                         </a>
 
+                        <a href="consultation-notes.html" class="primary-btn" style="background: #1f7a57; border-color: #1f7a57;">
+                            <i class="fa-solid fa-notes-medical"></i>
+                            <span data-i18n="consultationNotesTitle">AI Consultation Notes</span>
+                        </a>
+
                         <a href="practitioner-review.html" class="secondary-btn">
                             Review Workspace
                         </a>
@@ -253,6 +218,31 @@
             </div>
 
 
+            <!-- ================= AI CONSULTATION NOTES / SCRIBE FEATURE CARD (REQ 1) ================= -->
+            <div class="consultation-notes-banner-card" onclick="window.location.href='consultation-notes.html'">
+                <div class="banner-left">
+                    <div class="banner-tag">
+                        <i class="fa-solid fa-microphone-lines"></i> AI MEDICAL SCRIBE
+                    </div>
+                    <h2 data-i18n="consultationNotesTitle">AI Consultation Notes</h2>
+                    <p class="banner-sub" data-i18n="consultationNotesSubtitle">
+                        Listen, transcribe and generate patient notes automatically
+                    </p>
+                    <div class="banner-pills">
+                        <span><i class="fa-solid fa-wave-square"></i> Real-time Speech-to-Text</span>
+                        <span><i class="fa-solid fa-shield-halved"></i> Zero Medical Hallucination Rule</span>
+                        <span><i class="fa-solid fa-language"></i> English & Hindi Support</span>
+                        <span><i class="fa-solid fa-file-signature"></i> Doctor-Verified Notes</span>
+                    </div>
+                </div>
+                <div class="banner-right">
+                    <a href="consultation-notes.html" class="sih-btn primary scribe-launch-btn">
+                        <i class="fa-solid fa-play"></i> Start Consultation Notes
+                    </a>
+                </div>
+            </div>
+
+
             <!-- STATISTICS -->
 
             <div class="section-heading">
@@ -262,10 +252,10 @@
                     <p>Quick insights about your patients and cases.</p>
                 </div>
 
-                <select class="date-select" id="overviewTimeframe" aria-label="Select overview timeframe">
-                    <option value="month" selected>This Month</option>
-                    <option value="week">This Week</option>
-                    <option value="today">Today</option>
+                <select class="date-select">
+                    <option>This Month</option>
+                    <option>This Week</option>
+                    <option>Today</option>
                 </select>
 
             </div>
@@ -289,8 +279,8 @@
                         <i class="fa-solid fa-file-medical"></i>
                     </div>
                     <div class="stat-info">
-                        <p id="casesCountLabel">Cases This Month</p>
-                        <h2 id="casesTodayCount">8</h2>
+                        <p>Cases Today</p>
+                        <h2 id="casesTodayCount">3</h2>
                         <span class="positive"><i class="fa-solid fa-clock"></i> Active</span>
                     </div>
                 </div>
@@ -350,14 +340,14 @@
                     </div>
                 </div>
 
-                <div class="stat-card" id="systemAccuracyCard" style="cursor: pointer; position: relative;" title="Click to view System Accuracy & AI Model Verification analytics">
+                <div class="stat-card">
                     <div class="stat-icon" style="background: #f3f4f6; color: #4b5563;">
                         <i class="fa-solid fa-shield-check"></i>
                     </div>
                     <div class="stat-info">
                         <p>System Accuracy</p>
                         <h2 id="systemAccuracyRate">94%</h2>
-                        <span class="positive"><i class="fa-solid fa-check-double"></i> Verified Details <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px; margin-left: 2px;"></i></span>
+                        <span class="positive"><i class="fa-solid fa-check-double"></i> Verified</span>
                     </div>
                 </div>
 
@@ -577,6 +567,10 @@
                         Start voice case-taking
                     </button>
 
+                    <a href="consultation-notes.html" class="suggestion-btn" style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-notes-medical" style="color: #1f7a57;"></i>
+                        <span>AI Consultation Notes & Scribe</span>
+                    </a>
 
                     <button class="suggestion-btn">
                         <i class="fa-solid fa-file-lines"></i>
@@ -602,62 +596,6 @@
         </section>
 
     </main>
-
-    <!-- SYSTEM ACCURACY & MODEL ANALYTICS MODAL -->
-    <div id="systemAccuracyModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: #ffffff; border-radius: 20px; max-width: 580px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; animation: modalFadeIn 0.25s ease;">
-            <div style="padding: 24px 28px; background: linear-gradient(135deg, #1f7a57 0%, #15573f 100%); color: white; display: flex; justify-content: space-between; align-items: flex-start;">
-                <div>
-                    <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 8px;">
-                        <i class="fa-solid fa-shield-check"></i> SYSTEM AUDIT & VERIFICATION
-                    </div>
-                    <h3 style="font-size: 20px; font-weight: 800; margin: 0;">System Accuracy Breakdown</h3>
-                    <p style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Multi-layer clinical safety and AYUSH AI accuracy benchmarks.</p>
-                </div>
-                <button type="button" id="closeSystemAccuracyModal" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div style="padding: 24px 28px;">
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
-                    <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 16px;">
-                        <div style="font-size: 11px; font-weight: 700; color: #166534; text-transform: uppercase;">Clinical Guidelines</div>
-                        <div style="font-size: 26px; font-weight: 800; color: #166534; margin: 6px 0;">98.4%</div>
-                        <p style="font-size: 12px; color: #4b5563; margin: 0;">AYUSH standard pharmacopoeia rules verified</p>
-                    </div>
-                    <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 16px;">
-                        <div style="font-size: 11px; font-weight: 700; color: #1d4ed8; text-transform: uppercase;">Prakriti Alignment</div>
-                        <div style="font-size: 26px; font-weight: 800; color: #1d4ed8; margin: 6px 0;">95.6%</div>
-                        <p style="font-size: 12px; color: #4b5563; margin: 0;">Tridosha multi-modal symptom correlation</p>
-                    </div>
-                    <div style="background: #fefce8; border: 1.5px solid #fef08a; border-radius: 12px; padding: 16px;">
-                        <div style="font-size: 11px; font-weight: 700; color: #854d0e; text-transform: uppercase;">Drug Safeguard Filter</div>
-                        <div style="font-size: 26px; font-weight: 800; color: #854d0e; margin: 6px 0;">100%</div>
-                        <p style="font-size: 12px; color: #4b5563; margin: 0;">Zero unverified toxic doses or interactions</p>
-                    </div>
-                    <div style="background: #faf5ff; border: 1.5px solid #e9d5ff; border-radius: 12px; padding: 16px;">
-                        <div style="font-size: 11px; font-weight: 700; color: #7e22ce; text-transform: uppercase;">Dr. Confirmation Rate</div>
-                        <div style="font-size: 26px; font-weight: 800; color: #7e22ce; margin: 6px 0;">94.2%</div>
-                        <p style="font-size: 12px; color: #4b5563; margin: 0;">Practitioners accepted AI case structures</p>
-                    </div>
-                </div>
-
-                <div style="background: #f9fafb; border-radius: 12px; padding: 14px; margin-bottom: 24px; font-size: 12px; color: #4b5563; border: 1px solid #e5e7eb;">
-                    <i class="fa-solid fa-circle-info" style="color: #1f7a57;"></i> <strong>Transparency Notice:</strong> All scores are calculated automatically across patient sessions and audit trails in <code>ClinicalStorage</code>.
-                </div>
-
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <a href="analytics.html" class="sih-btn" style="background: #f0fdf4; color: #166534; border: 1.5px solid #86efac; text-decoration: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-chart-line"></i> Full Analytics Page
-                    </a>
-                    <a href="profile.html" class="sih-btn primary" style="padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-shield-halved"></i> System Governance
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
     <!-- JAVASCRIPT -->
