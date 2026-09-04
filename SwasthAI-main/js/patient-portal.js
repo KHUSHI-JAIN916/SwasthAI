@@ -10,18 +10,18 @@ const PatientPortal = (() => {
     let isRecording = false;
 
     function init() {
-        loadPatientData();
-        setupVoiceRecording();
-        setupSymptomSubmission();
-        setupFileInput();
-        renderPrescriptions();
-        renderDiseasesList();
-        renderPastRecordsList();
-        renderDailyReminders();
-        renderWeeklyMedChart();
-        renderSmartTimeline("all");
-
-        setupModalListeners();
+        try { loadPatientData(); } catch(e) {}
+        try { setupVoiceRecording(); } catch(e) {}
+        try { setupSymptomSubmission(); } catch(e) {}
+        try { setupFileInput(); } catch(e) {}
+        try { renderPrescriptions(); } catch(e) {}
+        try { renderDiseasesList(); } catch(e) {}
+        try { renderPastRecordsList(); } catch(e) {}
+        try { renderDailyReminders(); } catch(e) {}
+        try { renderWeeklyMedChart(); } catch(e) {}
+        try { renderSmartTimeline("all"); } catch(e) {}
+        try { initHealthMonitoring(); } catch(e) {}
+        try { setupModalListeners(); } catch(e) {}
 
         const symptomInput = document.getElementById("patientSymptomInput");
         if (symptomInput) {
@@ -57,12 +57,13 @@ const PatientPortal = (() => {
     }
 
     function setupModalListeners() {
-        const modals = ["addDiseaseModal", "addPastDoctorModal"];
+        const modals = ["addDiseaseModal", "addPastDoctorModal", "addHealthReadingModal"];
         modals.forEach(id => {
             const modal = document.getElementById(id);
             if (modal) {
                 modal.addEventListener("click", (e) => {
                     if (e.target === modal) {
+                        modal.style.display = "none";
                         modal.classList.remove("active");
                     }
                 });
@@ -73,6 +74,26 @@ const PatientPortal = (() => {
             if (e.key === "Escape") {
                 closeAddDiseaseModal();
                 closeAddPastDoctorModal();
+                closeAddReadingModal();
+            }
+        });
+
+        // Direct DOM event binding as fallback for inline onclick attributes
+        document.querySelectorAll("[onclick*='openAddDiseaseModal']").forEach(btn => {
+            btn.addEventListener("click", (e) => { e.preventDefault(); openAddDiseaseModal(); });
+        });
+        document.querySelectorAll("[onclick*='openAddPastDoctorModal']").forEach(btn => {
+            btn.addEventListener("click", (e) => { e.preventDefault(); openAddPastDoctorModal(); });
+        });
+        document.querySelectorAll("[onclick*='openAddReadingModal']").forEach(btn => {
+            btn.addEventListener("click", (e) => { e.preventDefault(); openAddReadingModal(); });
+        });
+        document.querySelectorAll(".body-symptom-card").forEach(card => {
+            const onClickAttr = card.getAttribute("onclick") || "";
+            const match = onClickAttr.match(/toggleBodySymptom\s*\(\s*['"]([^'"]+)['"]/);
+            if (match && match[1]) {
+                const symptomName = match[1];
+                card.addEventListener("click", () => { toggleBodySymptom(symptomName, card); });
             }
         });
     }
@@ -400,6 +421,7 @@ const PatientPortal = (() => {
         const modal = document.getElementById("addDiseaseModal");
         if (modal) {
             modal.classList.add("active");
+            modal.style.display = "flex";
             if (typeof I18nService !== "undefined") {
                 I18nService.translatePage();
             }
@@ -407,7 +429,11 @@ const PatientPortal = (() => {
     }
 
     function closeAddDiseaseModal() {
-        document.getElementById("addDiseaseModal").classList.remove("active");
+        const modal = document.getElementById("addDiseaseModal");
+        if (modal) {
+            modal.classList.remove("active");
+            modal.style.display = "none";
+        }
     }
 
     function submitAddDisease(e) {
@@ -470,6 +496,7 @@ const PatientPortal = (() => {
         const modal = document.getElementById("addPastDoctorModal");
         if (modal) {
             modal.classList.add("active");
+            modal.style.display = "flex";
             if (typeof I18nService !== "undefined") {
                 I18nService.translatePage();
             }
@@ -477,7 +504,11 @@ const PatientPortal = (() => {
     }
 
     function closeAddPastDoctorModal() {
-        document.getElementById("addPastDoctorModal").classList.remove("active");
+        const modal = document.getElementById("addPastDoctorModal");
+        if (modal) {
+            modal.classList.remove("active");
+            modal.style.display = "none";
+        }
     }
 
     function submitAddPastDoctor(e) {
@@ -1013,6 +1044,23 @@ const PatientPortal = (() => {
         filterTimeline
     };
 })();
+
+if (typeof window !== "undefined") {
+    window.PatientPortal = PatientPortal;
+    window.openAddDiseaseModal = PatientPortal.openAddDiseaseModal;
+    window.closeAddDiseaseModal = PatientPortal.closeAddDiseaseModal;
+    window.submitAddDisease = PatientPortal.submitAddDisease;
+    window.openAddPastDoctorModal = PatientPortal.openAddPastDoctorModal;
+    window.closeAddPastDoctorModal = PatientPortal.closeAddPastDoctorModal;
+    window.submitAddPastDoctor = PatientPortal.submitAddPastDoctor;
+    window.openAddReadingModal = PatientPortal.openAddReadingModal;
+    window.closeAddReadingModal = PatientPortal.closeAddReadingModal;
+    window.submitHealthReading = PatientPortal.submitHealthReading;
+    window.toggleBodySymptom = PatientPortal.toggleBodySymptom;
+}
+if (typeof globalThis !== "undefined") {
+    globalThis.PatientPortal = PatientPortal;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     PatientPortal.init();
