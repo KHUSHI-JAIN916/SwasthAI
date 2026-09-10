@@ -161,10 +161,85 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Auto-Fill Patient Details by Credentials
+    const fetchCredsBtn = document.getElementById("fetchPatientCredsBtn");
+    const fetchIdInput = document.getElementById("fetchPatientIdInput");
+    const fetchPassInput = document.getElementById("fetchPatientPassInput");
+    const fetchStatusMsg = document.getElementById("fetchPatientStatusMsg");
+
+    if (fetchCredsBtn) {
+        fetchCredsBtn.addEventListener("click", () => {
+            const queryId = (fetchIdInput ? fetchIdInput.value : "").trim();
+
+            if (!queryId) {
+                alert("Please enter a Patient ID or Mobile Number.");
+                if (fetchIdInput) fetchIdInput.focus();
+                return;
+            }
+
+            // Find patient in ClinicalStorage
+            let targetPatient = null;
+            if (typeof ClinicalStorage !== "undefined") {
+                targetPatient = ClinicalStorage.getPatientById(queryId);
+                if (!targetPatient) {
+                    const allPatients = ClinicalStorage.getPatients();
+                    targetPatient = allPatients.find(p => 
+                        (p.id && p.id.toLowerCase() === queryId.toLowerCase()) ||
+                        (p.phone && p.phone.replace(/\D/g, "").includes(queryId.replace(/\D/g, "")))
+                    );
+                }
+            }
+
+            if (!targetPatient) {
+                if (fetchStatusMsg) {
+                    fetchStatusMsg.style.display = "block";
+                    fetchStatusMsg.style.background = "#fef2f2";
+                    fetchStatusMsg.style.color = "#991b1b";
+                    fetchStatusMsg.style.border = "1px solid #fca5a5";
+                    fetchStatusMsg.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> No patient found matching "${queryId}". Please verify Patient ID or Phone number.`;
+                }
+                return;
+            }
+
+            // Auto-fill form input fields
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el && val !== undefined && val !== null) {
+                    el.value = val;
+                }
+            };
+
+            setVal("fullName", targetPatient.fullName);
+            if (targetPatient.dob) setVal("dob", targetPatient.dob);
+            setVal("gender", targetPatient.gender);
+            setVal("bloodGroup", targetPatient.bloodGroup);
+            setVal("occupation", targetPatient.occupation || "");
+            setVal("phone", targetPatient.phone || "");
+            setVal("email", targetPatient.email || "");
+            setVal("address", targetPatient.address || "");
+            setVal("emergencyName", targetPatient.emergencyName || "");
+            setVal("emergencyPhone", targetPatient.emergencyPhone || "");
+            setVal("allergies", targetPatient.allergies || "");
+            setVal("conditions", targetPatient.conditions || "");
+
+            if (fetchStatusMsg) {
+                fetchStatusMsg.style.display = "block";
+                fetchStatusMsg.style.background = "#f0fdf4";
+                fetchStatusMsg.style.color = "#166534";
+                fetchStatusMsg.style.border = "1px solid #bbf7d0";
+                fetchStatusMsg.innerHTML = `<i class="fa-solid fa-circle-check"></i> <strong>Patient Details Auto-Filled Successfully!</strong><br>Found: ${targetPatient.fullName} (ID: ${targetPatient.id}, Phone: ${targetPatient.phone || 'N/A'}). Form fields populated automatically.`;
+            }
+
+            if (typeof I18nService !== "undefined") {
+                I18nService.translatePage();
+            }
+        });
+    }
+
     const goToPatients = document.getElementById("goToPatients");
     if (goToPatients) {
         goToPatients.addEventListener("click", () => {
-            window.location.href = "patients.html";
+            window.location.href = "dashboard.html";
         });
     }
 

@@ -1,9 +1,4 @@
-/* ==========================================================================
-   SwasthAI / SWASTHAI — Smart Dashboard Controller
-   Populates live metrics, Practitioner Attention Queue, Upcoming Follow-ups,
-   RBAC Role Switcher, Offline Fallback, and Demo Mode Launcher.
-   ========================================================================== */
-
+document.addEventListener("DOMContentLoaded", () => {
     // Dynamic Time-Based Greeting
     function updateGreeting() {
         const greetingEl = document.getElementById("dashboardGreeting") || document.querySelector(".topbar-left h1");

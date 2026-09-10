@@ -54,11 +54,6 @@
             <span>Dashboard</span>
         </a>
 
-        <a href="patients.html" class="nav-item">
-            <i class="fa-solid fa-users"></i>
-            <span>Patients</span>
-        </a>
-
         <a href="add-patient.html" class="nav-item active">
             <i class="fa-solid fa-user-plus"></i>
             <span>Add Patient</span>
@@ -204,6 +199,39 @@
 
             </div>
 
+        </div>
+
+        <!-- IMPORT PATIENT BY CREDENTIALS CARD -->
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 2px dashed #16a34a; border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.08);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #16a34a; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #166534;">Auto-Fill Patient Details by ID / Password</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: #15803d;">Enter existing Patient ID / Mobile Number and Password to automatically fetch and populate all details.</p>
+                    </div>
+                </div>
+                <span style="font-size: 11px; font-weight: 700; background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 12px;">Fast Credential Auto-Fill</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; align-items: flex-end;">
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Patient ID or Mobile *</label>
+                    <input type="text" id="fetchPatientIdInput" placeholder="e.g. AYU-2026-DEMO or 9876543210" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; font-weight: 600;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 4px;">Password *</label>
+                    <input type="password" id="fetchPatientPassInput" placeholder="e.g. 123456" value="123456" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; font-weight: 600;">
+                </div>
+                <div>
+                    <button type="button" id="fetchPatientCredsBtn" style="width: 100%; padding: 10px 16px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
+                        <i class="fa-solid fa-cloud-arrow-down"></i> Fetch & Auto-Fill Details
+                    </button>
+                </div>
+            </div>
+            <div id="fetchPatientStatusMsg" style="display: none; margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600;"></div>
         </div>
 
 

@@ -70,10 +70,28 @@ const PatientPortal = (() => {
         if (idBadge) idBadge.textContent = `ID: ${currentPatient.id}`;
         if (welcomeEl) welcomeEl.textContent = currentPatient.fullName;
         if (welcomeId) welcomeId.textContent = currentPatient.id;
-        if (avatarEl) {
-            const initials = (currentPatient.fullName || "P").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-            avatarEl.textContent = initials;
-        }
+        
+        const initials = (currentPatient.fullName || "P").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+        if (avatarEl) avatarEl.textContent = initials;
+
+        // Populate Clinical Dossier Summary Card
+        const dFullName = document.getElementById("dossierFullName");
+        const dIdBadge = document.getElementById("dossierIdBadge");
+        const dAvatar = document.getElementById("dossierAvatar");
+        const dAgeGender = document.getElementById("dossierAgeGender");
+        const dBlood = document.getElementById("dossierBloodGroup");
+        const dPhone = document.getElementById("dossierPhone");
+        const dEmergency = document.getElementById("dossierEmergency");
+        const dAllergies = document.getElementById("dossierAllergiesText");
+
+        if (dFullName) dFullName.textContent = currentPatient.fullName;
+        if (dIdBadge) dIdBadge.textContent = `Patient ID: ${currentPatient.id}`;
+        if (dAvatar) dAvatar.textContent = initials;
+        if (dAgeGender) dAgeGender.textContent = `${currentPatient.age || 35} yrs / ${currentPatient.gender || 'Other'}`;
+        if (dBlood) dBlood.textContent = `${currentPatient.bloodGroup || 'Not recorded'}`;
+        if (dPhone) dPhone.textContent = currentPatient.phone || "Not recorded";
+        if (dEmergency) dEmergency.textContent = `${currentPatient.emergencyName || 'Emergency Contact'} (${currentPatient.emergencyPhone || 'N/A'})`;
+        if (dAllergies) dAllergies.textContent = currentPatient.allergies || "No Known Drug Allergies (NKDA)";
 
         const logoutBtn = document.getElementById("patientLogoutBtn");
         if (logoutBtn) {
@@ -358,8 +376,8 @@ const PatientPortal = (() => {
                     <strong style="font-size: 14px; color: #166534;"><i class="fa-solid fa-virus"></i> ${d.diseaseName}</strong>
                     <span style="font-size: 11px; background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 12px; font-weight: 700;">${d.severity || 'Moderate'}</span>
                 </div>
-                <div style="font-size: 12px; color: #374151; margin-bottom: 2px;"><strong>समय:</strong> ${d.duration || 'हाल ही में'}</div>
-                ${d.symptoms ? `<div style="font-size: 11px; color: #64748b;"><strong>लक्षण:</strong> ${d.symptoms}</div>` : ''}
+                <div style="font-size: 12px; color: #374151; margin-bottom: 2px;"><strong>Duration:</strong> ${d.duration || 'Recently'}</div>
+                ${d.symptoms ? `<div style="font-size: 11px; color: #64748b;"><strong>Symptoms:</strong> ${d.symptoms}</div>` : ''}
             `;
             container.appendChild(card);
         });
@@ -412,7 +430,7 @@ const PatientPortal = (() => {
         if (records.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; padding: 14px; color: #64748b; font-size: 13px; background: #f8fafc; border-radius: 8px;">
-                    अभी कोई पुराना डॉक्टर रिकॉर्ड नहीं जोड़ा गया है।
+                    No previous doctor consultations recorded.
                 </div>
             `;
             return;
@@ -426,9 +444,9 @@ const PatientPortal = (() => {
                     <strong style="font-size: 14px; color: #1e40af;"><i class="fa-solid fa-user-doctor"></i> ${r.doctorName}</strong>
                     <span style="font-size: 11px; background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 12px; font-weight: 700;">${r.year || 'Past'}</span>
                 </div>
-                <div style="font-size: 12px; color: #374151; margin-bottom: 2px;"><strong>निदान (Diagnosis):</strong> ${r.diagnosis}</div>
-                ${r.clinicOrHospital ? `<div style="font-size: 11px; color: #475569;"><strong>क्लिनिक/अस्पताल:</strong> ${r.clinicOrHospital}</div>` : ''}
-                ${r.pastMedicines ? `<div style="font-size: 11px; color: #166534; margin-top: 2px;"><strong>दवाइयां:</strong> ${r.pastMedicines}</div>` : ''}
+                <div style="font-size: 12px; color: #374151; margin-bottom: 2px;"><strong>Diagnosis:</strong> ${r.diagnosis}</div>
+                ${r.clinicOrHospital ? `<div style="font-size: 11px; color: #475569;"><strong>Clinic/Hospital:</strong> ${r.clinicOrHospital}</div>` : ''}
+                ${r.pastMedicines ? `<div style="font-size: 11px; color: #166534; margin-top: 2px;"><strong>Medicines:</strong> ${r.pastMedicines}</div>` : ''}
             `;
             container.appendChild(card);
         });
@@ -447,7 +465,7 @@ const PatientPortal = (() => {
             container.innerHTML = `
                 <div style="grid-column: 1 / -1; padding: 18px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 8px;">
                     <i class="fa-solid fa-notes-medical" style="font-size: 24px; color: #1f7a57; margin-bottom: 6px; display: block;"></i>
-                    वर्तमान में कोई नई दवा की पर्ची लंबित नहीं है। नई तकलीफ के लिए ऊपर बोलकर बताएं।
+                    No prescriptions issued yet. Speak or submit your symptoms above.
                 </div>
             `;
             return;
@@ -460,10 +478,10 @@ const PatientPortal = (() => {
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <h4 style="margin: 0; font-size: 14px; color: #166534; font-weight: 800;"><i class="fa-solid fa-pills"></i> ${med.name}</h4>
-                    <span class="report-parameter-badge badge-normal">${med.dose || '1 गोली'}</span>
+                    <span class="report-parameter-badge badge-normal">${med.dose || '1 Dose'}</span>
                 </div>
-                <div style="font-size: 12px; color: #374151; margin-bottom: 4px;"><strong>समय:</strong> ${med.frequency || 'दिन में दो बार (खाने के बाद)'}</div>
-                <div style="font-size: 11px; color: #6b7280;">डॉक्टर का निर्देश: ${med.reason || 'नियमित सेवन करें'}</div>
+                <div style="font-size: 12px; color: #374151; margin-bottom: 4px;"><strong>Frequency:</strong> ${med.frequency || 'Twice Daily'}</div>
+                <div style="font-size: 11px; color: #6b7280;">Doctor Advice: ${med.reason || 'Take regularly'}</div>
             `;
             container.appendChild(card);
         });
