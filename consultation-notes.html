@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Consultation Notes | SWASTHAI</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/clinical-system.css">
+</head>
+
+<body>
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="images/swasthai-logo.jpg" alt="SWASTHAI Logo" class="swasthai-brand-logo">
+            <div>
+                <h2>SWASTHAI</h2>
+                <span>From Voice to Insight</span>
+            </div>
+        </div>
+
+        <div class="menu-title">
+            MAIN MENU
+        </div>
+
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span data-i18n="navDashboard">Dashboard</span>
+            </a>
+
+            <a href="add-patient.html" class="nav-item">
+                <i class="fa-solid fa-user-plus"></i>
+                <span data-i18n="navAddPatient">Add Patient</span>
+            </a>
+
+            <a href="case-taking.html" class="nav-item">
+                <i class="fa-solid fa-file-medical"></i>
+                <span data-i18n="navNewCase">New Case</span>
+            </a>
+
+            <a href="practitioner-review.html" class="nav-item">
+                <i class="fa-solid fa-user-doctor"></i>
+                <span data-i18n="navReview">Review Workspace</span>
+            </a>
+
+            <a href="case-history.html" class="nav-item">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span data-i18n="navCaseHistory">Case History</span>
+            </a>
+
+            <a href="analytics.html" class="nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                <span data-i18n="navAnalytics">Analytics</span>
+            </a>
+
+            <a href="ai-assistant.html" class="nav-item">
+                <i class="fa-solid fa-robot"></i>
+                <span data-i18n="navAiAssistant">AI Assistant</span>
+            </a>
+
+            <a href="voice-case.html" class="nav-item">
+                <i class="fa-solid fa-microphone"></i>
+                <span data-i18n="navVoiceCase">Voice Case Taking</span>
+            </a>
+
+            <!-- ACTIVE: AI Consultation Notes -->
+            <a href="consultation-notes.html" class="nav-item active">
+                <i class="fa-solid fa-notes-medical" style="color: #1f7a57;"></i>
+                <span data-i18n="navConsultationNotes">AI Consultation Notes</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+
+            <a href="javascript:void(0)" class="nav-item logout" id="scribeLogoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span data-i18n="navLogout">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <div>
+                    <p class="breadcrumb">
+                        Dashboard / <span data-i18n="consultationNotesTitle">AI Consultation Notes</span>
+                    </p>
+                    <h1 id="scribePageTitle" data-i18n="scribePageTitle">AI Consultation Notes & Medical Scribe</h1>
+                </div>
+            </div>
+
+            <div class="topbar-right">
+                <!-- Global Language Switcher Container -->
+                <div id="globalLanguageSwitcherContainer" class="lang-switcher-wrapper"></div>
+
+                <div class="doctor-profile">
+                    <div class="doctor-avatar" id="currentDoctorAvatar">DS</div>
+                    <div class="doctor-info">
+                        <h4 id="currentDoctorName">Dr. Sharma</h4>
+                        <p id="currentDoctorRole" style="font-size: 11px; color: #2563eb; font-weight: 700;">AIIMS Partner Hospital</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- SCRIBE CONTAINER -->
+        <div class="scribe-container">
+
+            <!-- 1. PATIENT HEADER & CONSULTATION STATUS BAR -->
+            <div class="scribe-header-bar">
+                <div class="patient-picker-wrap">
+                    <label for="patientSelect">
+                        <i class="fa-solid fa-user-injured" style="color: #1f7a57;"></i> <span data-i18n="patientLabel">Patient:</span>
+                    </label>
+                    <select id="patientSelect" class="patient-select-input">
+                        <option value="" data-i18n="selectPatientOption">-- Select Registered Patient --</option>
+                        <!-- Populated dynamically via JS -->
+                    </select>
+
+                    <div id="patientQuickDetails" style="display: none; font-size: 13px; color: #475569;">
+                        <strong>ID:</strong> <span id="displayPatientId">--</span> |
+                        <strong>Age:</strong> <span id="displayPatientAge">--</span> |
+                        <strong>Gender:</strong> <span id="displayPatientGender">--</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                    <!-- Visual Recording State Indicator -->
+                    <div id="sessionStatusPill" class="session-status-badge ready">
+                        <span id="sessionStatusDot">🟢</span>
+                        <span id="sessionStatusText" data-i18n="statusReady">Ready</span>
+                    </div>
+
+                    <!-- Consultation Duration Timer -->
+                    <div class="timer-pill" title="Consultation Timer">
+                        <i class="fa-regular fa-clock" style="color: #64748b;"></i>
+                        <span id="consultationTimer">00:00:00</span>
+                    </div>
+
+                    <!-- Current Date and Time -->
+                    <div style="font-size: 12.5px; font-weight: 600; color: #64748b;" id="currentDateTime">
+                        --:--
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. PRIVACY NOTICE & MANDATORY CONSENT (REQ 11) -->
+            <div class="consent-banner" id="consentBanner">
+                <div class="consent-banner-text">
+                    <i class="fa-solid fa-shield-halved" style="color: #2563eb; font-size: 18px; margin-top: 2px;"></i>
+                    <div>
+                        <strong>Privacy Notice:</strong>
+                        <span data-i18n="privacyNotice">Patient conversation is processed only with the doctor's permission. Please follow applicable privacy and consent requirements before recording a consultation.</span>
+                    </div>
+                </div>
+                <div class="consent-checkbox-wrap">
+                    <input type="checkbox" id="patientConsentCheckbox">
+                    <label for="patientConsentCheckbox" id="consentCheckboxLabel" data-i18n="consentCheckboxText">
+                        I confirm that appropriate patient consent has been obtained for recording/transcription.
+                    </label>
+                </div>
+            </div>
+
+            <!-- 3. CONSULTATION WORKSPACE (2 COLUMNS) -->
+            <div class="scribe-grid">
+
+                <!-- LEFT COLUMN: CONTROLS & LIVE TRANSCRIPT -->
+                <div class="scribe-card">
+                    <div class="scribe-card-header">
+                        <h3><i class="fa-solid fa-headset" style="color: #1f7a57;"></i> <span data-i18n="liveScribeTitle">Live Medical Scribe</span></h3>
+                        <span style="font-size: 11.5px; font-weight: 700; color: #64748b;" id="micDeviceHint">Web Speech API</span>
+                    </div>
+
+                    <!-- Unsupported Browser Notice -->
+                    <div id="speechUnsupportedWarning" class="unsupported-banner" style="display: none;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>Live Speech Recognition is not supported in this browser. Chrome or Edge is recommended. You can still type conversation turns below.</span>
+                    </div>
+
+                    <!-- Microphone & Controls -->
+                    <div class="mic-control-center">
+                        <button type="button" class="big-mic-btn" id="mainMicBtn" title="Start / Toggle Consultation">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        <p style="margin-top: 10px; font-size: 13px; font-weight: 700; color: #1e293b;" id="micStatusHint" data-i18n="clickStartHint">
+                            Click Start to begin consultation
+                        </p>
+
+                        <!-- Control Buttons -->
+                        <div class="scribe-buttons-row">
+                            <button type="button" class="btn-scribe start" id="startConsultationBtn">
+                                <i class="fa-solid fa-play"></i> <span data-i18n="startConsultationBtn">Start Consultation</span>
+                            </button>
+                            <button type="button" class="btn-scribe pause" id="pauseConsultationBtn" style="display: none;">
+                                <i class="fa-solid fa-pause"></i> <span data-i18n="pauseConsultationBtn">Pause</span>
+                            </button>
+                            <button type="button" class="btn-scribe resume" id="resumeConsultationBtn" style="display: none;">
+                                <i class="fa-solid fa-play"></i> <span data-i18n="resumeConsultationBtn">Resume</span>
+                            </button>
+                            <button type="button" class="btn-scribe stop" id="stopConsultationBtn" disabled>
+                                <i class="fa-solid fa-stop"></i> <span data-i18n="stopConsultationBtn">Stop Consultation</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Speaker Attribution & Sample Dialogue Row -->
+                    <div class="speaker-toggle-row">
+                        <span style="font-size: 12px; font-weight: 700; color: #475569;" data-i18n="speakingTurnLabel">
+                            <i class="fa-solid fa-user-tag"></i> Speaking Turn:
+                        </span>
+                        <div class="speaker-btn-group">
+                            <button type="button" class="speaker-btn active doctor" id="setDoctorSpeakerBtn" data-i18n="speakerDoctor">
+                                👨‍⚕️ Doctor
+                            </button>
+                            <button type="button" class="speaker-btn patient" id="setPatientSpeakerBtn" data-i18n="speakerPatient">
+                                👤 Patient
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Demo Dialogue Pre-loader for Instant Testing -->
+                    <div class="sample-dialogue-bar">
+                        <span style="font-size: 11.5px; font-weight: 700; color: #64748b;">
+                            <i class="fa-solid fa-flask"></i> Quick Demo:
+                        </span>
+                        <button type="button" class="sample-btn" id="loadEnglishSampleBtn" title="Load sample English doctor-patient conversation">
+                            <i class="fa-solid fa-file-lines"></i> English Sample
+                        </button>
+                        <button type="button" class="sample-btn" id="loadHindiSampleBtn" title="Load sample Hindi doctor-patient conversation">
+                            <i class="fa-solid fa-language"></i> हिन्दी बातचीत (Hindi)
+                        </button>
+                    </div>
+
+                    <!-- Transcript Stream Display -->
+                    <div class="transcript-stream" id="transcriptStream">
+                        <!-- Dialogue turns injected dynamically via JS -->
+                    </div>
+
+                    <!-- Interim Speech Preview (Real-time Speech Recognition) -->
+                    <div class="interim-preview" id="interimPreview" style="display: none;">
+                        <i class="fa-solid fa-circle-notch fa-spin" style="color: #1f7a57;"></i>
+                        <span id="interimText">Listening...</span>
+                    </div>
+
+                    <!-- Manual Line Input & Clear -->
+                    <div class="manual-turn-add" style="margin-top: 10px;">
+                        <input type="text" id="manualTurnInput" placeholder="Type or correct conversation turn..." />
+                        <button type="button" class="btn-scribe start" id="addTurnBtn" style="padding: 6px 12px;">
+                            <span data-i18n="addTurnBtn">Add</span>
+                        </button>
+                        <button type="button" class="btn-scribe pause" id="clearTranscriptBtn" title="Clear Transcript" style="padding: 6px 10px;">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <!-- AI Note Generation Trigger (Req 4) -->
+                    <div class="generate-ai-action">
+                        <button type="button" class="btn-generate-ai" id="generateAiNotesBtn">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="generateNotesBtn">Generate AI Notes</span>
+                        </button>
+                        <p style="font-size: 11px; text-align: center; color: #64748b;" data-i18n="generateAiSub">
+                            Transcribes dialogue & extracts symptoms, vitals, history, assessment and plan.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: STRUCTURED & EDITABLE NOTES -->
+                <div class="scribe-card" id="notesCard">
+                    <div class="scribe-card-header">
+                        <h3><i class="fa-solid fa-file-waveform" style="color: #1f7a57;"></i> <span data-i18n="structuredNotesTitle">Structured Consultation Notes</span></h3>
+                        <span style="font-size: 11.5px; font-weight: 700; color: #2563eb;" id="notesStatusTag">Draft</span>
+                    </div>
+
+                    <!-- AI Medical Safety Rule Badge (Req 5) -->
+                    <div class="ai-disclaimer-alert">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 15px;"></i>
+                        <span data-i18n="aiDraftBadge">AI-generated draft — doctor review required.</span>
+                    </div>
+
+                    <!-- EDITABLE MEDICAL NOTE FORM (7 SECTIONS) -->
+                    <form id="consultationNotesForm">
+
+                        <!-- 1. PATIENT COMPLAINT -->
+                        <div class="notes-form-section">
+                            <div class="notes-section-title">
+                                <i class="fa-solid fa-circle-exclamation" style="color: #e11d48;"></i> <span data-i18n="sectionComplaint">1. Patient Complaint</span>
+                            </div>
+                            <div class="notes-input-group">
+                                <label for="noteMainComplaint" data-i18n="labelMainComplaint">Main Complaint</label>
+                                <input type="text" id="noteMainComplaint" placeholder="e.g. Headache and mild fever" value="Not mentioned">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="notes-input-group">
+                                    <label for="noteDuration" data-i18n="labelDuration">Duration</label>
+                                    <input type="text" id="noteDuration" placeholder="e.g. 3 days" value="Not mentioned">
+                                </div>
+                                <div class="notes-input-group">
+                                    <label for="noteSeverity" data-i18n="labelSeverity">Severity</label>
+                                    <input type="text" id="noteSeverity" placeholder="e.g. Moderate, Severe, Mild" value="Not mentioned">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. SYMPTOMS -->
+                        <div class="notes-form-section">
+                            <div class="notes-section-title">
+                                <i class="fa-solid fa-stethoscope" style="color: #2563eb;"></i> <span data-i18n="sectionSymptoms">2. Symptoms</span>
+                            </div>
+                            <div class="notes-input-group">
+                                <label for="notePresentSymptoms" data-i18n="labelPresentSymptoms">Present Symptoms</label>
+                                <textarea id="notePresentSymptoms" rows="2" placeholder="Symptoms positively reported">Not mentioned</textarea>
+                            </div>
+                            <div class="notes-input-group">
+                                <label for="noteNegativeSymptoms" data-i18n="labelNegativeSymptoms">Negative Symptoms (Explicitly Denied)</label>
+                                <textarea id="noteNegativeSymptoms" rows="2" placeholder="e.g. No cough, no chest pain, no vomiting">Not mentioned</textarea>
+                            </div>
+                        </div>
+
+                        <!-- 3. MEDICAL HISTORY -->
+                        <div class="notes-form-section">
+                            <div class="notes-section-title">
+                                <i class="fa-solid fa-notes-medical" style="color: #7c3aed;"></i> <span data-i18n="sectionHistory">3. Medical History</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="notes-input-group">
+                                    <label for="notePastConditions" data-i18n="labelConditions">Previous Conditions</label>
+                                    <input type="text" id="notePastConditions" value="Not mentioned">
+                                </div>
+                                <div class="notes-input-group">
+                                    <label for="notePastSurgeries" data-i18n="labelSurgeries">Previous Surgeries</label>
+                                    <input type="text" id="notePastSurgeries" value="Not mentioned">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="notes-input-group">
+                                    <label for="noteAllergies" data-i18n="labelAllergies">Allergies</label>
+                                    <input type="text" id="noteAllergies" value="Not mentioned">
+                                </div>
+                                <div class="notes-input-group">
+                                    <label for="noteCurrentMedications" data-i18n="labelMedications">Current Medications</label>
+                                    <input type="text" id="noteCurrentMedications" value="Not mentioned">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. VITALS -->
+                        <div class="notes-form-section">
+                            <div class="notes-section-title">
+                                <i class="fa-solid fa-heart-pulse" style="color: #dc2626;"></i> <span data-i18n="sectionVitals">4. Vitals (Only if mentioned)</span>
+                            </div>
+                            <div class="vitals-inputs-grid">
+                                <div class="notes-input-group">
+                                    <label for="vitalBp" data-i18n="labelBp">Blood Pressure</label>
+                                    <input type="text" id="vitalBp" value="Not mentioned" placeholder="120/80 mmHg">
+                                </div>
+                                <div class="notes-input-group">
+                                    <label for="vitalHr" data-i18n="labelHr">Heart Rate</label>
+                                    <input type="text" id="vitalHr" value="Not mentioned" placeholder="72 bpm">
+                                </div>
+                                <div class="notes-input-group">
+                                    <label for="vitalTemp" data-i18n="labelTemp">Temperature</label>
+                                    <input type="text" id="vitalTemp" value="Not mentioned" placeholder="98.6 °F">
+                                </div>
+                                <div class="notes-input-group">
+                                    <label for="vitalSpo2" data-i18n="labelSpo2">SpO2</label>
+                                    <input type="text" id="vitalSpo2" value="Not mentioned" placeholder="98%">
+                                </div>
+                                <div class="notes-input-group">
+                                    <label for="vitalWeight" data-i18n="labelWeight">Weight</label>
+                                    <input type="text" id="vitalWeight" value="Not mentioned" placeholder="65 kg">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. ASSESSMENT -->
+                        <div class="notes-form-section">
+                            <div class="notes-section-title">
+                                <i class="fa-solid fa-brain" style="color: #0d9488;"></i> <span data-i18n="sectionAssessment">5. Assessment</span>
+                            </div>
+                            <div class="notes-input-group">
+                                <label for="noteAssessment" data-i18n="labelAssessment">Clinical Assessment (Doctor summary from conversation)</label>
+                                <textarea id="noteAssessment" rows="2" placeholder="Summarize doctor's clinical impression. Do NOT invent a diagnosis.">Not mentioned</textarea>
+                            </div>
+                        </div>
+
+                        <!-- 6. PLAN -->
+                        <div class="notes-form-section">
+                            <div class="notes-section-title">
+                                <i class="fa-solid fa-list-check" style="color: #16a34a;"></i> <span data-i18n="sectionPlan">6. Plan</span>
+                            </div>
+                            <div class="notes-input-group">
+                                <label for="notePlanMedicines" data-i18n="labelPlanMedicines">Medicines Mentioned</label>
+                                <textarea id="notePlanMedicines" rows="2" placeholder="Medicines with dosages">Not mentioned</textarea>
+                            </div>
+                            <div class="notes-input-group">
+                                <label for="notePlanTests" data-i18n="labelPlanTests">Tests Recommended</label>
+                                <input type="text" id="notePlanTests" value="Not mentioned" placeholder="e.g. CBC, Ultrasound">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div class="notes-input-group">
+                                    <label for="notePlanLifestyle" data-i18n="labelPlanLifestyle">Lifestyle / Diet Advice</label>
+                                    <input type="text" id="notePlanLifestyle" value="Not mentioned">
+                                </div>
+                                <div class="notes-input-group">
+                                    <label for="notePlanFollowUp" data-i18n="labelPlanFollowUp">Follow-up Instructions</label>
+                                    <input type="text" id="notePlanFollowUp" value="Not mentioned">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. DOCTOR NOTES -->
+                        <div class="notes-form-section">
+                            <div class="notes-section-title">
+                                <i class="fa-solid fa-user-doctor" style="color: #4338ca;"></i> <span data-i18n="sectionDoctorNotes">7. Doctor Notes & Observations</span>
+                            </div>
+                            <div class="notes-input-group">
+                                <label for="noteDoctorNotes" data-i18n="labelDoctorNotes">Additional Observations</label>
+                                <textarea id="noteDoctorNotes" rows="2" placeholder="Important additional observations">Not mentioned</textarea>
+                            </div>
+                        </div>
+
+                        <!-- ACTION BUTTONS -->
+                        <div class="notes-actions-bar">
+                            <button type="button" class="btn-scribe start" id="saveConsultationBtn" style="font-size: 14px; padding: 10px 20px;">
+                                <i class="fa-solid fa-floppy-disk"></i> <span data-i18n="saveConsultationBtn">Save Consultation</span>
+                            </button>
+                            <button type="button" class="btn-scribe resume" id="regenerateNotesBtn">
+                                <i class="fa-solid fa-arrows-rotate"></i> <span data-i18n="regenerateNotesBtn">Regenerate Notes</span>
+                            </button>
+                            <button type="button" class="btn-scribe pause" id="clearNotesFormBtn">
+                                <i class="fa-solid fa-eraser"></i> <span data-i18n="clearNotesBtn">Clear</span>
+                            </button>
+                            <button type="button" class="btn-scribe stop" id="printNoteBtn" style="margin-left: auto;">
+                                <i class="fa-solid fa-print"></i> <span data-i18n="printExportBtn">Print / Export</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 4. CONSULTATION HISTORY (REQ 8) -->
+            <div class="history-section-wrap" id="consultationHistorySection">
+                <div class="scribe-card-header">
+                    <div>
+                        <h3><i class="fa-solid fa-clock-rotate-left" style="color: #1f7a57;"></i> <span data-i18n="consultationHistoryTitle">Consultation History</span></h3>
+                        <p style="font-size: 13px; color: #64748b; margin-top: 2px;" data-i18n="consultationHistorySub">
+                            Archived AI Medical Scribe consultations and doctor-verified notes.
+                        </p>
+                    </div>
+                    <span id="historyCountBadge" class="session-status-badge ready">0 Saved</span>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="colPatientName">Patient Name</th>
+                                <th data-i18n="colPatientId">Patient ID</th>
+                                <th data-i18n="colDateTime">Date & Time</th>
+                                <th data-i18n="colComplaintSummary">Complaint Summary</th>
+                                <th data-i18n="colStatus">Status</th>
+                                <th style="text-align: right;" data-i18n="colAction">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="consultationHistoryTableBody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ================= VIEW CONSULTATION MODAL ================= -->
+    <div class="consultation-modal-overlay" id="viewConsultationModal">
+        <div class="consultation-modal-box">
+            <button type="button" class="modal-close-btn" id="closeModalBtn">&times;</button>
+            <div id="modalConsultationContent">
+                <!-- Injected dynamically via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script src="js/models/clinical-state.js"></script>
+    <script src="js/storage/clinical-storage.js"></script>
+    <script src="js/services/ai-service.js"></script>
+    <script src="js/services/speech-service.js"></script>
+    <script src="js/services/i18n-service.js"></script>
+    <script src="js/services/demo-service.js"></script>
+    <script src="js/consultation-notes.js"></script>
+</body>
+
+</html>

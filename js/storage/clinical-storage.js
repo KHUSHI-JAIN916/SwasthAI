@@ -13,7 +13,8 @@ const ClinicalStorage = (() => {
         OFFLINE_DRAFTS: "ayushOfflineDrafts",
         USERS: "ayushUsers",
         CURRENT_USER: "ayushCurrentUser",
-        ACTIVE_ROLE: "ayushActiveRole" // 'practitioner' | 'patient' | 'admin'
+        ACTIVE_ROLE: "ayushActiveRole", // 'practitioner' | 'patient' | 'admin'
+        CONSULTATION_NOTES: "ayushConsultationNotes"
     };
 
     // Realistic seed patients
@@ -663,6 +664,87 @@ const ClinicalStorage = (() => {
         }
     ];
 
+    // Seed realistic consultation notes
+    const DEFAULT_CONSULTATION_NOTES = [
+        {
+            id: "CN-2026-001",
+            patientId: "AYU-2026-001",
+            patientName: "Rahul Kumar",
+            doctorName: "Dr. Sharma",
+            doctorId: "DOC-2026-001",
+            date: "2026-09-22T10:30:00.000Z",
+            formattedDate: "Sep 22, 2026, 10:30 AM",
+            status: "Completed",
+            durationSeconds: 195,
+            rawTranscriptText: "Doctor: Good morning, Rahul. What problem are you facing today?\nPatient: Good morning doctor. I have been having a severe headache and mild fever for the last three days.\nDoctor: I see. Do you have a cough or chest congestion?\nPatient: No, no cough at all.\nDoctor: Any history of high BP, diabetes, or medication allergies?\nPatient: No allergies. I had work stress recently. No regular medicines right now.\nDoctor: Let me check your vitals. Blood pressure is 120/80 mmHg, temperature is 99.4 F, pulse is 76 bpm.\nDoctor: It looks like tension-type headache with viral prodrome. I am prescribing Paracetamol 650mg SOS after meals, and Brahmi Vati 1 tablet twice daily. Drink plenty of water and rest. Follow up in 3 days if fever persists.",
+            generatedNotes: {
+                complaint: {
+                    main: "Headache and mild fever",
+                    duration: "3 days",
+                    severity: "Severe headache, mild fever"
+                },
+                symptoms: {
+                    present: "Headache, mild fever",
+                    negative: "No cough, no chest congestion"
+                },
+                history: {
+                    conditions: "Work stress reported",
+                    surgeries: "Not mentioned",
+                    allergies: "No known drug allergies",
+                    medications: "No regular medications"
+                },
+                vitals: {
+                    bloodPressure: "120/80 mmHg",
+                    heartRate: "76 bpm",
+                    temperature: "99.4 °F",
+                    spO2: "Not mentioned",
+                    weight: "Not mentioned"
+                },
+                assessment: "Tension-type headache associated with mild viral prodrome. No acute red flags observed.",
+                plan: {
+                    medicines: "Paracetamol 650mg SOS post-meals; Brahmi Vati 1 tablet BID",
+                    tests: "Not mentioned",
+                    lifestyle: "Adequate hydration, proper rest, stress reduction",
+                    followUp: "Follow up in 3 days if fever persists"
+                },
+                doctorNotes: "Patient was coherent and responsive. Alert to worsening symptoms."
+            },
+            finalNotes: {
+                complaint: {
+                    main: "Headache and mild fever",
+                    duration: "3 days",
+                    severity: "Severe headache, mild fever"
+                },
+                symptoms: {
+                    present: "Headache, mild fever",
+                    negative: "No cough, no chest congestion"
+                },
+                history: {
+                    conditions: "Work stress reported",
+                    surgeries: "Not mentioned",
+                    allergies: "No known drug allergies",
+                    medications: "No regular medications"
+                },
+                vitals: {
+                    bloodPressure: "120/80 mmHg",
+                    heartRate: "76 bpm",
+                    temperature: "99.4 °F",
+                    spO2: "Not mentioned",
+                    weight: "Not mentioned"
+                },
+                assessment: "Tension-type headache associated with mild viral prodrome. No acute red flags observed.",
+                plan: {
+                    medicines: "Paracetamol 650mg SOS post-meals; Brahmi Vati 1 tablet BID",
+                    tests: "Not mentioned",
+                    lifestyle: "Adequate hydration, proper rest, stress reduction",
+                    followUp: "Follow up in 3 days if fever persists"
+                },
+                doctorNotes: "Patient was coherent and responsive. Alert to worsening symptoms."
+            },
+            isAiDraft: true
+        }
+    ];
+
     /* Initialization */
     function initialize() {
         if (!localStorage.getItem(KEYS.PATIENTS)) {
@@ -682,6 +764,9 @@ const ClinicalStorage = (() => {
         }
         if (!localStorage.getItem(KEYS.ACTIVE_ROLE)) {
             localStorage.setItem(KEYS.ACTIVE_ROLE, "practitioner");
+        }
+        if (!localStorage.getItem(KEYS.CONSULTATION_NOTES)) {
+            localStorage.setItem(KEYS.CONSULTATION_NOTES, JSON.stringify(DEFAULT_CONSULTATION_NOTES));
         }
     }
 
@@ -1157,6 +1242,84 @@ const ClinicalStorage = (() => {
         };
     }
 
+    /* =========================================================================
+       CONSULTATION NOTES METHODS (AI Medical Scribe)
+       ========================================================================= */
+    function getConsultationNotes() {
+        try {
+            const raw = localStorage.getItem(KEYS.CONSULTATION_NOTES);
+            if (!raw) {
+                localStorage.setItem(KEYS.CONSULTATION_NOTES, JSON.stringify(DEFAULT_CONSULTATION_NOTES));
+                return DEFAULT_CONSULTATION_NOTES;
+            }
+            return JSON.parse(raw) || [];
+        } catch (e) {
+            console.error("Error reading consultation notes", e);
+            return DEFAULT_CONSULTATION_NOTES;
+        }
+    }
+
+    function saveConsultationNotes(notes) {
+        localStorage.setItem(KEYS.CONSULTATION_NOTES, JSON.stringify(notes));
+    }
+
+    function getConsultationNoteById(id) {
+        return getConsultationNotes().find(n => n.id === id);
+    }
+
+    function saveConsultationNote(noteData) {
+        const notes = getConsultationNotes();
+        if (!noteData.id) {
+            const nextNum = (notes.length + 1).toString().padStart(3, "0");
+            noteData.id = `CN-${new Date().getFullYear()}-${nextNum}`;
+        }
+        if (!noteData.date) {
+            noteData.date = new Date().toISOString();
+        }
+        if (!noteData.formattedDate) {
+            noteData.formattedDate = new Date(noteData.date).toLocaleString([], {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        const existingIndex = notes.findIndex(n => n.id === noteData.id);
+        if (existingIndex >= 0) {
+            notes[existingIndex] = { ...notes[existingIndex], ...noteData, updatedAt: new Date().toISOString() };
+        } else {
+            notes.unshift(noteData);
+        }
+
+        saveConsultationNotes(notes);
+
+        // Also add timeline event for patient if patientId exists
+        if (noteData.patientId) {
+            addTimelineEvent({
+                patientId: noteData.patientId,
+                date: noteData.date.split("T")[0],
+                category: "Consultation",
+                title: "AI Consultation Note Recorded",
+                details: `Dr. consultation completed: ${noteData.finalNotes?.complaint?.main || noteData.generatedNotes?.complaint?.main || "General Consultation"}.`,
+                icon: "fa-notes-medical",
+                tag: "Scribe Note"
+            });
+        }
+
+        logAudit("Saved Consultation Note", getActiveRole(), "Consultation Note", noteData.id, `Saved note for ${noteData.patientName} (${noteData.patientId})`);
+
+        return noteData;
+    }
+
+    function deleteConsultationNote(id) {
+        const notes = getConsultationNotes().filter(n => n.id !== id);
+        saveConsultationNotes(notes);
+        logAudit("Deleted Consultation Note", getActiveRole(), "Consultation Note", id, `Deleted note ID ${id}`);
+        return true;
+    }
+
     return {
         KEYS,
         getPatients,
@@ -1185,7 +1348,11 @@ const ClinicalStorage = (() => {
         authenticatePatient,
         addPastDoctorRecord,
         addPatientReportedDisease,
-        searchPatientFullProfile
+        searchPatientFullProfile,
+        getConsultationNotes,
+        getConsultationNoteById,
+        saveConsultationNote,
+        deleteConsultationNote
     };
 })();
 

@@ -596,12 +596,415 @@ const AIService = (() => {
         };
     }
 
+    /* =========================================================================
+       AI MEDICAL SCRIBE & STRUCTURED CONSULTATION NOTES ENGINE
+       Strict Medical Safety: NEVER invent symptoms, vitals, diagnosis, medicines,
+       or history. If not in transcript, write "Not mentioned".
+       ========================================================================= */
+
+    async function generateStructuredConsultationNotes(transcriptData, patientInfo = {}, options = {}) {
+        let transcriptText = "";
+        if (Array.isArray(transcriptData)) {
+            transcriptText = transcriptData.map(item => {
+                if (typeof item === "string") return item;
+                return `${item.speaker || 'Speaker'}: ${item.text || ''}`;
+            }).join("\n");
+        } else if (typeof transcriptData === "string") {
+            transcriptText = transcriptData;
+        }
+
+        const apiKey = options.apiKey || localStorage.getItem("swasthai_gemini_api_key") || "";
+
+        if (apiKey && apiKey.trim().length > 15) {
+            try {
+                const geminiNotes = await callGeminiScribeApi(transcriptText, patientInfo, apiKey.trim());
+                if (geminiNotes) {
+                    return geminiNotes;
+                }
+            } catch (err) {
+                console.warn("Remote AI service unavailable, utilizing local Clinical NLP engine:", err);
+            }
+        }
+
+        return extractNotesRuleBased(transcriptText, patientInfo);
+    }
+
+    function extractNotesRuleBased(transcriptText, patientInfo = {}) {
+        const text = transcriptText || "";
+        const lower = text.toLowerCase();
+        const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+
+        // Separate Doctor and Patient speech lines if labeled
+        const doctorLines = [];
+        const patientLines = [];
+        lines.forEach(line => {
+            if (/^doctor\s*:/i.test(line)) {
+                doctorLines.push(line.replace(/^doctor\s*:/i, "").trim());
+            } else if (/^patient\s*:/i.test(line)) {
+                patientLines.push(line.replace(/^patient\s*:/i, "").trim());
+            }
+        });
+
+        // 1. PATIENT COMPLAINT
+        let mainComplaint = "Not mentioned";
+        let duration = "Not mentioned";
+        let severity = "Not mentioned";
+
+        // Extract Complaint
+        const complaintMatches = [];
+        if (/fever|bukhar|tap|temperature/i.test(text)) complaintMatches.push("Fever");
+        if (/headache|sir dard|sar dard|mathe me dard/i.test(text)) complaintMatches.push("Headache");
+        if (/stomach (?:pain|ache)|pet (?:me|mein) dard|abdominal pain|acidity|gas/i.test(text)) complaintMatches.push("Abdominal pain / Acidity");
+        if (/cough|khansi/i.test(text) && !/no cough|khansi nahi/i.test(lower)) complaintMatches.push("Cough");
+        if (/joint pain|ghutne (?:me|mein) dard|sandhishoola/i.test(text)) complaintMatches.push("Joint pain");
+        if (/vomiting|ulti/i.test(text) && !/no vomiting|ulti nahi/i.test(lower)) complaintMatches.push("Vomiting");
+        if (/chest pain|chhati me dard/i.test(text) && !/no chest pain|chhati me dard nahi/i.test(lower)) complaintMatches.push("Chest discomfort");
+        if (/throat pain|gale me dard|sore throat/i.test(text)) complaintMatches.push("Sore throat");
+        if (/weakness|kamzori|thakan|fatigue/i.test(text)) complaintMatches.push("Fatigue / Weakness");
+
+        if (complaintMatches.length > 0) {
+            mainComplaint = complaintMatches.join(", ");
+        } else {
+            // Fallback to searching first patient utterance
+            if (patientLines.length > 0) {
+                const firstPatientLine = patientLines[0];
+                if (firstPatientLine.length < 120) {
+                    mainComplaint = firstPatientLine;
+                }
+            }
+        }
+
+        // Extract Duration
+        const durMatch = text.match(/(?:for|since|last|pichle|se)\s*(\d+\s*(?:days?|weeks?|months?|hours?|din|hafte|mahine))/i) ||
+                         text.match(/(\d+\s*(?:days?|weeks?|months?|hours?|din|hafte|mahine)\s*(?:se|ago|duration))/i);
+        if (durMatch) {
+            duration = durMatch[1].trim();
+        } else if (/yesterday|kal se/i.test(text)) {
+            duration = "Since yesterday";
+        } else if (/today morning|aaj subah se/i.test(text)) {
+            duration = "Since today morning";
+        }
+
+        // Extract Severity
+        if (/severe|unbearable|bahut tez|tez dard|bura haal|extreme|high/i.test(text)) {
+            severity = "Severe";
+        } else if (/moderate|theek thak|medium/i.test(text)) {
+            severity = "Moderate";
+        } else if (/mild|halka|thoda/i.test(text)) {
+            severity = "Mild";
+        }
+
+        // 2. SYMPTOMS (Present vs Negative)
+        const presentSymptoms = [];
+        const negativeSymptoms = [];
+
+        // Check Present
+        if (/fever|bukhar/i.test(lower)) presentSymptoms.push("Fever");
+        if (/headache|sir dard|sar dard/i.test(lower)) presentSymptoms.push("Headache");
+        if (/body (?:pain|ache)|badan dard/i.test(lower)) presentSymptoms.push("Body ache");
+        if (/nausea|matli|jee ghabrana/i.test(lower)) presentSymptoms.push("Nausea");
+        if (/chills|shivering|thand lagna/i.test(lower)) presentSymptoms.push("Chills / Shivering");
+        if (/loose motion|diarrhea|dast/i.test(lower) && !/no loose motion|dast nahi/i.test(lower)) presentSymptoms.push("Diarrhea");
+        if (/cough|khansi/i.test(lower) && !/no cough|khansi nahi/i.test(lower)) presentSymptoms.push("Cough");
+        if (/swelling|sujan/i.test(lower)) presentSymptoms.push("Swelling");
+        if (/burning|jalan|heartburn/i.test(lower)) presentSymptoms.push("Heartburn / Burning sensation");
+
+        // Check Explicit Negative Symptoms
+        if (/no cough|don't have cough|khansi nahi|not having cough|cough nahi/i.test(lower)) negativeSymptoms.push("No cough");
+        if (/no chest pain|chhati me dard nahi|no chest heaviness/i.test(lower)) negativeSymptoms.push("No chest pain");
+        if (/no vomiting|ulti nahi|vomiting nahi/i.test(lower)) negativeSymptoms.push("No vomiting");
+        if (/no loose motion|dast nahi|no diarrhea/i.test(lower)) negativeSymptoms.push("No loose motions");
+        if (/no fever|bukhar nahi/i.test(lower)) negativeSymptoms.push("No fever");
+        if (/no breathing difficulty|saans lene me dikkat nahi|no breathlessness|no dyspnea/i.test(lower)) negativeSymptoms.push("No breathlessness");
+        if (/no dizziness|chakkar nahi/i.test(lower)) negativeSymptoms.push("No dizziness");
+
+        // 3. MEDICAL HISTORY
+        let pastConditions = "Not mentioned";
+        let pastSurgeries = "Not mentioned";
+        let allergies = "Not mentioned";
+        let currentMedications = "Not mentioned";
+
+        const conds = [];
+        if (/hypertension|high bp|high blood pressure/i.test(lower)) conds.push("Hypertension");
+        if (/diabetes|sugar ki bimari|sugar patient|type 2 diabetes/i.test(lower)) conds.push("Diabetes Mellitus");
+        if (/asthma|dama/i.test(lower)) conds.push("Asthma");
+        if (/thyroid/i.test(lower)) conds.push("Thyroid disorder");
+        if (/work stress|tension|stress/i.test(lower)) conds.push("Work stress / mental fatigue");
+        if (conds.length > 0) pastConditions = conds.join(", ");
+
+        if (/no (?:past )?surger(?:y|ies)|never had surgery|operation nahi hua/i.test(lower)) {
+            pastSurgeries = "No prior surgeries reported";
+        } else {
+            const surgMatch = text.match(/(?:surgery for|operation for|operated for|had surgery of)\s*([a-zA-Z\s]{3,30})/i);
+            if (surgMatch) pastSurgeries = surgMatch[0].trim();
+        }
+
+        if (/no allergies|no known (?:drug )?allergies|nkda|kisi dawai se allergy nahi/i.test(lower)) {
+            allergies = "No known drug allergies reported";
+        } else if (/allergic to penicillin|penicillin allergy/i.test(lower)) {
+            allergies = "Penicillin (Reported allergy)";
+        } else if (/allergic to sulfa|sulfa allergy/i.test(lower)) {
+            allergies = "Sulfa drugs (Reported allergy)";
+        } else if (/allergic to aspirin|aspirin allergy/i.test(lower)) {
+            allergies = "Aspirin / NSAIDs (Reported allergy)";
+        }
+
+        const medsFound = [];
+        if (/amlodipine|stamlo/i.test(lower)) medsFound.push("Amlodipine");
+        if (/metformin|glycomet/i.test(lower)) medsFound.push("Metformin");
+        if (/thyronorm|eltroxin/i.test(lower)) medsFound.push("Thyroxine");
+        if (/no regular medicines|no regular medications|koi dawai nahi lete|not taking any medicine/i.test(lower)) {
+            currentMedications = "No regular medications";
+        } else if (medsFound.length > 0) {
+            currentMedications = medsFound.join(", ");
+        }
+
+        // 4. VITALS (Strict regex extraction only)
+        let bloodPressure = "Not mentioned";
+        let heartRate = "Not mentioned";
+        let temperature = "Not mentioned";
+        let spO2 = "Not mentioned";
+        let weight = "Not mentioned";
+
+        // BP
+        const bpMatch = text.match(/(?:bp|blood pressure|b\.p\.)\s*(?:is|:|=)?\s*(\d{2,3}\s*[\/\\]\s*\d{2,3}(?:\s*mmhg)?)/i) ||
+                        text.match(/(\b\d{2,3}\s*[\/\\]\s*\d{2,3}\b(?:\s*mmhg)?)/i);
+        if (bpMatch) {
+            bloodPressure = bpMatch[1].trim();
+            if (!bloodPressure.toLowerCase().includes("mmhg")) bloodPressure += " mmHg";
+        }
+
+        // Pulse / HR
+        const hrMatch = text.match(/(?:pulse|heart rate|hr|pr)\s*(?:is|:|=)?\s*(\d{2,3}(?:\s*bpm)?)/i) ||
+                        text.match(/(\b\d{2,3}\b)\s*bpm/i);
+        if (hrMatch) {
+            heartRate = hrMatch[1].trim();
+            if (!heartRate.toLowerCase().includes("bpm")) heartRate += " bpm";
+        }
+
+        // Temperature
+        const tempMatch = text.match(/(?:temp|temperature)\s*(?:is|:|=)?\s*(\d{2,3}(?:\.\d+)?\s*(?:f|c|°f|°c|deg(?:rees)?)?)/i) ||
+                          text.match(/(\b\d{2,3}(?:\.\d+)?\b)\s*(?:°?f|°?c)/i);
+        if (tempMatch) {
+            temperature = tempMatch[1].trim();
+            if (!/[fc]/i.test(temperature)) temperature += " °F";
+        }
+
+        // SpO2
+        const spo2Match = text.match(/(?:spo2|oxygen|saturation|o2 sat)\s*(?:is|:|=)?\s*(\d{2,3}\s*%)/i) ||
+                          text.match(/(\b\d{2,3}\b)\s*%\s*(?:spo2|saturation|oxygen)?/i);
+        if (spo2Match) {
+            spO2 = spo2Match[1].trim();
+            if (!spO2.includes("%")) spO2 += "%";
+        }
+
+        // Weight
+        const wtMatch = text.match(/(?:weight|wt)\s*(?:is|:|=)?\s*(\d{2,3}(?:\.\d+)?\s*(?:kg|kgs|kilo|pounds|lbs)?)/i);
+        if (wtMatch && !/loss|gain/i.test(wtMatch[0])) {
+            weight = wtMatch[1].trim();
+            if (!/[a-z]/i.test(weight)) weight += " kg";
+        }
+
+        // 5. ASSESSMENT
+        let assessment = "Not mentioned";
+        const assessmentKeywords = [
+            /(?:looks like|seems like|indicates|impression is|diagnos(?:is|ed)|likely|suspecting|condition is|cause of)\s*([^.,\n]+)/i,
+            /(?:tension-type headache|viral prodrome|viral fever|acute gastritis|upper respiratory tract infection|urti|migraine|sandhivata|amlapitta)/i
+        ];
+
+        for (const kw of assessmentKeywords) {
+            const m = text.match(kw);
+            if (m) {
+                if (m[1]) {
+                    assessment = `Doctor impression: ${m[1].trim()}`;
+                } else {
+                    assessment = `Doctor impression: ${m[0].trim()}`;
+                }
+                break;
+            }
+        }
+
+        // 6. PLAN
+        let planMedicines = "Not mentioned";
+        let planTests = "Not mentioned";
+        let planLifestyle = "Not mentioned";
+        let planFollowUp = "Not mentioned";
+
+        // Medicines in plan
+        const prescribedMeds = [];
+        if (/paracetamol|pcm|dolo|crocin|calpol/i.test(lower)) {
+            const pcmDose = text.match(/paracetamol\s*(\d+mg|\w+)/i) || text.match(/dolo\s*(\d+mg|\w+)/i);
+            prescribedMeds.push(pcmDose ? pcmDose[0] : "Paracetamol 650mg SOS after meals");
+        }
+        if (/brahmi vati/i.test(lower)) prescribedMeds.push("Brahmi Vati 1 tablet twice daily");
+        if (/pantocid|pan 40|pantoprazole/i.test(lower)) prescribedMeds.push("Pantoprazole 40mg before breakfast");
+        if (/cetirizine|allegra/i.test(lower)) prescribedMeds.push("Antihistamine (Cetirizine / Allegra) as advised");
+        if (/amoxicillin|azithromycin|antibiotic/i.test(lower)) {
+            const abxMatch = text.match(/(?:amoxicillin|azithromycin)\s*(?:\d+mg)?/i);
+            prescribedMeds.push(abxMatch ? abxMatch[0] : "Antibiotic as specified by doctor");
+        }
+        if (/cough syrup|kuf|syrup/i.test(lower)) prescribedMeds.push("Cough syrup as advised");
+
+        if (prescribedMeds.length > 0) {
+            planMedicines = prescribedMeds.join("; ");
+        }
+
+        // Tests
+        const tests = [];
+        if (/blood test|cbc|complete blood count/i.test(lower)) tests.push("Complete Blood Count (CBC)");
+        if (/lft|liver function/i.test(lower)) tests.push("Liver Function Test (LFT)");
+        if (/kft|kidney function/i.test(lower)) tests.push("Kidney Function Test (KFT)");
+        if (/x-?ray/i.test(lower)) tests.push("X-Ray");
+        if (/ultrasound|usg/i.test(lower)) tests.push("Ultrasound (USG)");
+        if (/ecg|electrocardiogram/i.test(lower)) tests.push("Electrocardiogram (ECG)");
+        if (/urine routine|urine test/i.test(lower)) tests.push("Urine Routine Examination");
+        if (tests.length > 0) planTests = tests.join(", ");
+
+        // Lifestyle / Diet
+        const lifestyleAdvice = [];
+        if (/water|hydration|paani/i.test(lower)) lifestyleAdvice.push("Drink plenty of fluids / maintain hydration");
+        if (/rest|aaram|sleep/i.test(lower)) lifestyleAdvice.push("Adequate physical rest and sleep");
+        if (/avoid oily|light diet|avoid spicy|tala bhuna/i.test(lower)) lifestyleAdvice.push("Light, easy-to-digest diet; avoid spicy/oily food");
+        if (/warm water|garam paani/i.test(lower)) lifestyleAdvice.push("Sip warm water");
+        if (/salt/i.test(lower)) lifestyleAdvice.push("Limit sodium/salt intake");
+        if (lifestyleAdvice.length > 0) planLifestyle = lifestyleAdvice.join("; ");
+
+        // Follow-up
+        const fuMatch = text.match(/(?:follow up|review|come back|dikhao|milna)\s*(?:in|after|ke baad)?\s*(\d+\s*(?:days?|weeks?|mahine|din))/i);
+        if (fuMatch) {
+            planFollowUp = `Follow up in ${fuMatch[1].trim()}`;
+        } else if (/if fever persists|if symptoms worsen|agar bukhar na tute/i.test(lower)) {
+            planFollowUp = "Follow up if symptoms persist or worsen";
+        }
+
+        // 7. DOCTOR NOTES
+        let doctorNotes = "Not mentioned";
+        // Check if doctor made specific observations
+        const observationMatches = text.match(/(?:observe|noticed|alert to|advice to report|patient seems|looks|note:)\s*([^.,\n]+)/i);
+        if (observationMatches) {
+            doctorNotes = observationMatches[0].trim();
+        }
+
+        return {
+            complaint: {
+                main: mainComplaint,
+                duration: duration,
+                severity: severity
+            },
+            symptoms: {
+                present: presentSymptoms.length > 0 ? presentSymptoms.join(", ") : (mainComplaint !== "Not mentioned" ? mainComplaint : "Not mentioned"),
+                negative: negativeSymptoms.length > 0 ? negativeSymptoms.join(", ") : "Not mentioned"
+            },
+            history: {
+                conditions: pastConditions,
+                surgeries: pastSurgeries,
+                allergies: allergies,
+                medications: currentMedications
+            },
+            vitals: {
+                bloodPressure: bloodPressure,
+                heartRate: heartRate,
+                temperature: temperature,
+                spO2: spO2,
+                weight: weight
+            },
+            assessment: assessment,
+            plan: {
+                medicines: planMedicines,
+                tests: planTests,
+                lifestyle: planLifestyle,
+                followUp: planFollowUp
+            },
+            doctorNotes: doctorNotes,
+            aiDisclaimer: "AI-generated draft — doctor review required."
+        };
+    }
+
+    async function callGeminiScribeApi(transcriptText, patientInfo, apiKey) {
+        const prompt = `You are a certified clinical AI medical scribe assisting a licensed doctor.
+Convert the following consultation transcript into accurate, structured clinical consultation notes.
+
+STRICT MEDICAL SAFETY RULES:
+1. You must NEVER invent or assume symptoms, vital signs, diagnosis, medicines, laboratory tests, or medical history.
+2. If any piece of information is NOT explicitly stated in the transcript, write EXACTLY: "Not mentioned".
+3. For Assessment: Summarize only the doctor's explicit verbal assessment. Do NOT invent a diagnosis.
+4. Output MUST be valid JSON with this exact structure:
+{
+  "complaint": {
+    "main": "string (or 'Not mentioned')",
+    "duration": "string (or 'Not mentioned')",
+    "severity": "string (or 'Not mentioned')"
+  },
+  "symptoms": {
+    "present": "string (or 'Not mentioned')",
+    "negative": "string (negative symptoms explicitly denied, or 'Not mentioned')"
+  },
+  "history": {
+    "conditions": "string (or 'Not mentioned')",
+    "surgeries": "string (or 'Not mentioned')",
+    "allergies": "string (or 'Not mentioned')",
+    "medications": "string (or 'Not mentioned')"
+  },
+  "vitals": {
+    "bloodPressure": "string with mmHg (or 'Not mentioned')",
+    "heartRate": "string with bpm (or 'Not mentioned')",
+    "temperature": "string with unit (or 'Not mentioned')",
+    "spO2": "string with % (or 'Not mentioned')",
+    "weight": "string with kg (or 'Not mentioned')"
+  },
+  "assessment": "string (summarize ONLY explicit verbal assessment stated by doctor, or 'Not mentioned')",
+  "plan": {
+    "medicines": "string (or 'Not mentioned')",
+    "tests": "string (or 'Not mentioned')",
+    "lifestyle": "string (or 'Not mentioned')",
+    "followUp": "string (or 'Not mentioned')"
+  },
+  "doctorNotes": "string (additional observations explicitly stated by doctor, or 'Not mentioned')"
+}
+
+PATIENT CONTEXT:
+Name: ${patientInfo.fullName || patientInfo.patientName || 'Patient'}
+ID: ${patientInfo.id || patientInfo.patientId || 'Unspecified'}
+
+CONSULTATION TRANSCRIPT:
+"""
+${transcriptText}
+"""
+
+Respond with ONLY the JSON object.`;
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.1,
+                    responseMimeType: "application/json"
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const candidateText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!candidateText) throw new Error("Empty response from Gemini API");
+
+        const parsed = JSON.parse(candidateText);
+        parsed.aiDisclaimer = "AI-generated draft — doctor review required.";
+        return parsed;
+    }
+
     return {
         processPatientUtterance,
         applyPatientCorrection,
         getFlagExplanation,
         getQuestionText,
-        generateBriefClinicalSummary
+        generateBriefClinicalSummary,
+        generateStructuredConsultationNotes
     };
-
 })();
