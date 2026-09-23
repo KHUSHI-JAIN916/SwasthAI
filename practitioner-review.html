@@ -117,6 +117,10 @@
         <!-- REVIEW CONTAINER -->
         <section class="review-container" style="padding: 24px;">
 
+            <!-- ================= AI DIGITAL TWIN PANEL (Doctor View) ================= -->
+            <!-- Clinical Snapshot — priority-ranked patient signals for quick assessment -->
+            <div id="dtDoctorContainer"></div>
+
             <!-- RED FLAG SAFETY BANNER (Dynamic) -->
             <div id="redFlagBannerContainer"></div>
 
@@ -486,6 +490,27 @@
     <script src="js/services/document-service.js"></script>
     <script src="js/services/i18n-service.js"></script>
     <script src="js/services/demo-service.js"></script>
+    <script src="js/ai-digital-twin.js"></script>
     <script src="js/practitioner-review.js"></script>
+    <script>
+        // Render Digital Twin Clinical Snapshot after page loads
+        // We hook into case-load cycle: PractitionerReview.loadCase() triggers re-render too
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof DigitalTwin === "undefined") return;
+
+            // Initial render (uses URL caseId if present)
+            const urlParams = new URLSearchParams(window.location.search);
+            const caseId = urlParams.get("caseId") || null;
+            DigitalTwin.renderPanel("dtDoctorContainer", "doctor", null, caseId);
+
+            // Re-render when doctor switches case via dropdown
+            const caseSelector = document.getElementById("caseSelector");
+            if (caseSelector) {
+                caseSelector.addEventListener("change", (e) => {
+                    DigitalTwin.renderPanel("dtDoctorContainer", "doctor", null, e.target.value);
+                });
+            }
+        });
+    </script>
 </body>
 </html>

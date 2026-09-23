@@ -5136,3 +5136,297 @@ body {
     }
 
 }
+
+
+/* ==========================================================================
+   AI DIGITAL TWIN PANEL
+   ========================================================================== */
+
+/* ── Main container ───────────────────────────────────────────────────────── */
+.dt-panel {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+    margin-bottom: 24px;
+    overflow: hidden;
+    font-family: "Inter", sans-serif;
+    animation: dt-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes dt-slide-in {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Critical state — top border glow */
+.dt-panel.dt-has-critical {
+    border-color: #fca5a5;
+    box-shadow: 0 4px 24px rgba(220, 38, 38, 0.12);
+}
+
+/* ── Panel Header ─────────────────────────────────────────────────────────── */
+.dt-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #1f7a57 0%, #15803d 100%);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dt-role-patient .dt-panel-header {
+    background: linear-gradient(135deg, #166534 0%, #15803d 60%, #1d4ed8 100%);
+}
+
+.dt-role-doctor .dt-panel-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+}
+
+.dt-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dt-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+}
+
+.dt-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.dt-subtitle {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 2px 0 0 0;
+}
+
+.dt-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dt-live-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.dt-live-dot {
+    width: 7px;
+    height: 7px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: dt-pulse-green 1.5s infinite;
+    flex-shrink: 0;
+}
+
+@keyframes dt-pulse-green {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+.dt-collapse-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.dt-collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+/* ── Panel Body ───────────────────────────────────────────────────────────── */
+.dt-panel-body {
+    padding: 0 0 8px 0;
+}
+
+.dt-panel-sub {
+    font-size: 12px;
+    color: #64748b;
+    font-style: italic;
+    padding: 10px 20px 6px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* ── Priority Bands ───────────────────────────────────────────────────────── */
+.dt-band {
+    border-left: 4px solid transparent;
+    margin: 6px 12px;
+    border-radius: 0 10px 10px 0;
+    overflow: hidden;
+}
+
+.dt-band-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 14px 4px;
+}
+
+.dt-band-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-bottom: 6px;
+}
+
+/* CRITICAL band */
+.dt-band-critical {
+    border-left-color: #dc2626;
+    background: #fff5f5;
+}
+
+.dt-band-critical .dt-band-label {
+    color: #dc2626;
+    background: #fee2e2;
+}
+
+/* URGENT band */
+.dt-band-urgent {
+    border-left-color: #ea580c;
+    background: #fff7ed;
+}
+
+.dt-band-urgent .dt-band-label {
+    color: #c2410c;
+    background: #ffedd5;
+}
+
+/* IMPORTANT band */
+.dt-band-important {
+    border-left-color: #ca8a04;
+    background: #fefce8;
+}
+
+.dt-band-important .dt-band-label {
+    color: #92400e;
+    background: #fef9c3;
+}
+
+/* INFO band */
+.dt-band-info {
+    border-left-color: #16a34a;
+    background: #f0fdf4;
+}
+
+.dt-band-info .dt-band-label {
+    color: #166534;
+    background: #dcfce7;
+}
+
+/* ── Signal Rows ──────────────────────────────────────────────────────────── */
+.dt-signal-row {
+    font-size: 13px;
+    line-height: 1.55;
+    padding: 7px 14px;
+    color: #1e293b;
+    border-radius: 6px;
+    margin: 0 6px;
+}
+
+.dt-signal-row strong {
+    font-weight: 700;
+}
+
+.dt-signal-critical {
+    color: #7f1d1d;
+    background: rgba(220, 38, 38, 0.06);
+    border: 1px solid rgba(220, 38, 38, 0.15);
+    font-weight: 600;
+}
+
+/* Pulse animation for critical rows */
+.dt-signal-critical {
+    animation: dt-critical-pulse 2.5s infinite;
+}
+
+@keyframes dt-critical-pulse {
+    0%, 100% { background: rgba(220, 38, 38, 0.06); }
+    50%       { background: rgba(220, 38, 38, 0.14); }
+}
+
+.dt-signal-urgent {
+    color: #7c2d12;
+}
+
+.dt-signal-important {
+    color: #451a03;
+}
+
+.dt-signal-info {
+    color: #14532d;
+}
+
+/* ── Powered-by footer ────────────────────────────────────────────────────── */
+.dt-powered-by {
+    text-align: right;
+    font-size: 10px;
+    color: #94a3b8;
+    padding: 6px 18px 4px;
+    font-style: italic;
+}
+
+/* ── Mobile responsiveness ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .dt-panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .dt-header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .dt-title {
+        font-size: 13px;
+    }
+
+    .dt-signal-row {
+        font-size: 12px;
+    }
+
+    .dt-live-badge {
+        font-size: 10px;
+    }
+}

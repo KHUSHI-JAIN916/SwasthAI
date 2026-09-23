@@ -119,6 +119,10 @@
     <!-- MAIN PATIENT CONTAINER -->
     <main style="max-width: 1100px; margin: 24px auto; padding: 0 16px 80px 16px;">
 
+        <!-- ================= AI DIGITAL TWIN PANEL (Patient View) ================= -->
+        <!-- Ye panel sabse pehle load hota hai — priority ke according health summary -->
+        <div id="dtPatientContainer"></div>
+
         <!-- PATIENT HERO AUDIO PROMPT -->
         <div class="audio-guide-banner">
             <div style="display: flex; align-items: center; gap: 14px;">
@@ -545,7 +549,16 @@
     <script src="js/services/speech-service.js"></script>
     <script src="js/services/document-service.js"></script>
     <script src="js/services/i18n-service.js"></script>
+    <script src="js/ai-digital-twin.js"></script>
     <script src="js/patient-portal.js"></script>
+    <script>
+        // Render Digital Twin panel as soon as page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof DigitalTwin !== "undefined") {
+                DigitalTwin.renderPanel("dtPatientContainer", "patient");
+            }
+        });
+    </script>
 </body>
 
 </html>
