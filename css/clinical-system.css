@@ -2663,4 +2663,328 @@ body.elderly-mode .elderly-action-bar {
     }
 }
 
+/* ==========================================================================
+   DAILY HEALTH MONITORING & CHARTS (SWASTHAI SYSTEM)
+   ========================================================================== */
+.daily-health-section {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.daily-health-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1.5px solid #f1f5f9;
+}
+
+.vitals-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.vital-summary-card {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.vital-summary-card:hover {
+    border-color: #16a34a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+}
+
+.vital-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.vital-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+.vital-card-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vital-card-value {
+    font-size: 20px;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.vital-card-unit {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-left: 2px;
+}
+
+.vital-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+}
+
+/* Badges for vitals */
+.vital-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.vital-badge-normal {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.vital-badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.vital-badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    animation: pulseSubtle 2s infinite;
+}
+
+.vital-badge-info {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+@keyframes pulseSubtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}
+
+/* Chart Container & Toolbar */
+.health-chart-wrapper {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+}
+
+.chart-controls-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.chart-metric-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chart-tab-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chart-tab-btn:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.chart-tab-btn.active {
+    background: #1f7a57;
+    border-color: #1f7a57;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(31, 122, 87, 0.25);
+}
+
+.chart-range-pills {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chart-range-btn {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chart-range-btn:hover {
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+.chart-range-btn.active {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #ffffff;
+}
+
+.canvas-container-responsive {
+    position: relative;
+    height: 280px;
+    width: 100%;
+}
+
+/* Readings Table */
+.health-table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1.5px solid #e2e8f0;
+    background: #ffffff;
+}
+
+.health-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.health-table thead th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 800;
+    padding: 12px 14px;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.health-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+}
+
+.health-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.health-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.health-table tbody td {
+    padding: 12px 14px;
+    color: #1e293b;
+    vertical-align: middle;
+}
+
+.table-action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    transition: all 0.15s ease;
+}
+
+.table-action-btn.edit-btn {
+    color: #2563eb;
+}
+.table-action-btn.edit-btn:hover {
+    background: #eff6ff;
+}
+
+.table-action-btn.delete-btn {
+    color: #dc2626;
+}
+.table-action-btn.delete-btn:hover {
+    background: #fee2e2;
+}
+
+.vitals-empty-state {
+    text-align: center;
+    padding: 36px 20px;
+    color: #64748b;
+}
+
+.vitals-empty-state i {
+    font-size: 40px;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .daily-health-section {
+        padding: 16px;
+    }
+    .chart-controls-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .chart-metric-pills {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+    .canvas-container-responsive {
+        height: 220px;
+    }
+}
+
+
 

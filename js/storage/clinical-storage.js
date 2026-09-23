@@ -14,7 +14,8 @@ const ClinicalStorage = (() => {
         USERS: "ayushUsers",
         CURRENT_USER: "ayushCurrentUser",
         ACTIVE_ROLE: "ayushActiveRole", // 'practitioner' | 'patient' | 'admin'
-        CONSULTATION_NOTES: "ayushConsultationNotes"
+        CONSULTATION_NOTES: "ayushConsultationNotes",
+        HEALTH_READINGS: "ayushHealthReadings"
     };
 
     // Realistic seed patients
@@ -594,6 +595,138 @@ const ClinicalStorage = (() => {
         }
     ];
 
+    // Seed realistic daily health monitoring readings
+    const DEFAULT_HEALTH_READINGS = [
+        {
+            id: "vital-demo-01",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-03",
+            time: "08:30",
+            systolic: 138,
+            diastolic: 88,
+            bloodSugar: 124,
+            heartRate: 84,
+            temperature: 99.8,
+            spo2: 97,
+            weight: 78.2,
+            notes: "Mild abdominal discomfort remaining in the morning. Took Amlodipine.",
+            createdRole: "patient",
+            createdAt: "2026-09-03T08:30:00.000Z"
+        },
+        {
+            id: "vital-demo-02",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-02",
+            time: "19:45",
+            systolic: 142,
+            diastolic: 92,
+            bloodSugar: 138,
+            heartRate: 88,
+            temperature: 99.6,
+            spo2: 96,
+            weight: 78.4,
+            notes: "Feverish feeling, stomach pain increased after dinner.",
+            createdRole: "patient",
+            createdAt: "2026-09-02T19:45:00.000Z"
+        },
+        {
+            id: "vital-demo-03",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-01",
+            time: "08:15",
+            systolic: 134,
+            diastolic: 86,
+            bloodSugar: 118,
+            heartRate: 76,
+            temperature: 98.6,
+            spo2: 98,
+            weight: 78.5,
+            notes: "Morning routine reading. Feeling normal.",
+            createdRole: "patient",
+            createdAt: "2026-09-01T08:15:00.000Z"
+        },
+        {
+            id: "vital-demo-04",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-08-30",
+            time: "08:00",
+            systolic: 130,
+            diastolic: 84,
+            bloodSugar: 112,
+            heartRate: 74,
+            temperature: 98.4,
+            spo2: 98,
+            weight: 78.6,
+            notes: "Post morning walk vitals.",
+            createdRole: "patient",
+            createdAt: "2026-08-30T08:00:00.000Z"
+        },
+        {
+            id: "vital-demo-05",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-08-28",
+            time: "08:20",
+            systolic: 136,
+            diastolic: 88,
+            bloodSugar: 122,
+            heartRate: 78,
+            temperature: 98.5,
+            spo2: 98,
+            weight: 78.8,
+            notes: "Routine check.",
+            createdRole: "patient",
+            createdAt: "2026-08-28T08:20:00.000Z"
+        },
+        {
+            id: "vital-demo-06",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-08-25",
+            time: "08:10",
+            systolic: 132,
+            diastolic: 85,
+            bloodSugar: 115,
+            heartRate: 72,
+            temperature: 98.6,
+            spo2: 99,
+            weight: 79.0,
+            notes: "All vitals stable.",
+            createdRole: "patient",
+            createdAt: "2026-08-25T08:10:00.000Z"
+        },
+        {
+            id: "vital-demo-07",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-08-20",
+            time: "08:30",
+            systolic: 135,
+            diastolic: 86,
+            bloodSugar: 120,
+            heartRate: 75,
+            temperature: 98.4,
+            spo2: 98,
+            weight: 79.2,
+            notes: "Starting health log on SwasthAI.",
+            createdRole: "patient",
+            createdAt: "2026-08-20T08:30:00.000Z"
+        },
+        {
+            id: "vital-demo-08",
+            patientId: "AYU-2026-001",
+            date: "2026-09-02",
+            time: "09:00",
+            systolic: 118,
+            diastolic: 78,
+            bloodSugar: 92,
+            heartRate: 70,
+            temperature: 98.6,
+            spo2: 99,
+            weight: 68.5,
+            notes: "Morning vitals normal.",
+            createdRole: "patient",
+            createdAt: "2026-09-02T09:00:00.000Z"
+        }
+    ];
+
     // Seed audit logs
     const DEFAULT_AUDIT_LOGS = [
         {
@@ -745,6 +878,220 @@ const ClinicalStorage = (() => {
         }
     ];
 
+    /* =========================================================================
+       DEFAULT HEALTH READINGS (DAILY HEALTH MONITORING SEED DATA)
+       ========================================================================= */
+    const DEFAULT_HEALTH_READINGS = [
+        {
+            id: "vital-demo-01",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-14",
+            time: "08:30",
+            systolic: 146,
+            diastolic: 94,
+            bloodSugar: 158,
+            heartRate: 86,
+            temperature: 98.6,
+            spo2: 97,
+            weight: 73.2,
+            notes: "Morning headache and neck stiffness after poor sleep.",
+            createdRole: "patient",
+            createdAt: "2026-09-14T08:30:00.000Z"
+        },
+        {
+            id: "vital-demo-02",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-15",
+            time: "09:00",
+            systolic: 142,
+            diastolic: 90,
+            bloodSugar: 145,
+            heartRate: 82,
+            temperature: 98.4,
+            spo2: 97,
+            weight: 73.0,
+            notes: "Taking prescribed medication regularly.",
+            createdRole: "patient",
+            createdAt: "2026-09-15T09:00:00.000Z"
+        },
+        {
+            id: "vital-demo-03",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-16",
+            time: "08:15",
+            systolic: 138,
+            diastolic: 88,
+            bloodSugar: 132,
+            heartRate: 78,
+            temperature: 98.6,
+            spo2: 98,
+            weight: 72.8,
+            notes: "Light 20-minute morning walk done.",
+            createdRole: "patient",
+            createdAt: "2026-09-16T08:15:00.000Z"
+        },
+        {
+            id: "vital-demo-04",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-17",
+            time: "08:45",
+            systolic: 134,
+            diastolic: 86,
+            bloodSugar: 124,
+            heartRate: 76,
+            temperature: 98.7,
+            spo2: 98,
+            weight: 72.5,
+            notes: "Low salt diet followed, reduced stress.",
+            createdRole: "patient",
+            createdAt: "2026-09-17T08:45:00.000Z"
+        },
+        {
+            id: "vital-demo-05",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-18",
+            time: "08:30",
+            systolic: 130,
+            diastolic: 84,
+            bloodSugar: 118,
+            heartRate: 75,
+            temperature: 98.4,
+            spo2: 98,
+            weight: 72.4,
+            notes: "Blood pressure gradually improving.",
+            createdRole: "patient",
+            createdAt: "2026-09-18T08:30:00.000Z"
+        },
+        {
+            id: "vital-demo-06",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-19",
+            time: "09:10",
+            systolic: 128,
+            diastolic: 82,
+            bloodSugar: 112,
+            heartRate: 74,
+            temperature: 98.5,
+            spo2: 99,
+            weight: 72.2,
+            notes: "Feeling energetic, headache resolved.",
+            createdRole: "patient",
+            createdAt: "2026-09-19T09:10:00.000Z"
+        },
+        {
+            id: "vital-demo-07",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-20",
+            time: "08:30",
+            systolic: 126,
+            diastolic: 82,
+            bloodSugar: 108,
+            heartRate: 72,
+            temperature: 98.6,
+            spo2: 98,
+            weight: 72.0,
+            notes: "Normal morning reading. Restful sleep.",
+            createdRole: "patient",
+            createdAt: "2026-09-20T08:30:00.000Z"
+        },
+        {
+            id: "vital-demo-08",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-21",
+            time: "08:15",
+            systolic: 124,
+            diastolic: 80,
+            bloodSugar: 104,
+            heartRate: 70,
+            temperature: 98.4,
+            spo2: 99,
+            weight: 71.9,
+            notes: "Fasting blood sugar down near normal target.",
+            createdRole: "patient",
+            createdAt: "2026-09-21T08:15:00.000Z"
+        },
+        {
+            id: "vital-demo-09",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-22",
+            time: "08:40",
+            systolic: 122,
+            diastolic: 80,
+            bloodSugar: 98,
+            heartRate: 72,
+            temperature: 98.6,
+            spo2: 98,
+            weight: 71.8,
+            notes: "Vitals stable, feeling comfortable.",
+            createdRole: "patient",
+            createdAt: "2026-09-22T08:40:00.000Z"
+        },
+        {
+            id: "vital-demo-10",
+            patientId: "AYU-2026-DEMO",
+            date: "2026-09-23",
+            time: "08:30",
+            systolic: 120,
+            diastolic: 78,
+            bloodSugar: 96,
+            heartRate: 72,
+            temperature: 98.4,
+            spo2: 99,
+            weight: 71.6,
+            notes: "All parameters in target range today.",
+            createdRole: "patient",
+            createdAt: "2026-09-23T08:30:00.000Z"
+        },
+        {
+            id: "vital-demo-11",
+            patientId: "AYU-2026-001",
+            date: "2026-09-21",
+            time: "09:00",
+            systolic: 118,
+            diastolic: 76,
+            bloodSugar: 92,
+            heartRate: 68,
+            temperature: 98.4,
+            spo2: 99,
+            weight: 68.0,
+            notes: "Baseline checkup.",
+            createdRole: "patient",
+            createdAt: "2026-09-21T09:00:00.000Z"
+        },
+        {
+            id: "vital-demo-12",
+            patientId: "AYU-2026-001",
+            date: "2026-09-22",
+            time: "08:30",
+            systolic: 120,
+            diastolic: 78,
+            bloodSugar: 95,
+            heartRate: 70,
+            temperature: 98.6,
+            spo2: 99,
+            weight: 68.2,
+            notes: "Morning routine reading.",
+            createdRole: "patient",
+            createdAt: "2026-09-22T08:30:00.000Z"
+        },
+        {
+            id: "vital-demo-13",
+            patientId: "AYU-2026-001",
+            date: "2026-09-23",
+            time: "08:45",
+            systolic: 116,
+            diastolic: 74,
+            bloodSugar: 90,
+            heartRate: 66,
+            temperature: 98.2,
+            spo2: 100,
+            weight: 68.0,
+            notes: "All vitals in optimal range.",
+            createdRole: "patient",
+            createdAt: "2026-09-23T08:45:00.000Z"
+        }
+    ];
+
     /* Initialization */
     function initialize() {
         if (!localStorage.getItem(KEYS.PATIENTS)) {
@@ -767,6 +1114,9 @@ const ClinicalStorage = (() => {
         }
         if (!localStorage.getItem(KEYS.CONSULTATION_NOTES)) {
             localStorage.setItem(KEYS.CONSULTATION_NOTES, JSON.stringify(DEFAULT_CONSULTATION_NOTES));
+        }
+        if (!localStorage.getItem(KEYS.HEALTH_READINGS)) {
+            localStorage.setItem(KEYS.HEALTH_READINGS, JSON.stringify(DEFAULT_HEALTH_READINGS));
         }
     }
 
@@ -936,7 +1286,8 @@ const ClinicalStorage = (() => {
             timeline,
             followups,
             pastDoctorRecords: patient.pastDoctorRecords || [],
-            patientReportedDiseases: patient.patientReportedDiseases || []
+            patientReportedDiseases: patient.patientReportedDiseases || [],
+            healthReadings: getHealthReadings(patient.id)
         };
     }
 
@@ -1320,6 +1671,330 @@ const ClinicalStorage = (() => {
         return true;
     }
 
+    /* =========================================================================
+       DAILY HEALTH MONITORING METHODS
+       ========================================================================= */
+    function evaluateVitals(reading) {
+        if (!reading) return {};
+        const evalResult = {
+            bp: { status: "normal", label: "Normal", badgeClass: "badge-normal", details: "Normal BP (<120/80)" },
+            bloodSugar: { status: "normal", label: "Normal", badgeClass: "badge-normal", details: "Normal Sugar (70-99 mg/dL)" },
+            heartRate: { status: "normal", label: "Normal", badgeClass: "badge-normal", details: "Normal (60-100 bpm)" },
+            temperature: { status: "normal", label: "Normal", badgeClass: "badge-normal", details: "Normal (97-99°F)" },
+            spo2: { status: "normal", label: "Normal", badgeClass: "badge-normal", details: "Optimal (≥95%)" },
+            isAbnormal: false,
+            abnormalAlerts: []
+        };
+
+        // BP
+        const sys = Number(reading.systolic);
+        const dia = Number(reading.diastolic);
+        if (!isNaN(sys) && !isNaN(dia) && sys > 0 && dia > 0) {
+            if (sys >= 140 || dia >= 90) {
+                evalResult.bp = { status: "danger", label: "Stage 2 High", badgeClass: "badge-alert", details: "High BP (Stage 2: ≥140/90 mmHg)" };
+                evalResult.isAbnormal = true;
+                evalResult.abnormalAlerts.push(`High BP: ${sys}/${dia} mmHg`);
+            } else if (sys >= 130 || dia >= 80) {
+                evalResult.bp = { status: "warning", label: "Stage 1 High", badgeClass: "badge-warning", details: "Stage 1 BP (130-139 / 80-89 mmHg)" };
+                evalResult.isAbnormal = true;
+                evalResult.abnormalAlerts.push(`Stage 1 BP: ${sys}/${dia} mmHg`);
+            } else if (sys >= 120 && dia < 80) {
+                evalResult.bp = { status: "info", label: "Elevated", badgeClass: "badge-info", details: "Elevated BP (120-129 / <80 mmHg)" };
+            } else if (sys < 90 || dia < 60) {
+                evalResult.bp = { status: "danger", label: "Low BP", badgeClass: "badge-alert", details: "Hypotension (<90/60 mmHg)" };
+                evalResult.isAbnormal = true;
+                evalResult.abnormalAlerts.push(`Low BP: ${sys}/${dia} mmHg`);
+            }
+        }
+
+        // Blood Sugar
+        const sugar = Number(reading.bloodSugar);
+        if (!isNaN(sugar) && sugar > 0) {
+            if (sugar >= 140) {
+                evalResult.bloodSugar = { status: "danger", label: "High", badgeClass: "badge-alert", details: "High Sugar (≥140 mg/dL)" };
+                evalResult.isAbnormal = true;
+                evalResult.abnormalAlerts.push(`High Blood Sugar: ${sugar} mg/dL`);
+            } else if (sugar >= 100) {
+                evalResult.bloodSugar = { status: "warning", label: "Elevated", badgeClass: "badge-warning", details: "Elevated Sugar (100-139 mg/dL)" };
+            } else if (sugar < 70) {
+                evalResult.bloodSugar = { status: "danger", label: "Low (Hypo)", badgeClass: "badge-alert", details: "Hypoglycemia (<70 mg/dL)" };
+                evalResult.isAbnormal = true;
+                evalResult.abnormalAlerts.push(`Low Blood Sugar: ${sugar} mg/dL`);
+            }
+        }
+
+        // Heart Rate
+        const hr = Number(reading.heartRate);
+        if (!isNaN(hr) && hr > 0) {
+            if (hr > 100) {
+                evalResult.heartRate = { status: "danger", label: "Tachycardia", badgeClass: "badge-alert", details: "Rapid Heart Rate (>100 bpm)" };
+                evalResult.isAbnormal = true;
+                evalResult.abnormalAlerts.push(`Tachycardia: ${hr} bpm`);
+            } else if (hr < 60) {
+                evalResult.heartRate = { status: "warning", label: "Bradycardia", badgeClass: "badge-warning", details: "Slow Heart Rate (<60 bpm)" };
+            }
+        }
+
+        // Temperature
+        const temp = Number(reading.temperature);
+        if (!isNaN(temp) && temp > 0) {
+            if (temp > 100.4) {
+                evalResult.temperature = { status: "danger", label: "High Fever", badgeClass: "badge-alert", details: "High Grade Fever (>100.4°F)" };
+                evalResult.isAbnormal = true;
+                evalResult.abnormalAlerts.push(`High Fever: ${temp}°F`);
+            } else if (temp > 99.0) {
+                evalResult.temperature = { status: "warning", label: "Mild Fever", badgeClass: "badge-warning", details: "Mild Fever (99.1-100.4°F)" };
+                evalResult.isAbnormal = true;
+                evalResult.abnormalAlerts.push(`Mild Fever: ${temp}°F`);
+            } else if (temp < 96.0) {
+                evalResult.temperature = { status: "warning", label: "Low Temp", badgeClass: "badge-warning", details: "Hypothermia (<96°F)" };
+            }
+        }
+
+        // SpO2
+        const spo2 = Number(reading.spo2);
+        if (!isNaN(spo2) && spo2 > 0) {
+            if (spo2 < 90) {
+                evalResult.spo2 = { status: "danger", label: "Critical (<90%)", badgeClass: "badge-alert", details: "Critical Hypoxemia (<90%)" };
+                evalResult.isAbnormal = true;
+                evalResult.abnormalAlerts.push(`Critical SpO2: ${spo2}%`);
+            } else if (spo2 < 95) {
+                evalResult.spo2 = { status: "warning", label: "Low (90-94%)", badgeClass: "badge-warning", details: "Low Oxygen Saturation (90-94%)" };
+                evalResult.isAbnormal = true;
+                evalResult.abnormalAlerts.push(`Low SpO2: ${spo2}%`);
+            }
+        }
+
+        return evalResult;
+    }
+
+    function getHealthReadings(patientId, options = {}) {
+        try {
+            let all = JSON.parse(localStorage.getItem(KEYS.HEALTH_READINGS));
+            if (!all || !Array.isArray(all) || all.length === 0) {
+                all = DEFAULT_HEALTH_READINGS;
+                localStorage.setItem(KEYS.HEALTH_READINGS, JSON.stringify(all));
+            }
+
+            let filtered = all;
+            if (patientId) {
+                filtered = filtered.filter(r => r.patientId === patientId);
+            }
+
+            // Date filtering: days: 7 | 30 | 'all'
+            if (options.days && options.days !== "all") {
+                const numDays = parseInt(options.days, 10);
+                if (!isNaN(numDays) && numDays > 0) {
+                    const cutoff = new Date();
+                    cutoff.setDate(cutoff.getDate() - numDays);
+                    const cutoffStr = cutoff.toISOString().split("T")[0];
+                    filtered = filtered.filter(r => (r.date || "") >= cutoffStr);
+                }
+            }
+
+            if (options.startDate) {
+                filtered = filtered.filter(r => (r.date || "") >= options.startDate);
+            }
+            if (options.endDate) {
+                filtered = filtered.filter(r => (r.date || "") <= options.endDate);
+            }
+
+            // Sort newest readings first (date descending, then time descending)
+            filtered.sort((a, b) => {
+                const dtA = `${a.date || ''}T${a.time || '00:00'}`;
+                const dtB = `${b.date || ''}T${b.time || '00:00'}`;
+                return dtB.localeCompare(dtA);
+            });
+
+            return filtered;
+        } catch (e) {
+            console.error("Error fetching health readings", e);
+            return [];
+        }
+    }
+
+    function getHealthReadingById(id) {
+        if (!id) return null;
+        const readings = getHealthReadings();
+        return readings.find(r => r.id === id) || null;
+    }
+
+    function saveHealthReading(readingData) {
+        if (!readingData || !readingData.patientId) {
+            return { success: false, message: "Patient ID is required." };
+        }
+
+        // Authorization check: if patient role, must be logged-in patient
+        const activeRole = getActiveRole();
+        const activePatientId = localStorage.getItem("swasthai_active_patient_id");
+        if (activeRole === "patient" && activePatientId && readingData.patientId !== activePatientId) {
+            return { success: false, message: "Unauthorized: Patients can only submit readings for their own account." };
+        }
+
+        // Required field validation
+        if (!readingData.date) {
+            return { success: false, message: "Date is required." };
+        }
+        if (!readingData.time) {
+            return { success: false, message: "Time is required." };
+        }
+
+        const sys = (readingData.systolic !== "" && readingData.systolic !== null && readingData.systolic !== undefined) ? Number(readingData.systolic) : null;
+        const dia = (readingData.diastolic !== "" && readingData.diastolic !== null && readingData.diastolic !== undefined) ? Number(readingData.diastolic) : null;
+        const sugar = (readingData.bloodSugar !== "" && readingData.bloodSugar !== null && readingData.bloodSugar !== undefined) ? Number(readingData.bloodSugar) : null;
+        const hr = (readingData.heartRate !== "" && readingData.heartRate !== null && readingData.heartRate !== undefined) ? Number(readingData.heartRate) : null;
+        const temp = (readingData.temperature !== "" && readingData.temperature !== null && readingData.temperature !== undefined) ? Number(readingData.temperature) : null;
+        const spo2 = (readingData.spo2 !== "" && readingData.spo2 !== null && readingData.spo2 !== undefined) ? Number(readingData.spo2) : null;
+        const wt = (readingData.weight !== "" && readingData.weight !== null && readingData.weight !== undefined) ? Number(readingData.weight) : null;
+
+        // At least one vital reading required
+        if (sys === null && dia === null && sugar === null && hr === null && temp === null && spo2 === null && wt === null) {
+            return { success: false, message: "Please enter at least one health measurement (BP, Sugar, Heart Rate, etc.)." };
+        }
+
+        // Logical numeric range validations
+        if (sys !== null && (isNaN(sys) || sys < 40 || sys > 300)) {
+            return { success: false, message: "Systolic BP must be between 40 and 300 mmHg." };
+        }
+        if (dia !== null && (isNaN(dia) || dia < 30 || dia > 200)) {
+            return { success: false, message: "Diastolic BP must be between 30 and 200 mmHg." };
+        }
+        if (sugar !== null && (isNaN(sugar) || sugar < 20 || sugar > 800)) {
+            return { success: false, message: "Blood Sugar must be between 20 and 800 mg/dL." };
+        }
+        if (hr !== null && (isNaN(hr) || hr < 20 || hr > 250)) {
+            return { success: false, message: "Heart Rate must be between 20 and 250 bpm." };
+        }
+        if (temp !== null && (isNaN(temp) || temp < 85 || temp > 115)) {
+            return { success: false, message: "Temperature must be between 85 and 115 °F." };
+        }
+        if (spo2 !== null && (isNaN(spo2) || spo2 < 50 || spo2 > 100)) {
+            return { success: false, message: "SpO2 must be between 50% and 100%." };
+        }
+        if (wt !== null && (isNaN(wt) || wt < 1 || wt > 400)) {
+            return { success: false, message: "Weight must be between 1 and 400 kg." };
+        }
+
+        let all = JSON.parse(localStorage.getItem(KEYS.HEALTH_READINGS));
+        if (!all || !Array.isArray(all)) {
+            all = [...DEFAULT_HEALTH_READINGS];
+        }
+
+        let isUpdate = false;
+        let record = null;
+
+        if (readingData.id) {
+            const index = all.findIndex(r => r.id === readingData.id);
+            if (index !== -1) {
+                isUpdate = true;
+                record = {
+                    ...all[index],
+                    date: readingData.date,
+                    time: readingData.time,
+                    systolic: sys,
+                    diastolic: dia,
+                    bloodSugar: sugar,
+                    heartRate: hr,
+                    temperature: temp,
+                    spo2: spo2,
+                    weight: wt,
+                    notes: (readingData.notes || "").trim(),
+                    updatedAt: new Date().toISOString()
+                };
+                all[index] = record;
+            }
+        }
+
+        if (!isUpdate) {
+            record = {
+                id: "vital-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+                patientId: readingData.patientId,
+                date: readingData.date,
+                time: readingData.time,
+                systolic: sys,
+                diastolic: dia,
+                bloodSugar: sugar,
+                heartRate: hr,
+                temperature: temp,
+                spo2: spo2,
+                weight: wt,
+                notes: (readingData.notes || "").trim(),
+                createdRole: activeRole || "patient",
+                createdAt: new Date().toISOString()
+            };
+            all.unshift(record);
+        }
+
+        localStorage.setItem(KEYS.HEALTH_READINGS, JSON.stringify(all));
+
+        // Add timeline event
+        const patient = getPatientById(readingData.patientId);
+        const evalInfo = evaluateVitals(record);
+        const bpStr = (sys && dia) ? `BP: ${sys}/${dia} mmHg` : "";
+        const sugarStr = sugar ? `Sugar: ${sugar} mg/dL` : "";
+        const hrStr = hr ? `HR: ${hr} bpm` : "";
+        const spo2Str = spo2 ? `SpO2: ${spo2}%` : "";
+        const summaryStr = [bpStr, sugarStr, hrStr, spo2Str].filter(Boolean).join(", ") || "Daily Vitals";
+
+        addTimelineEvent({
+            patientId: readingData.patientId,
+            date: record.date,
+            category: "Vitals",
+            title: isUpdate ? `Updated Health Reading (${record.time})` : `Daily Health Reading Logged (${record.time})`,
+            details: `${summaryStr}. ${evalInfo.isAbnormal ? '⚠️ Alerts: ' + evalInfo.abnormalAlerts.join('; ') : 'Parameters within normal target.'}`,
+            icon: "fa-heart-pulse",
+            tag: evalInfo.isAbnormal ? "Abnormal Vitals" : "Daily Health"
+        });
+
+        logAudit(
+            isUpdate ? "Updated Daily Health Reading" : "Logged Daily Health Reading",
+            activeRole || "Patient",
+            "Health Readings",
+            record.id,
+            `Patient: ${patient ? patient.fullName : readingData.patientId}. ${summaryStr}`
+        );
+
+        return { success: true, reading: record, isUpdate };
+    }
+
+    function deleteHealthReading(id) {
+        if (!id) return { success: false, message: "Reading ID required." };
+        let all = JSON.parse(localStorage.getItem(KEYS.HEALTH_READINGS)) || DEFAULT_HEALTH_READINGS;
+        const target = all.find(r => r.id === id);
+        if (!target) return { success: false, message: "Reading not found." };
+
+        all = all.filter(r => r.id !== id);
+        localStorage.setItem(KEYS.HEALTH_READINGS, JSON.stringify(all));
+
+        logAudit("Deleted Daily Health Reading", getActiveRole(), "Health Readings", id, `Reading on ${target.date} ${target.time} deleted.`);
+        return { success: true };
+    }
+
+    function getHealthSummary(patientId) {
+        const readings = getHealthReadings(patientId);
+        if (readings.length === 0) {
+            return {
+                hasData: false,
+                latest: null,
+                previous: null,
+                evaluation: null,
+                totalReadings: 0
+            };
+        }
+
+        const latest = readings[0];
+        const previous = readings.length > 1 ? readings[1] : null;
+        const evaluation = evaluateVitals(latest);
+
+        return {
+            hasData: true,
+            latest,
+            previous,
+            evaluation,
+            totalReadings: readings.length
+        };
+    }
+
     return {
         KEYS,
         getPatients,
@@ -1352,7 +2027,13 @@ const ClinicalStorage = (() => {
         getConsultationNotes,
         getConsultationNoteById,
         saveConsultationNote,
-        deleteConsultationNote
+        deleteConsultationNote,
+        getHealthReadings,
+        getHealthReadingById,
+        saveHealthReading,
+        deleteHealthReading,
+        evaluateVitals,
+        getHealthSummary
     };
 })();
 

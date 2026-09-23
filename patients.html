@@ -18,6 +18,8 @@
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/clinical-system.css">
+    <!-- Chart.js for health trend charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 
@@ -672,6 +674,21 @@
                         <i class="fa-solid fa-virus"></i> Patient-Reported Diseases & Current Symptoms (मरीज़ द्वारा बताई गई बीमारी)
                     </h4>
                     <div id="dossierReportedDiseases" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Daily Health Monitoring & Recent Vitals -->
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4 style="font-size: 14px; font-weight: 800; color: #1f7a57; margin: 0;">
+                            <i class="fa-solid fa-heart-pulse"></i> Daily Health Monitoring & Recent Vitals (दैनिक स्वास्थ्य चार्ट)
+                        </h4>
+                        <a id="dossierReviewVitalsLink" href="practitioner-review.html" style="font-size: 12px; color: #1f7a57; font-weight: 700; text-decoration: none;">
+                            View Trend Charts <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div id="dossierHealthVitalsContainer">
                         <!-- Injected dynamically -->
                     </div>
                 </div>

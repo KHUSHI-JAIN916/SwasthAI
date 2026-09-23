@@ -194,7 +194,19 @@ const I18nService = (() => {
             viewNotesBtn: "View Notes",
             statusReady: "Ready",
             statusRecording: "Recording",
-            statusPaused: "Paused"
+            statusPaused: "Paused",
+            // Daily Health Chart
+            dailyHealthChartTitle: "Daily Health Chart",
+            dailyHealthChartSub: "Record and track your daily vitals: Blood Pressure, Blood Sugar, Heart Rate & more.",
+            addTodayReadingBtn: "Add Today's Reading",
+            readingHistory: "Reading History",
+            bloodPressure: "Blood Pressure",
+            bloodSugar: "Blood Sugar",
+            heartRate: "Heart Rate",
+            temperature: "Temperature",
+            spo2: "SpO₂ (%)",
+            weight: "Weight (kg)",
+            vitalsNotes: "Notes"
         },
         hi: {
             appName: "स्वास्थ AI",
@@ -375,7 +387,19 @@ const I18nService = (() => {
             viewNotesBtn: "नोट्स देखें",
             statusReady: "तैयार",
             statusRecording: "रिकॉर्डिंग चालू",
-            statusPaused: "रुका हुआ"
+            statusPaused: "रुका हुआ",
+            // Daily Health Chart
+            dailyHealthChartTitle: "दैनिक स्वास्थ्य चार्ट",
+            dailyHealthChartSub: "अपने दैनिक स्वास्थ्य माप दर्ज करें: ब्लड प्रेशर, ब्लड शुगर, पल्स व ऑक्सीजन स्तर।",
+            addTodayReadingBtn: "+ आज का स्वास्थ्य माप जोड़ें",
+            readingHistory: "दैनिक माप इतिहास",
+            bloodPressure: "रक्तचाप (Blood Pressure)",
+            bloodSugar: "ब्लड शुगर (Blood Sugar)",
+            heartRate: "हृदय गति (Heart Rate)",
+            temperature: "तापमान (Temperature)",
+            spo2: "ऑक्सीजन स्तर (SpO₂)",
+            weight: "वज़न (Weight)",
+            vitalsNotes: "टिप्पणी (Notes)"
         },
         hinglish: {
             appName: "SWASTH AI",

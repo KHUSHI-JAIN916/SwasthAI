@@ -16,6 +16,8 @@
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/clinical-system.css">
+    <!-- Chart.js for health trend charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -170,6 +172,7 @@
                     <button class="sih-btn" id="tabTimelineBtn" style="color: #374151; background: #e5e7eb;">Clinical Timeline</button>
                     <button class="sih-btn" id="tabMedReconBtn" style="color: #374151; background: #e5e7eb;">Medication Reconciliation</button>
                     <button class="sih-btn" id="tabDocReportsBtn" style="color: #374151; background: #e5e7eb;">Lab Reports</button>
+                    <button class="sih-btn" id="tabHealthVitalsBtn" style="color: #374151; background: #e5e7eb;">Daily Health Monitoring</button>
                 </div>
                 <div>
                     <span style="font-size: 12px; color: #6b7280;">Caregiver Consent: <strong id="consentStatusLabel" style="color: #16a34a;">GRANTED (Meena Patel)</strong></span>
@@ -417,6 +420,85 @@
 
                     <div id="reportComparisonContainer">
                         <!-- Populated dynamically with LFT comparison table -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: DAILY HEALTH MONITORING -->
+            <div id="healthVitalsSection" style="display: none;">
+                <div class="case-card" style="padding: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <div>
+                            <h3 style="font-size: 18px; font-weight: 700; color: #111827;">Daily Health Monitoring</h3>
+                            <p style="font-size: 13px; color: #6b7280;">View and track patient's daily vitals and health metrics.</p>
+                        </div>
+                    </div>
+
+                    <!-- Trend Chart Area -->
+                    <div class="health-chart-wrapper" id="doctorHealthChartWrapper">
+                        <div class="chart-controls-toolbar">
+                            <!-- Metric Tabs -->
+                            <div class="chart-metric-pills" id="docChartMetricTabs">
+                                <button class="chart-tab-btn active" data-metric="bp" onclick="PractitionerReview.switchHealthChartMetric('bp', this)">
+                                    <i class="fa-solid fa-heart-pulse"></i> Blood Pressure
+                                </button>
+                                <button class="chart-tab-btn" data-metric="bloodSugar" onclick="PractitionerReview.switchHealthChartMetric('bloodSugar', this)">
+                                    <i class="fa-solid fa-droplet"></i> Blood Sugar
+                                </button>
+                                <button class="chart-tab-btn" data-metric="heartRate" onclick="PractitionerReview.switchHealthChartMetric('heartRate', this)">
+                                    <i class="fa-solid fa-stethoscope"></i> Heart Rate
+                                </button>
+                                <button class="chart-tab-btn" data-metric="spo2" onclick="PractitionerReview.switchHealthChartMetric('spo2', this)">
+                                    <i class="fa-solid fa-lungs"></i> SpO₂
+                                </button>
+                                <button class="chart-tab-btn" data-metric="weight" onclick="PractitionerReview.switchHealthChartMetric('weight', this)">
+                                    <i class="fa-solid fa-weight-scale"></i> Weight
+                                </button>
+                            </div>
+                            <!-- Range Buttons -->
+                            <div class="chart-range-pills" id="docChartRangeBtns">
+                                <button class="chart-range-btn" data-days="7" onclick="PractitionerReview.switchHealthChartRange(7, this)">7 Days</button>
+                                <button class="chart-range-btn active" data-days="30" onclick="PractitionerReview.switchHealthChartRange(30, this)">30 Days</button>
+                                <button class="chart-range-btn" data-days="all" onclick="PractitionerReview.switchHealthChartRange('all', this)">All</button>
+                                <span style="font-size: 11px; color: #94a3b8; margin-left: 4px;">Custom:</span>
+                                <input type="date" id="docChartFromDate" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 8px; font-size: 11px; color: #475569;">
+                                <input type="date" id="docChartToDate" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 8px; font-size: 11px; color: #475569;">
+                                <button class="chart-range-btn" onclick="PractitionerReview.applyHealthChartCustomRange()" style="background: #1f7a57; color: white; border-color: #1f7a57;">Apply</button>
+                            </div>
+                        </div>
+                        <div class="canvas-container-responsive">
+                            <canvas id="doctorHealthChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Readings History Table -->
+                    <div style="margin-top: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #1e293b;">
+                                <i class="fa-solid fa-table-list" style="color: #1f7a57;"></i> Reading History
+                            </h4>
+                            <span id="docReadingsCountBadge" style="font-size: 12px; color: #64748b; background: #f1f5f9; padding: 3px 10px; border-radius: 12px; font-weight: 700;"></span>
+                        </div>
+                        <div class="health-table-responsive">
+                            <table class="health-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>BP (mmHg)</th>
+                                        <th>Sugar (mg/dL)</th>
+                                        <th>HR (bpm)</th>
+                                        <th>Temp (°F)</th>
+                                        <th>SpO₂ (%)</th>
+                                        <th>Weight (kg)</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="docHealthReadingsTableBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

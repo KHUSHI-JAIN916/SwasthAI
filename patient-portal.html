@@ -18,6 +18,9 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/clinical-system.css">
 
+    <!-- Chart.js for health trend charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         .patient-portal-header {
             background: #ffffff;
@@ -516,7 +519,99 @@
             </div>
         </div>
 
-        <!-- ================= 6. EMERGENCY CALL BANNER ================= -->
+        <!-- ================= 6. DAILY HEALTH MONITORING CHART ================= -->
+        <section class="daily-health-section" id="dailyHealthSection">
+
+            <!-- Section Header -->
+            <div class="daily-health-header">
+                <div>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 900; color: #1f7a57;">
+                        <i class="fa-solid fa-heart-pulse"></i> <span data-i18n="dailyHealthChartTitle">Daily Health Chart</span>
+                        <span style="font-size: 12px; color: #64748b; font-weight: 600; margin-left: 8px;">(दैनिक स्वास्थ्य चार्ट)</span>
+                    </h3>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;" data-i18n="dailyHealthChartSub">Record and track your daily vitals: Blood Pressure, Blood Sugar, Heart Rate &amp; more.</p>
+                </div>
+                <button type="button" id="addReadingBtn" onclick="PatientPortal.openAddReadingModal()"
+                    style="background: #1f7a57; color: white; border: none; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;">
+                    <i class="fa-solid fa-plus"></i> <span data-i18n="addTodayReadingBtn">Add Today's Reading</span>
+                </button>
+            </div>
+
+            <!-- Latest Vitals Summary Cards -->
+            <div id="vitalsSummaryGrid" class="vitals-summary-grid">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Trend Chart Area -->
+            <div class="health-chart-wrapper" id="healthChartWrapper">
+                <div class="chart-controls-toolbar">
+                    <!-- Metric Tabs -->
+                    <div class="chart-metric-pills" id="chartMetricTabs">
+                        <button class="chart-tab-btn active" data-metric="bp" onclick="PatientPortal.switchChartMetric('bp', this)">
+                            <i class="fa-solid fa-heart-pulse"></i> Blood Pressure
+                        </button>
+                        <button class="chart-tab-btn" data-metric="bloodSugar" onclick="PatientPortal.switchChartMetric('bloodSugar', this)">
+                            <i class="fa-solid fa-droplet"></i> Blood Sugar
+                        </button>
+                        <button class="chart-tab-btn" data-metric="heartRate" onclick="PatientPortal.switchChartMetric('heartRate', this)">
+                            <i class="fa-solid fa-stethoscope"></i> Heart Rate
+                        </button>
+                        <button class="chart-tab-btn" data-metric="spo2" onclick="PatientPortal.switchChartMetric('spo2', this)">
+                            <i class="fa-solid fa-lungs"></i> SpO₂
+                        </button>
+                        <button class="chart-tab-btn" data-metric="weight" onclick="PatientPortal.switchChartMetric('weight', this)">
+                            <i class="fa-solid fa-weight-scale"></i> Weight
+                        </button>
+                    </div>
+                    <!-- Range Buttons -->
+                    <div class="chart-range-pills" id="chartRangeBtns">
+                        <button class="chart-range-btn" data-days="7" onclick="PatientPortal.switchChartRange(7, this)">7 Days</button>
+                        <button class="chart-range-btn active" data-days="30" onclick="PatientPortal.switchChartRange(30, this)">30 Days</button>
+                        <button class="chart-range-btn" data-days="all" onclick="PatientPortal.switchChartRange('all', this)">All</button>
+                        <span style="font-size: 11px; color: #94a3b8; margin-left: 4px;">Custom:</span>
+                        <input type="date" id="chartFromDate" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 8px; font-size: 11px; color: #475569;">
+                        <input type="date" id="chartToDate" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 8px; font-size: 11px; color: #475569;">
+                        <button class="chart-range-btn" onclick="PatientPortal.applyCustomRange()" style="background: #1f7a57; color: white; border-color: #1f7a57;">Apply</button>
+                    </div>
+                </div>
+                <div class="canvas-container-responsive">
+                    <canvas id="patientHealthChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Readings History Table -->
+            <div style="margin-top: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #1e293b;">
+                        <i class="fa-solid fa-table-list" style="color: #1f7a57;"></i> Reading History
+                    </h4>
+                    <span id="readingsCountBadge" style="font-size: 12px; color: #64748b; background: #f1f5f9; padding: 3px 10px; border-radius: 12px; font-weight: 700;"></span>
+                </div>
+                <div class="health-table-responsive">
+                    <table class="health-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>BP (mmHg)</th>
+                                <th>Sugar (mg/dL)</th>
+                                <th>HR (bpm)</th>
+                                <th>Temp (°F)</th>
+                                <th>SpO₂ (%)</th>
+                                <th>Weight (kg)</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="healthReadingsTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 7. EMERGENCY CALL BANNER ================= -->
         <div style="background: #fef2f2; border: 2px solid #f87171; border-radius: 16px; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 30px;">
             <div style="display: flex; align-items: center; gap: 14px;">
                 <div style="background: #fee2e2; color: #dc2626; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
@@ -616,6 +711,93 @@
                     </div>
                     <button type="submit" style="width: 100%; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer;">
                         <i class="fa-solid fa-save"></i> <span data-i18n="modalSavePastRecordBtn">पुराना रिकॉर्ड सुरक्षित करें (Save Record)</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: ADD / EDIT HEALTH READING ================= -->
+    <div class="clinical-modal" id="addHealthReadingModal">
+        <div class="clinical-modal-content" style="max-width: 600px;">
+            <div class="clinical-modal-header">
+                <h3><i class="fa-solid fa-heart-pulse" style="color: #1f7a57;"></i> <span id="healthReadingModalTitle">Add Today's Health Reading</span></h3>
+                <button type="button" class="sih-close-btn" onclick="PatientPortal.closeAddReadingModal()">&times;</button>
+            </div>
+            <div class="clinical-modal-body">
+                <!-- Success message -->
+                <div id="healthReadingSuccessMsg" style="display:none; background: #dcfce7; border: 1.5px solid #86efac; border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; color: #166534; font-weight: 700; font-size: 13px;">
+                    <i class="fa-solid fa-circle-check"></i> <span id="healthReadingSuccessText">Reading saved successfully!</span>
+                </div>
+                <!-- Validation error -->
+                <div id="healthReadingErrorMsg" style="display:none; background: #fee2e2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; color: #991b1b; font-weight: 700; font-size: 13px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span id="healthReadingErrorText"></span>
+                </div>
+
+                <form id="addHealthReadingForm" onsubmit="PatientPortal.submitHealthReading(event)">
+                    <input type="hidden" id="editReadingId" value="">
+
+                    <!-- Date & Time Row -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                        <div>
+                            <label style="font-size: 13px; font-weight: 700; display: block; margin-bottom: 4px;">Date *</label>
+                            <input type="date" id="readingDate" required style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; font-weight: 700; display: block; margin-bottom: 4px;">Time *</label>
+                            <input type="time" id="readingTime" required style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <!-- Blood Pressure Row -->
+                    <div style="background: #fef3f2; border: 1px solid #fecaca; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+                        <label style="font-size: 13px; font-weight: 800; color: #991b1b; display: block; margin-bottom: 8px;">
+                            <i class="fa-solid fa-heart-pulse"></i> Blood Pressure (mmHg)
+                        </label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <label style="font-size: 11px; color: #64748b; font-weight: 700;">Systolic (upper)</label>
+                                <input type="number" id="readingSystolic" min="40" max="300" placeholder="e.g. 120" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #fca5a5; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; color: #64748b; font-weight: 700;">Diastolic (lower)</label>
+                                <input type="number" id="readingDiastolic" min="30" max="200" placeholder="e.g. 80" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #fca5a5; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other Vitals Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px;">
+                        <div>
+                            <label style="font-size: 13px; font-weight: 700; display: block; margin-bottom: 4px;"><i class="fa-solid fa-droplet" style="color: #2563eb;"></i> Blood Sugar (mg/dL)</label>
+                            <input type="number" id="readingBloodSugar" min="20" max="800" placeholder="e.g. 95" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; font-weight: 700; display: block; margin-bottom: 4px;"><i class="fa-solid fa-stethoscope" style="color: #7c3aed;"></i> Heart Rate (bpm)</label>
+                            <input type="number" id="readingHeartRate" min="20" max="250" placeholder="e.g. 72" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; font-weight: 700; display: block; margin-bottom: 4px;"><i class="fa-solid fa-thermometer" style="color: #ea580c;"></i> Temperature (°F)</label>
+                            <input type="number" id="readingTemperature" min="85" max="115" step="0.1" placeholder="e.g. 98.6" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; font-weight: 700; display: block; margin-bottom: 4px;"><i class="fa-solid fa-lungs" style="color: #0ea5e9;"></i> SpO₂ (%)</label>
+                            <input type="number" id="readingSpO2" min="50" max="100" placeholder="e.g. 98" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; font-weight: 700; display: block; margin-bottom: 4px;"><i class="fa-solid fa-weight-scale" style="color: #0f766e;"></i> Weight (kg)</label>
+                            <input type="number" id="readingWeight" min="1" max="400" step="0.1" placeholder="e.g. 70.5" style="width: 100%; padding: 9px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div style="margin-bottom: 18px;">
+                        <label style="font-size: 13px; font-weight: 700; display: block; margin-bottom: 4px;"><i class="fa-solid fa-note-sticky" style="color: #64748b;"></i> Notes (Optional)</label>
+                        <textarea id="readingNotes" rows="2" placeholder="e.g. Felt dizziness in the morning, took medication after reading..." style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 13px; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+                    </div>
+
+                    <button type="submit" id="saveReadingBtn" style="width: 100%; padding: 13px; background: #1f7a57; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Reading
                     </button>
                 </form>
             </div>
