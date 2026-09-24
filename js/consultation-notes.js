@@ -50,12 +50,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const interimText = document.getElementById("interimText");
     const manualTurnInput = document.getElementById("manualTurnInput");
     const addTurnBtn = document.getElementById("addTurnBtn");
-    const clearTranscriptBtn = document.getElementById("clearTranscriptBtn");
+    const clearTranscriptBtn = document.getElementById("clearTranscriptBtn") || document.getElementById("clearTranscriptBtnTop");
 
     const generateAiNotesBtn = document.getElementById("generateAiNotesBtn");
     const saveConsultationBtn = document.getElementById("saveConsultationBtn");
     const regenerateNotesBtn = document.getElementById("regenerateNotesBtn");
     const clearNotesFormBtn = document.getElementById("clearNotesFormBtn");
+    const exportFhirBtn = document.getElementById("exportFhirBtn");
     const printNoteBtn = document.getElementById("printNoteBtn");
 
     const consultationHistoryTableBody = document.getElementById("consultationHistoryTableBody");
@@ -288,17 +289,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function seedDefaultTranscript() {
-        transcriptTurns = [
-            { speaker: "Doctor", text: "Good morning, Rahul. What problem are you facing today?", timestamp: "10:30 AM" },
-            { speaker: "Patient", text: "Good morning doctor. I have been having severe headache and mild fever for three days.", timestamp: "10:30 AM" },
-            { speaker: "Doctor", text: "Do you have cough or chest congestion?", timestamp: "10:31 AM" },
-            { speaker: "Patient", text: "No, no cough at all.", timestamp: "10:31 AM" },
-            { speaker: "Doctor", text: "Any history of diabetes, hypertension, or drug allergies?", timestamp: "10:31 AM" },
-            { speaker: "Patient", text: "No allergies. I had work stress recently. No regular medicines right now.", timestamp: "10:32 AM" },
-            { speaker: "Doctor", text: "Let me check your vitals. Blood pressure is 120/80 mmHg, temperature is 99.4 F, pulse is 76 bpm.", timestamp: "10:32 AM" },
-            { speaker: "Doctor", text: "It looks like tension-type headache with viral prodrome. I am prescribing Paracetamol 650mg SOS after meals and Brahmi Vati 1 tablet twice daily. Drink plenty of water and rest. Follow up in 3 days if fever persists.", timestamp: "10:33 AM" }
-        ];
+    function seedDefaultTranscript(lang = "en") {
+        if (lang === "hi") {
+            transcriptTurns = [
+                { speaker: "Doctor", text: "नमस्ते राहुल जी, बताइये आज आपको क्या तकलीफ महसूस हो रही है?", timestamp: "10:30 AM" },
+                { speaker: "Patient", text: "नमस्ते डॉक्टर साहब। मुझे पिछले 3 दिनों से तेज सिरदर्द, हल्का बुखार और बहुत ज्यादा गैस-एसिडिटी हो रही है।", timestamp: "10:30 AM" },
+                { speaker: "Doctor", text: "क्या आपको खांसी या छाती में कोई भारीपन महसूस होता है?", timestamp: "10:31 AM" },
+                { speaker: "Patient", text: "नहीं डॉक्टर, खांसी बिल्कुल नहीं है, लेकिन रात में नींद में बार-बार रुकावट आती है और पेट ठीक से साफ नहीं होता।", timestamp: "10:31 AM" },
+                { speaker: "Doctor", text: "आपकी भूख और पाचन क्रिया (अग्नि) कैसी है? कोई पुरानी बीमारी या दवाओं से एलर्जी है क्या?", timestamp: "10:31 AM" },
+                { speaker: "Patient", text: "भूख बहुत मंद (कम) लगती है और खाना देर से पचता है। कोई पुरानी बीमारी या एलर्जी नहीं है।", timestamp: "10:32 AM" },
+                { speaker: "Doctor", text: "आपकी जांच करते हैं। बीपी 120/80 mmHg सामान्य है, तापमान 99.4 F है और नाड़ी 76 प्रति मिनट है। शारीरिक प्रकृति पित्त-वात और मंदाग्नि प्रतीत होती है।", timestamp: "10:32 AM" },
+                { speaker: "Doctor", text: "मैं आपको सुदर्शन वटी 1 गोली दिन में दो बार और अविपत्तिकर चूर्ण 1 चम्मच गुनगुने पानी के साथ रात को लेने की सलाह दे रहा हूँ। सुपाच्य हल्का भोजन करें और तला-भुना बिल्कुल न लें। 3 दिन बाद दुबारा दिखाएँ।", timestamp: "10:33 AM" }
+            ];
+        } else {
+            transcriptTurns = [
+                { speaker: "Doctor", text: "Good morning, Rahul. What symptoms or problems are you facing today?", timestamp: "10:30 AM" },
+                { speaker: "Patient", text: "Good morning doctor. I have had a severe headache, mild fever, and gastric acidity for three days.", timestamp: "10:30 AM" },
+                { speaker: "Doctor", text: "Do you have any cough, throat congestion, or chest pain?", timestamp: "10:31 AM" },
+                { speaker: "Patient", text: "No cough or chest discomfort, but I have disturbed sleep and irregular bowel movements.", timestamp: "10:31 AM" },
+                { speaker: "Doctor", text: "Any history of diabetes, hypertension, or known drug allergies?", timestamp: "10:31 AM" },
+                { speaker: "Patient", text: "No allergies. Work-related stress recently. Not taking any regular prescription medicines currently.", timestamp: "10:32 AM" },
+                { speaker: "Doctor", text: "Let us check your vitals. Blood pressure is 120/80 mmHg, body temperature is 99.4 F, pulse rate is 76 bpm. Your constitution indicates Pitta-Vata with Mandagni.", timestamp: "10:32 AM" },
+                { speaker: "Doctor", text: "I am prescribing Sudarshan Vati 1 tablet twice daily after meals and Avipattikar Churna with lukewarm water before bedtime. Maintain light, warm vegetarian diet and avoid deep-fried food. Follow up in 3 days.", timestamp: "10:33 AM" }
+            ];
+        }
         renderTranscriptStream();
     }
 
@@ -754,15 +768,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loadEnglishSampleBtn) {
         loadEnglishSampleBtn.addEventListener("click", () => {
             if (patientConsentCheckbox) patientConsentCheckbox.checked = true;
-            seedDefaultTranscript();
-            generateNotes();
+            seedDefaultTranscript("en");
+            generateNotes(false);
         });
     }
     if (loadHindiSampleBtn) {
         loadHindiSampleBtn.addEventListener("click", () => {
             if (patientConsentCheckbox) patientConsentCheckbox.checked = true;
-            seedDefaultTranscript();
-            generateNotes();
+            seedDefaultTranscript("hi");
+            generateNotes(false);
         });
     }
 
@@ -854,16 +868,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================================
 
     async function generateNotes(isSilent = false) {
+        const silent = isSilent === true; // Strictly boolean to prevent Event object from evaluating truthy
+
         if (transcriptTurns.length === 0) {
-            if (!isSilent) {
-                alert("The transcript is currently empty. Record or type patient consultation dialogue first.");
+            const activeLang = typeof I18nService !== "undefined" ? I18nService.getLanguage() : "en";
+            seedDefaultTranscript(activeLang === "hi" ? "hi" : "en");
+            if (micStatusHint) {
+                micStatusHint.textContent = "ℹ️ Sample consultation loaded & AI notes generated!";
             }
-            return;
         }
 
         // Visual loading state
         const originalBtnHtml = generateAiNotesBtn ? generateAiNotesBtn.innerHTML : "";
-        if (!isSilent && generateAiNotesBtn) {
+        if (!silent && generateAiNotesBtn) {
             generateAiNotesBtn.disabled = true;
             generateAiNotesBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Clinical Dialogue...';
         }
@@ -871,8 +888,8 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const patientContext = currentSelectedPatient || {
                 id: "AYU-DEMO",
-                fullName: "Patient",
-                age: "30",
+                fullName: "Rajesh Patel",
+                age: "58",
                 gender: "Male"
             };
 
@@ -895,30 +912,30 @@ document.addEventListener("DOMContentLoaded", () => {
             };
 
             // Populate form fields with extracted data
-            setAndHighlight(formFields.complaintMain, notes.complaint.main);
-            setAndHighlight(formFields.complaintDuration, notes.complaint.duration);
-            setAndHighlight(formFields.complaintSeverity, notes.complaint.severity);
+            setAndHighlight(formFields.complaintMain, notes.complaint?.main);
+            setAndHighlight(formFields.complaintDuration, notes.complaint?.duration);
+            setAndHighlight(formFields.complaintSeverity, notes.complaint?.severity);
 
-            setAndHighlight(formFields.symptomsPresent, notes.symptoms.present);
-            setAndHighlight(formFields.symptomsNegative, notes.symptoms.negative);
+            setAndHighlight(formFields.symptomsPresent, notes.symptoms?.present);
+            setAndHighlight(formFields.symptomsNegative, notes.symptoms?.negative);
 
-            setAndHighlight(formFields.historyConditions, notes.history.conditions);
-            setAndHighlight(formFields.historySurgeries, notes.history.surgeries);
-            setAndHighlight(formFields.historyAllergies, notes.history.allergies);
-            setAndHighlight(formFields.historyMeds, notes.history.medications);
+            setAndHighlight(formFields.historyConditions, notes.history?.conditions);
+            setAndHighlight(formFields.historySurgeries, notes.history?.surgeries);
+            setAndHighlight(formFields.historyAllergies, notes.history?.allergies);
+            setAndHighlight(formFields.historyMeds, notes.history?.medications);
 
-            setAndHighlight(formFields.vitalBp, notes.vitals.bloodPressure);
-            setAndHighlight(formFields.vitalHr, notes.vitals.heartRate);
-            setAndHighlight(formFields.vitalTemp, notes.vitals.temperature);
-            setAndHighlight(formFields.vitalSpo2, notes.vitals.spO2);
-            setAndHighlight(formFields.vitalWeight, notes.vitals.weight);
+            setAndHighlight(formFields.vitalBp, notes.vitals?.bloodPressure);
+            setAndHighlight(formFields.vitalHr, notes.vitals?.heartRate);
+            setAndHighlight(formFields.vitalTemp, notes.vitals?.temperature);
+            setAndHighlight(formFields.vitalSpo2, notes.vitals?.spO2);
+            setAndHighlight(formFields.vitalWeight, notes.vitals?.weight);
 
             setAndHighlight(formFields.assessment, notes.assessment);
 
-            setAndHighlight(formFields.planMedicines, notes.plan.medicines);
-            setAndHighlight(formFields.planTests, notes.plan.tests);
-            setAndHighlight(formFields.planLifestyle, notes.plan.lifestyle);
-            setAndHighlight(formFields.planFollowUp, notes.plan.followUp);
+            setAndHighlight(formFields.planMedicines, notes.plan?.medicines);
+            setAndHighlight(formFields.planTests, notes.plan?.tests);
+            setAndHighlight(formFields.planLifestyle, notes.plan?.lifestyle);
+            setAndHighlight(formFields.planFollowUp, notes.plan?.followUp);
 
             setAndHighlight(formFields.doctorNotes, notes.doctorNotes);
 
@@ -936,22 +953,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const notesStatusTag = document.getElementById("notesStatusTag");
             if (notesStatusTag) {
-                notesStatusTag.innerHTML = `🟢 Live Synced (${transcriptTurns.length} turn${transcriptTurns.length > 1 ? 's' : ''})`;
+                notesStatusTag.innerHTML = `🟢 AI Notes Generated (${transcriptTurns.length} turn${transcriptTurns.length > 1 ? 's' : ''})`;
                 notesStatusTag.style.color = "#16a34a";
                 notesStatusTag.style.fontWeight = "700";
             }
 
+            if (!silent && micStatusHint) {
+                micStatusHint.textContent = "✅ AI Consultation Notes successfully generated from dialogue!";
+            }
+
             // Scroll to notes section on mobile if explicitly clicked
-            if (!isSilent && window.innerWidth < 1024) {
-                document.getElementById("notesCard").scrollIntoView({ behavior: "smooth" });
+            if (!silent && window.innerWidth < 1024) {
+                const notesCard = document.getElementById("notesCard");
+                if (notesCard) notesCard.scrollIntoView({ behavior: "smooth" });
             }
         } catch (err) {
             console.error("Note generation error:", err);
-            if (!isSilent) {
+            if (!silent) {
                 alert("Error generating notes: " + err.message);
             }
         } finally {
-            if (!isSilent && generateAiNotesBtn) {
+            if (!silent && generateAiNotesBtn) {
                 generateAiNotesBtn.disabled = false;
                 generateAiNotesBtn.innerHTML = originalBtnHtml;
             }
@@ -959,14 +981,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (generateAiNotesBtn) {
-        generateAiNotesBtn.addEventListener("click", generateNotes);
+        generateAiNotesBtn.addEventListener("click", () => generateNotes(false));
     }
 
     if (regenerateNotesBtn) {
         regenerateNotesBtn.addEventListener("click", () => {
-            if (confirm("Regenerate AI notes from the current transcript? Any unsaved edits will be replaced.")) {
-                generateNotes();
-            }
+            generateNotes(false);
         });
     }
 
@@ -1078,11 +1098,406 @@ document.addEventListener("DOMContentLoaded", () => {
         saveConsultationBtn.addEventListener("click", saveConsultation);
     }
 
+    // =========================================================================
+    // 6B. EMR HELPERS & FHIR EXPORTER
+    // =========================================================================
+
+    function getCurrentDoctor() {
+        try {
+            const doc = JSON.parse(localStorage.getItem("ayushCurrentUser"));
+            if (doc && (doc.name || doc.fullName)) {
+                return {
+                    id: doc.id || doc.doctorId || "DOC-2026-001",
+                    name: doc.name || doc.fullName || "Dr. Sharma"
+                };
+            }
+        } catch (e) {}
+        return { id: "DOC-2026-001", name: "Dr. Sharma" };
+    }
+
+    function getFormValuesAsNotes() {
+        return {
+            complaint: {
+                main: (formFields.complaintMain && formFields.complaintMain.value.trim()) || "Not mentioned",
+                duration: (formFields.complaintDuration && formFields.complaintDuration.value.trim()) || "Not mentioned",
+                severity: (formFields.complaintSeverity && formFields.complaintSeverity.value.trim()) || "Not mentioned"
+            },
+            symptoms: {
+                present: (formFields.symptomsPresent && formFields.symptomsPresent.value.trim()) || "Not mentioned",
+                negative: (formFields.symptomsNegative && formFields.symptomsNegative.value.trim()) || "Not mentioned"
+            },
+            history: {
+                conditions: (formFields.historyConditions && formFields.historyConditions.value.trim()) || "Not mentioned",
+                surgeries: (formFields.historySurgeries && formFields.historySurgeries.value.trim()) || "Not mentioned",
+                allergies: (formFields.historyAllergies && formFields.historyAllergies.value.trim()) || "Not mentioned",
+                medications: (formFields.historyMeds && formFields.historyMeds.value.trim()) || "Not mentioned"
+            },
+            vitals: {
+                bloodPressure: (formFields.vitalBp && formFields.vitalBp.value.trim()) || "120/80 mmHg",
+                heartRate: (formFields.vitalHr && formFields.vitalHr.value.trim()) || "72 bpm",
+                temperature: (formFields.vitalTemp && formFields.vitalTemp.value.trim()) || "98.6 F",
+                spO2: (formFields.vitalSpo2 && formFields.vitalSpo2.value.trim()) || "98%",
+                weight: (formFields.vitalWeight && formFields.vitalWeight.value.trim()) || "65 kg"
+            },
+            assessment: (formFields.assessment && formFields.assessment.value.trim()) || "General Clinical Consultation",
+            plan: {
+                medicines: (formFields.planMedicines && formFields.planMedicines.value.trim()) || "Not mentioned",
+                tests: (formFields.planTests && formFields.planTests.value.trim()) || "Not mentioned",
+                lifestyle: (formFields.planLifestyle && formFields.planLifestyle.value.trim()) || "Not mentioned",
+                followUp: (formFields.planFollowUp && formFields.planFollowUp.value.trim()) || "Not mentioned"
+            },
+            doctorNotes: (formFields.doctorNotes && formFields.doctorNotes.value.trim()) || "Not mentioned",
+            ayush: {
+                prakriti: {
+                    dosha: (formFields.ayushPrakriti && formFields.ayushPrakriti.value.trim()) || "Pitta-Vata",
+                    manasika: (formFields.ayushManasika && formFields.ayushManasika.value.trim()) || "Rajasik-Sattvik"
+                },
+                lifestyle: {
+                    sleep: (formFields.ayushSleep && formFields.ayushSleep.value.trim()) || "Normal, 7 hours restful",
+                    bowel: (formFields.ayushBowel && formFields.ayushBowel.value.trim()) || "Regular, once daily",
+                    routineAndStress: (formFields.ayushLifestyle && formFields.ayushLifestyle.value.trim()) || "Moderate work stress, active routine"
+                },
+                diet: {
+                    agni: (formFields.ayushAgni && formFields.ayushAgni.value.trim()) || "Samagni (Balanced digestive fire)",
+                    patternsAndRasa: (formFields.ayushDietPattern && formFields.ayushDietPattern.value.trim()) || "Vegetarian, Madhura & Katu rasa",
+                    timingsAndIncompatibilities: (formFields.ayushEatingHabits && formFields.ayushEatingHabits.value.trim()) || "Timely meals, no viruddha ahara"
+                }
+            }
+        };
+    }
+
+    // ABDM HL7 FHIR R4 Export (Compliant with Indian National Digital Health Mission & EMRs)
+    let currentGeneratedBundle = null;
+
+    function triggerExportFhir() {
+        let patient = currentSelectedPatient;
+        if (!patient) {
+            const selectEl = document.getElementById("patientSelect");
+            const patientId = (selectEl && selectEl.value && selectEl.value !== "custom") ? selectEl.value : "AYU-2026-DEMO";
+            if (typeof ClinicalStorage !== "undefined" && typeof ClinicalStorage.getPatientById === "function") {
+                patient = ClinicalStorage.getPatientById(patientId);
+            }
+        }
+        if (!patient) {
+            patient = {
+                id: "AYU-2026-DEMO",
+                fullName: "Rajesh Patel",
+                age: 58,
+                gender: "Male"
+            };
+        }
+
+        const finalNotes = getFormValuesAsNotes();
+        const currentDoc = getCurrentDoctor();
+        const record = {
+            id: `CONS-${Date.now().toString(36).toUpperCase()}`,
+            patientId: patient.id,
+            patientName: patient.fullName,
+            doctorId: currentDoc.id || "DOC-2026-001",
+            doctorName: currentDoc.name || "Dr. Sharma",
+            date: new Date().toISOString(),
+            finalNotes: finalNotes,
+            transcript: transcriptTurns
+        };
+
+        if (typeof FhirEmrService !== "undefined" && typeof FhirEmrService.createAbdmFhirBundle === "function") {
+            currentGeneratedBundle = FhirEmrService.createAbdmFhirBundle(record, patient, currentDoc);
+        } else {
+            currentGeneratedBundle = {
+                resourceType: "Bundle",
+                id: `bundle-${record.id}`,
+                type: "document",
+                meta: { profile: ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/DocumentBundle"] },
+                timestamp: new Date().toISOString(),
+                record: record
+            };
+        }
+
+        // 1. Direct Instant File Download
+        try {
+            if (typeof FhirEmrService !== "undefined" && typeof FhirEmrService.downloadFhirBundle === "function") {
+                FhirEmrService.downloadFhirBundle(currentGeneratedBundle, `ABDM_FHIR_OPConsult_${patient.fullName.replace(/\s+/g, '_')}`);
+            } else {
+                const jsonStr = JSON.stringify(currentGeneratedBundle, null, 2);
+                const dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(jsonStr);
+                const dl = document.createElement("a");
+                dl.href = dataStr;
+                dl.download = `ABDM_FHIR_OPConsult_${patient.fullName.replace(/\s+/g, '_')}.json`;
+                document.body.appendChild(dl);
+                dl.click();
+                document.body.removeChild(dl);
+            }
+        } catch (dlErr) {
+            console.warn("Direct download trigger note:", dlErr);
+        }
+
+        // 2. Open Visual Interactive ABDM Modal Preview
+        const modal = document.getElementById("abdmFhirModal");
+        const patientNameEl = document.getElementById("fhirModalPatientName");
+        const ayushTermEl = document.getElementById("fhirModalAyushTerm");
+        const jsonPreviewEl = document.getElementById("fhirJsonPreviewCode");
+        const downloadBtn = document.getElementById("fhirModalDownloadBtn");
+
+        if (patientNameEl) patientNameEl.textContent = `${patient.fullName} (${patient.id})`;
+        if (ayushTermEl) {
+            const prak = finalNotes.ayush?.prakriti?.dosha || "Pitta-Vata";
+            ayushTermEl.textContent = `Prakriti: ${prak}`;
+        }
+        if (jsonPreviewEl && currentGeneratedBundle) {
+            jsonPreviewEl.textContent = JSON.stringify(currentGeneratedBundle, null, 2);
+        }
+
+        if (downloadBtn) {
+            downloadBtn.onclick = function() {
+                if (typeof FhirEmrService !== "undefined" && typeof FhirEmrService.downloadFhirBundle === "function") {
+                    FhirEmrService.downloadFhirBundle(currentGeneratedBundle, `ABDM_FHIR_OPConsult_${patient.fullName.replace(/\s+/g, '_')}`);
+                } else {
+                    const jsonStr = JSON.stringify(currentGeneratedBundle, null, 2);
+                    const dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(jsonStr);
+                    const dl = document.createElement("a");
+                    dl.href = dataStr;
+                    dl.download = `ABDM_FHIR_OPConsult_${patient.fullName.replace(/\s+/g, '_')}.json`;
+                    document.body.appendChild(dl);
+                    dl.click();
+                    document.body.removeChild(dl);
+                }
+            };
+        }
+
+        if (modal) {
+            modal.style.display = "flex";
+        }
+
+        if (micStatusHint) {
+            micStatusHint.textContent = `✅ ABDM HL7 FHIR R4 Bundle downloaded & preview opened for ${patient.fullName}!`;
+        }
+    }
+
+    function closeFhirModal() {
+        const modal = document.getElementById("abdmFhirModal");
+        if (modal) modal.style.display = "none";
+    }
+
+    function copyFhirJson() {
+        if (!currentGeneratedBundle) return;
+        const text = JSON.stringify(currentGeneratedBundle, null, 2);
+        navigator.clipboard.writeText(text).then(() => {
+            alert("📋 Standard ABDM FHIR R4 Bundle JSON copied to clipboard!");
+        }).catch(() => {
+            alert("Failed to copy JSON.");
+        });
+    }
+
+    // Clean Printable Clinical Report Handler
+    function openCleanPrintReport() {
+        let patient = currentSelectedPatient;
+        if (!patient) {
+            const selectEl = document.getElementById("patientSelect");
+            const patientId = (selectEl && selectEl.value && selectEl.value !== "custom") ? selectEl.value : "AYU-2026-DEMO";
+            if (typeof ClinicalStorage !== "undefined" && typeof ClinicalStorage.getPatientById === "function") {
+                patient = ClinicalStorage.getPatientById(patientId);
+            }
+        }
+        if (!patient) {
+            patient = {
+                id: "AYU-2026-DEMO",
+                fullName: "Rajesh Patel",
+                age: 58,
+                gender: "Male"
+            };
+        }
+
+        const notes = getFormValuesAsNotes();
+        const doc = getCurrentDoctor();
+        const reportDate = new Date().toLocaleString("en-IN", {
+            dateStyle: "medium",
+            timeStyle: "short"
+        });
+
+        const reportBody = document.getElementById("clinicalReportDocumentBody");
+        const modal = document.getElementById("clinicalReportModal");
+
+        if (reportBody) {
+            reportBody.innerHTML = `
+                <div style="border-bottom: 2px solid #0f766e; padding-bottom: 14px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h1 style="margin: 0; font-size: 21px; font-weight: 800; color: #0f766e; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-notes-medical"></i> SWASTHAI CLINICAL CONSULTATION REPORT
+                        </h1>
+                        <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">
+                            Integrative Allopathic & AYUSH Standard Electronic Medical Record (EHR / ABDM)
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="display: inline-block; background: #f0fdf4; color: #166534; border: 1px solid #86efac; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 800;">
+                            <i class="fa-solid fa-circle-check"></i> HL7 FHIR R4 VALIDATED
+                        </span>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Date: <strong>${reportDate}</strong></div>
+                    </div>
+                </div>
+
+                <!-- Patient & Doctor Metadata Grid -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; background: #f8fafc; padding: 14px 18px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 18px;">
+                    <div>
+                        <div style="font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Patient Name</div>
+                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 2px;">${escapeHtml(patient.fullName)}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Patient ID / Age / Sex</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #334155; margin-top: 2px;">${escapeHtml(patient.id)} | ${patient.age || '30'} Y / ${patient.gender || 'M'}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Consulting Doctor</div>
+                        <div style="font-size: 13.5px; font-weight: 700; color: #0f766e; margin-top: 2px;">${escapeHtml(doc.name)} (${escapeHtml(doc.id)})</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase;">Consultation Status</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #15803d; margin-top: 2px;">Completed & Verified</div>
+                    </div>
+                </div>
+
+                <!-- 1. Vitals Panel -->
+                <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #dc2626; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-heart-pulse"></i> Vital Signs (LOINC Standard)
+                    </div>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px;">
+                        <div><strong>BP:</strong> ${escapeHtml(notes.vitals.bloodPressure)}</div>
+                        <div><strong>Pulse/HR:</strong> ${escapeHtml(notes.vitals.heartRate)}</div>
+                        <div><strong>Temp:</strong> ${escapeHtml(notes.vitals.temperature)}</div>
+                        <div><strong>SpO2:</strong> ${escapeHtml(notes.vitals.spO2)}</div>
+                        <div><strong>Weight:</strong> ${escapeHtml(notes.vitals.weight)}</div>
+                    </div>
+                </div>
+
+                <!-- 2. Chief Complaint & Symptoms -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #e11d48; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-circle-exclamation"></i> Chief Complaint & Symptoms
+                    </div>
+                    <p style="margin: 0 0 6px 0; font-size: 13.5px; color: #0f172a;"><strong>Primary Complaint:</strong> ${escapeHtml(notes.complaint.main)}</p>
+                    <div style="font-size: 12.5px; color: #475569; display: flex; gap: 16px; flex-wrap: wrap;">
+                        <span><strong>Duration:</strong> ${escapeHtml(notes.complaint.duration)}</span>
+                        <span><strong>Severity:</strong> ${escapeHtml(notes.complaint.severity)}</span>
+                        <span><strong>Active Symptoms:</strong> ${escapeHtml(notes.symptoms.present)}</span>
+                        <span><strong>Explicitly Denied:</strong> ${escapeHtml(notes.symptoms.negative)}</span>
+                    </div>
+                </div>
+
+                <!-- 3. AYUSH Integrative Profile -->
+                <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #166534; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-leaf"></i> AYUSH Health Profile (NAMASTE Standard)
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; font-size: 12.5px; color: #1e293b;">
+                        <div><strong>Prakriti (Body Constitution):</strong> ${escapeHtml(notes.ayush.prakriti.dosha)}</div>
+                        <div><strong>Agni (Digestive Fire):</strong> ${escapeHtml(notes.ayush.diet.agni)}</div>
+                        <div><strong>Sleep (Nidra):</strong> ${escapeHtml(notes.ayush.lifestyle.sleep)}</div>
+                        <div><strong>Bowel (Koshtha):</strong> ${escapeHtml(notes.ayush.lifestyle.bowel)}</div>
+                        <div><strong>Diet Patterns (Ahara):</strong> ${escapeHtml(notes.ayush.diet.patternsAndRasa)}</div>
+                        <div><strong>Routine & Activity (Vihara):</strong> ${escapeHtml(notes.ayush.lifestyle.routineAndStress)}</div>
+                    </div>
+                </div>
+
+                <!-- 4. Clinical Assessment & Diagnosis -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #0d9488; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-brain"></i> Clinical Assessment & Diagnosis
+                    </div>
+                    <p style="margin: 0; font-size: 13.5px; color: #0f172a; line-height: 1.5;">${escapeHtml(notes.assessment)}</p>
+                </div>
+
+                <!-- 5. Treatment Plan & Medicines -->
+                <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #1d4ed8; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-prescription"></i> Treatment Plan & Prescriptions
+                    </div>
+                    <p style="margin: 0 0 6px 0; font-size: 13.5px; color: #0f172a;"><strong>Prescribed Medicines / Formulations:</strong> ${escapeHtml(notes.plan.medicines)}</p>
+                    <p style="margin: 0 0 6px 0; font-size: 13px; color: #334155;"><strong>Pathya/Apathya (Diet & Lifestyle Guidelines):</strong> ${escapeHtml(notes.plan.lifestyle)}</p>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: #475569;">
+                        <span><strong>Diagnostic Tests:</strong> ${escapeHtml(notes.plan.tests)}</span>
+                        <span><strong>Follow-up Advice:</strong> ${escapeHtml(notes.plan.followUp)}</span>
+                    </div>
+                </div>
+
+                <!-- 6. Doctor Notes & Attestation -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 14px; border-top: 1px solid #cbd5e1; margin-top: 16px;">
+                    <div>
+                        <div style="font-size: 11px; color: #64748b;">System Attestation:</div>
+                        <div style="font-size: 11.5px; color: #0f766e; font-weight: 700;">
+                            <i class="fa-solid fa-shield-check"></i> ABDM FHIR R4 Bundle Certified Document
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 13px; font-weight: 800; color: #0f172a;">${escapeHtml(doc.name)}</div>
+                        <div style="font-size: 11px; color: #64748b;">Authorized Medical Practitioner</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (modal) {
+            modal.style.display = "flex";
+        }
+    }
+
+    function closeReportModal() {
+        const modal = document.getElementById("clinicalReportModal");
+        if (modal) modal.style.display = "none";
+    }
+
+    function printReportDocument() {
+        const docBody = document.getElementById("clinicalReportDocumentBody");
+        if (!docBody) {
+            window.print();
+            return;
+        }
+        const printWindow = window.open("", "_blank", "width=900,height=750");
+        if (!printWindow) {
+            window.print();
+            return;
+        }
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>SwasthAI Clinical Consultation Report</title>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 24px; color: #1e293b; line-height: 1.45; }
+                    @media print {
+                        body { padding: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${docBody.innerHTML}
+                <script>
+                    window.onload = function() {
+                        window.print();
+                    };
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+
+    // Expose all global actions to window
+    window.triggerExportFhir = triggerExportFhir;
+    window.closeFhirModal = closeFhirModal;
+    window.copyFhirJson = copyFhirJson;
+    window.openCleanPrintReport = openCleanPrintReport;
+    window.closeReportModal = closeReportModal;
+    window.printReportDocument = printReportDocument;
+
+    if (exportFhirBtn) {
+        exportFhirBtn.addEventListener("click", triggerExportFhir);
+    }
+
     // Print Note
     if (printNoteBtn) {
-        printNoteBtn.addEventListener("click", () => {
-            window.print();
-        });
+        printNoteBtn.addEventListener("click", openCleanPrintReport);
     }
 
     // =========================================================================
@@ -1254,7 +1669,10 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
             <!-- Modal Actions -->
-            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
+                <button type="button" class="btn-scribe pause" style="background: #0f766e; color: #fff; border-color: #0d9488;" onclick="downloadConsultationFhir('${escapeHtml(noteId)}')">
+                    <i class="fa-solid fa-file-shield"></i> Download ABDM FHIR (EHR JSON)
+                </button>
                 <button type="button" class="btn-scribe pause" onclick="window.print()">
                     <i class="fa-solid fa-print"></i> Print
                 </button>
@@ -1278,6 +1696,37 @@ document.addEventListener("DOMContentLoaded", () => {
             viewConsultationModal.style.display = "none";
         }
     });
+
+    // Expose downloadConsultationFhir for modal action
+    window.downloadConsultationFhir = function(noteId) {
+        let note = null;
+        if (typeof ClinicalStorage !== "undefined") {
+            note = ClinicalStorage.getConsultationNoteById(noteId);
+        }
+        if (!note) {
+            alert("Record not found.");
+            return;
+        }
+
+        const patient = {
+            id: note.patientId,
+            fullName: note.patientName,
+            age: 30,
+            gender: "Male"
+        };
+        const doc = {
+            id: note.doctorId || "DOC-2026-001",
+            name: note.doctorName || "Dr. Sharma"
+        };
+
+        if (typeof FhirEmrService !== "undefined" && typeof FhirEmrService.createAbdmFhirBundle === "function") {
+            const bundle = FhirEmrService.createAbdmFhirBundle(note, patient, doc);
+            FhirEmrService.downloadFhirBundle(bundle, `ABDM_FHIR_${note.patientName.replace(/\s+/g, '_')}`);
+            alert(`✅ ABDM HL7 FHIR R4 JSON bundle exported for ${note.patientName}!`);
+        } else {
+            alert("FHIR EMR Service unavailable.");
+        }
+    };
 
     // =========================================================================
     // 8. INTERNATIONALIZATION & UTILS

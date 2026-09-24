@@ -156,3 +156,141 @@ exports.deleteConsultation = async (req, res, next) => {
         next(err);
     }
 };
+
+/**
+ * Export consultation record as ABDM / HL7 FHIR R4 Document Bundle
+ */
+exports.exportConsultationFhir = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const consultation = await Consultation.findOne({
+            $or: [{ consultationId: id }, { _id: id.match(/^[0-9a-fA-F]{24}$/) ? id : null }]
+        });
+
+        if (!consultation) {
+            return res.status(404).json({ success: false, message: "Consultation not found." });
+        }
+
+        const patient = await Patient.findOne({ patientId: consultation.patientId });
+
+        const timestamp = new Date(consultation.createdAt || consultation.date || Date.now()).toISOString();
+        const bundleId = `bundle-${consultation.consultationId}`;
+        const compositionId = `comp-${consultation.consultationId}`;
+        const patientId = consultation.patientId || "AYU-PAT-001";
+        const practitionerId = consultation.practitionerId || "DOC-IN-001";
+        const encounterId = `enc-${consultation.consultationId}`;
+
+        const sn = consultation.structuredNotes || {};
+        const entries = [];
+
+        // Composition
+        const composition = {
+            resourceType: "Composition",
+            id: compositionId,
+            meta: {
+                versionId: "1",
+                lastUpdated: timestamp,
+                profile: ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/OPConsultRecord"]
+            },
+            status: "final",
+            type: {
+                coding: [
+                    { system: "https://nrces.in/ndhm/fhir/r4/CodeSystem/ndhm-document-type", code: "OPConsult", display: "Outpatient Consultation Record" },
+                    { system: "http://snomed.info/sct", code: "371530004", display: "Clinical consultation report" }
+                ],
+                text: "OPD Consultation & Clinical Summary"
+            },
+            subject: { reference: `Patient/${patientId}`, display: consultation.patientName },
+            encounter: { reference: `Encounter/${encounterId}` },
+            date: timestamp,
+            author: [{ reference: `Practitioner/${practitionerId}`, display: consultation.doctorName }],
+            title: "Outpatient Consultation & AYUSH Integrative Clinical Note",
+            section: []
+        };
+
+        // Patient
+        entries.push({
+            fullUrl: `urn:uuid:${patientId}`,
+            resource: {
+                resourceType: "Patient",
+                id: patientId,
+                meta: { profile: ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/Patient"] },
+                identifier: [{ system: "https://healthid.abdm.gov.in", value: patientId }],
+                name: [{ text: consultation.patientName }],
+                gender: patient?.gender ? patient.gender.toLowerCase() : "unknown"
+            }
+        });
+
+        // Practitioner
+        entries.push({
+            fullUrl: `urn:uuid:${practitionerId}`,
+            resource: {
+                resourceType: "Practitioner",
+                id: practitionerId,
+                meta: { profile: ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/Practitioner"] },
+                name: [{ text: consultation.doctorName }]
+            }
+        });
+
+        // Encounter
+        entries.push({
+            fullUrl: `urn:uuid:${encounterId}`,
+            resource: {
+                resourceType: "Encounter",
+                id: encounterId,
+                meta: { profile: ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/Encounter"] },
+                status: "finished",
+                class: { system: "http://terminology.hl7.org/CodeSystem/v3-ActCode", code: "AMB", display: "ambulatory" },
+                subject: { reference: `Patient/${patientId}` },
+                period: { start: timestamp }
+            }
+        });
+
+        // Chief Complaint Condition
+        if (sn.complaintMain && sn.complaintMain !== "Not mentioned") {
+            const condId = `cond-${Date.now().toString(36)}`;
+            entries.push({
+                fullUrl: `urn:uuid:${condId}`,
+                resource: {
+                    resourceType: "Condition",
+                    id: condId,
+                    meta: { profile: ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/Condition"] },
+                    code: { text: sn.complaintMain },
+                    subject: { reference: `Patient/${patientId}` }
+                }
+            });
+            composition.section.push({
+                title: "Chief Complaint",
+                code: { coding: [{ system: "http://snomed.info/sct", code: "422843007", display: "Chief complaint section" }] },
+                entry: [{ reference: `Condition/${condId}` }]
+            });
+        }
+
+        // Prepend Composition
+        entries.unshift({
+            fullUrl: `urn:uuid:${compositionId}`,
+            resource: composition
+        });
+
+        const fhirBundle = {
+            resourceType: "Bundle",
+            id: bundleId,
+            meta: {
+                versionId: "1",
+                lastUpdated: timestamp,
+                profile: ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/DocumentBundle"]
+            },
+            type: "document",
+            timestamp: timestamp,
+            entry: entries
+        };
+
+        res.json({
+            success: true,
+            standard: "HL7 FHIR R4 / ABDM OPConsultRecord",
+            data: fhirBundle
+        });
+    } catch (err) {
+        next(err);
+    }
+};

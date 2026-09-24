@@ -158,7 +158,10 @@
                             <i class="fa-solid fa-calendar-plus"></i> Follow-up
                         </button>
                         <button class="secondary-btn" id="exportCaseBtn">
-                            <i class="fa-solid fa-download"></i> Export
+                            <i class="fa-solid fa-download"></i> Export JSON
+                        </button>
+                        <button class="secondary-btn" id="exportFhirBtn" style="background: #f0fdf4; color: #166534; border: 1.5px solid #86efac; font-weight: 700;" title="Export compliant with Ayushman Bharat Digital Mission (ABDM) / HL7 FHIR R4">
+                            <i class="fa-solid fa-file-shield" style="color: #15803d;"></i> Export ABDM FHIR
                         </button>
                         <button class="secondary-btn" onclick="window.print()">
                             <i class="fa-solid fa-print"></i> Print
@@ -579,6 +582,7 @@
     <script src="js/services/speech-service.js"></script>
     <script src="js/services/document-service.js"></script>
     <script src="js/services/prescription-service.js"></script>
+    <script src="js/services/fhir-emr-service.js"></script>
     <script src="js/services/i18n-service.js"></script>
     <script src="js/services/demo-service.js"></script>
     <script src="js/ai-digital-twin.js"></script>

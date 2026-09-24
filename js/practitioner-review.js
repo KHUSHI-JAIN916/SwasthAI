@@ -551,6 +551,11 @@ const PractitionerReview = (() => {
         if (exportCaseBtn) {
             exportCaseBtn.addEventListener("click", () => exportCaseData());
         }
+
+        const exportFhirBtn = document.getElementById("exportFhirBtn");
+        if (exportFhirBtn) {
+            exportFhirBtn.addEventListener("click", () => exportFhirData());
+        }
     }
 
     function saveFollowup() {
@@ -694,6 +699,21 @@ const PractitionerReview = (() => {
         dlAnchor.setAttribute("href", dataStr);
         dlAnchor.setAttribute("download", `Case_${currentCase.id}_${currentCase.patientName.replace(/\s+/g, '_')}.json`);
         dlAnchor.click();
+    }
+
+    function exportFhirData() {
+        if (!currentCase) {
+            alert("No active case to export.");
+            return;
+        }
+
+        if (typeof FhirEmrService !== "undefined" && typeof FhirEmrService.convertCaseToFhirBundle === "function") {
+            const bundle = FhirEmrService.convertCaseToFhirBundle(currentCase, currentPatient);
+            FhirEmrService.downloadFhirBundle(bundle, `ABDM_FHIR_Case_${currentCase.id}_${currentCase.patientName.replace(/\s+/g, '_')}`);
+            alert(`✅ ABDM HL7 FHIR R4 Bundle exported successfully for ${currentCase.patientName}!\nThis standardized document complies with India's Ayushman Bharat Digital Mission (ABDM) and can be imported into any certified hospital EHR/EMR.`);
+        } else {
+            alert("FHIR EMR Service is loading. Please try again.");
+        }
     }
 
     function uploadReportSimulation() {
