@@ -164,6 +164,42 @@ const I18nService = (() => {
             labelSurgeries: "Previous Surgeries",
             labelAllergies: "Allergies",
             labelMedications: "Current Medications",
+            // AYUSH & Lifestyle Profile keys
+            ayushModeBtnOn: "🌿 AYUSH Lifestyle Mode: ON",
+            ayushModeBtnOff: "🌿 AYUSH Lifestyle Mode: OFF",
+            ayushPanelTitle: "Body Type, Daily Habits & Diet Profile",
+            ayushPanelBadge: "🌿 AYUSH Lifestyle Mode",
+            ayushSection1Title: "1. Body & Mind Profile (Constitution)",
+            ayushPrakritiLabel: "Body Type & Energy (Prakriti)",
+            ayushPrakritiPlaceholder: "e.g. Warm & Fast Metabolism (Pitta), Light & Active (Vata), or Balanced",
+            ayushManasikaLabel: "Mental Temperament & Stress State",
+            ayushManasikaPlaceholder: "e.g. Calm & Focused, Restless / High Stress, or Tired & Sluggish",
+            ayushSection2Title: "2. Daily Habits & Body Rhythms (Lifestyle)",
+            ayushSleepLabel: "Sleep Duration & Quality (Neend)",
+            ayushSleepPlaceholder: "e.g. 7-8 hrs sound sleep, or Disturbed / Light sleep, Insomnia",
+            ayushBowelLabel: "Bowel Regularity (Pet Saaf Hona)",
+            ayushBowelPlaceholder: "e.g. Daily regular & smooth, Constipated / Hard stools (Kabz), or Loose",
+            ayushLifestyleLabel: "Daily Work Routine & Physical Exercise",
+            ayushLifestylePlaceholder: "e.g. Desk job for 8 hrs, moderate work stress, daily 30m walk",
+            ayushSection3Title: "3. Digestion & Food Habits (Diet & Hazma)",
+            ayushAgniLabel: "Digestion & Hunger Level (Hazma)",
+            ayushAgniPlaceholder: "e.g. Normal on-time, Slow digestion & heaviness, High acidity, or Gas/bloating",
+            ayushDietLabel: "Food Preferences & Taste Cravings",
+            ayushDietPlaceholder: "e.g. Vegetarian, craves spicy & oily foods, or prefers sweets",
+            ayushEatingHabitsLabel: "Meal Timings & Bad Eating Habits",
+            ayushEatingHabitsPlaceholder: "e.g. Late dinner at 11 PM, skipping breakfast, irregular meal timings",
+            ayushStep7Title: "Body Type, Daily Habits & Diet (AYUSH Profile)",
+            ayushStep7Sub: "Record body constitution, sleep, bowel habits, and diet in easy, everyday words.",
+            prakritiCardVata: "Light & Active (Vata)",
+            prakritiCardVataSub: "Quick movements, dry skin, variable energy & appetite",
+            prakritiCardPitta: "Warm & Fast Metabolism (Pitta)",
+            prakritiCardPittaSub: "Sharp hunger, heat sensitive, acidity & burning prone",
+            prakritiCardKapha: "Calm & Solid Build (Kapha)",
+            prakritiCardKaphaSub: "Steady energy, heavy build, slow digestion & calm nature",
+            prakritiCardDual: "Combination or Balanced",
+            prakritiCardDualSub: "Mix of two types (e.g. Pitta-Vata) or all balanced",
+            ayushObsLabel: "Practitioner Clinical & Holistic Observations",
+            ayushObsPlaceholder: "Enter doctor's holistic observations (general energy, tongue, pulse, lifestyle advice)...",
             sectionVitals: "4. Vitals (Only if mentioned)",
             labelBp: "Blood Pressure",
             labelHr: "Heart Rate",
@@ -357,6 +393,42 @@ const I18nService = (() => {
             labelSurgeries: "पूर्व ऑपरेशन / सर्जरी",
             labelAllergies: "दवा या अन्य एलर्जी",
             labelMedications: "वर्तमान दवाइयाँ",
+            // AYUSH & Lifestyle Profile keys
+            ayushModeBtnOn: "🌿 आयुष जीवनशैली मोड: चालू",
+            ayushModeBtnOff: "🌿 आयुष जीवनशैली मोड: बंद",
+            ayushPanelTitle: "शरीर प्रकृति, दैनिक आदतें व आहार विवरण",
+            ayushPanelBadge: "🌿 आयुष जीवनशैली मोड",
+            ayushSection1Title: "1. शरीर व मानसिक प्रकृति (प्रकृति व स्वभाव)",
+            ayushPrakritiLabel: "शरीर प्रकृति व ऊर्जा (Prakriti)",
+            ayushPrakritiPlaceholder: "उदा. गर्म व तेज़ चयापचय (पित्त), हल्का व सक्रिय (वात), या संतुलित",
+            ayushManasikaLabel: "मानसिक स्वभाव व तनाव स्थिति",
+            ayushManasikaPlaceholder: "उदा. शांत व एकाग्र, अशांत / अधिक तनाव, या थकान व सुस्ती",
+            ayushSection2Title: "2. दैनिक आदतें व शारीरिक चक्र (दिनचर्या)",
+            ayushSleepLabel: "नींद की अवधि व गुणवत्ता (Neend)",
+            ayushSleepPlaceholder: "उदा. 7-8 घंटे गहरी नींद, या टूटी-फूटी नींद, अनिद्रा",
+            ayushBowelLabel: "पेट साफ होने का नियम (कोष्ठ)",
+            ayushBowelPlaceholder: "उदा. रोजाना सामान्य व साफ, कब्ज़ / कड़ा मल, या दस्त",
+            ayushLifestyleLabel: "दैनिक कार्य दिनचर्या व व्यायाम",
+            ayushLifestylePlaceholder: "उदा. 8 घंटे डेस्क जॉब, मध्यम तनाव, रोजाना 30 मिनट वॉक",
+            ayushSection3Title: "3. पाचन व खान-पान की आदतें (आहार व अग्नि)",
+            ayushAgniLabel: "पाचन व भूख का स्तर (जठराग्नि)",
+            ayushAgniPlaceholder: "उदा. समय पर सामान्य भूख, भारीपन व धीमा पाचन, तेज़ एसिडिटी/जलन, या गैस",
+            ayushDietLabel: "भोजन पसंद व स्वाद की इच्छा",
+            ayushDietPlaceholder: "उदा. शाकाहारी, तीखा व तला-भुना पसंद, या मीठे की चाह",
+            ayushEatingHabitsLabel: "भोजन का समय व गलत आदतें",
+            ayushEatingHabitsPlaceholder: "उदा. रात 11 बजे भोजन, नाश्ता छोड़ना, अनियमित समय पर खाना",
+            ayushStep7Title: "शरीर प्रकृति, दैनिक आदतें व आहार (आयुष प्रोफाइल)",
+            ayushStep7Sub: "शरीर प्रकृति, नींद, पेट साफ होना और खान-पान की जानकारी सरल शब्दों में दर्ज करें।",
+            prakritiCardVata: "हल्का व सक्रिय शरीर (वात)",
+            prakritiCardVataSub: "तेज़ चाल, सूखी त्वचा, परिवर्तनशील ऊर्जा व भूख",
+            prakritiCardPitta: "गर्म व तेज़ चयापचय (पित्त)",
+            prakritiCardPittaSub: "तीव्र भूख, गर्मी के प्रति संवेदनशील, एसिडिटी व जलन",
+            prakritiCardKapha: "शांत व मजबूत शरीर (कफ)",
+            prakritiCardKaphaSub: "स्थिर ऊर्जा, भारी शरीर, धीमा पाचन व शांत स्वभाव",
+            prakritiCardDual: "मिश्रित अथवा संतुलित (सम)",
+            prakritiCardDualSub: "दो दोषों का मिश्रण (उदा. पित्त-वात) अथवा संतुलित",
+            ayushObsLabel: "डॉक्टर के नैदानिक एवं समग्र प्रेक्षण",
+            ayushObsPlaceholder: "डॉक्टर के समग्र प्रेक्षण दर्ज करें (सामान्य ऊर्जा, जीभ, नाड़ी, जीवनशैली सलाह)...",
             sectionVitals: "4. वाइटल्स (शारीरिक माप - केवल यदि उल्लिखित हों)",
             labelBp: "रक्तचाप (Blood Pressure)",
             labelHr: "हृदय गति (Heart Rate)",
@@ -485,7 +557,43 @@ const I18nService = (() => {
             generateNotesBtn: "AI Notes Generate Karein",
             saveConsultationBtn: "Consultation Save Karein",
             consultationHistoryTitle: "Consultation History",
-            aiDraftBadge: "AI-generated draft — doctor review zaruri hai."
+            aiDraftBadge: "AI-generated draft — doctor review zaruri hai.",
+            // AYUSH & Lifestyle Profile keys
+            ayushModeBtnOn: "🌿 AYUSH Lifestyle Mode: ON",
+            ayushModeBtnOff: "🌿 AYUSH Lifestyle Mode: OFF",
+            ayushPanelTitle: "Body Type, Daily Habits & Diet Profile",
+            ayushPanelBadge: "🌿 AYUSH Lifestyle Mode",
+            ayushSection1Title: "1. Body & Mind Profile (Prakriti & Gunas)",
+            ayushPrakritiLabel: "Body Type & Energy (Prakriti)",
+            ayushPrakritiPlaceholder: "e.g. Warm & Fast Metabolism (Pitta), Light & Active (Vata), ya Balanced",
+            ayushManasikaLabel: "Mental Temperament & Stress State",
+            ayushManasikaPlaceholder: "e.g. Calm & Focused, Restless / High Stress, ya Thakan aur Alasya",
+            ayushSection2Title: "2. Daily Habits & Body Rhythms (Lifestyle)",
+            ayushSleepLabel: "Sleep Duration & Quality (Neend)",
+            ayushSleepPlaceholder: "e.g. 7-8 hrs achhi neend, ya disturbed sleep, insomnia",
+            ayushBowelLabel: "Bowel Regularity (Pet Saaf Hona)",
+            ayushBowelPlaceholder: "e.g. Daily regular & smooth, Kabz / Hard stool, ya loose motion",
+            ayushLifestyleLabel: "Daily Work Routine & Exercise",
+            ayushLifestylePlaceholder: "e.g. 8 hrs desk job, moderate stress, daily 30m walk",
+            ayushSection3Title: "3. Digestion & Food Habits (Hazma & Diet)",
+            ayushAgniLabel: "Digestion & Hunger Level (Hazma / Agni)",
+            ayushAgniPlaceholder: "e.g. Normal on-time, Slow digestion & bhari pet, High acidity & jalan, ya gas/bloating",
+            ayushDietLabel: "Food Preferences & Taste Cravings",
+            ayushDietPlaceholder: "e.g. Shakahari, teekha aur tala-bhuna khana, ya meetha pasand",
+            ayushEatingHabitsLabel: "Meal Timings & Bad Eating Habits",
+            ayushEatingHabitsPlaceholder: "e.g. Late dinner 11 PM pe, breakfast chhodna, bina time khana",
+            ayushStep7Title: "Body Type, Daily Habits & Diet (AYUSH Profile)",
+            ayushStep7Sub: "Body type, neend, pet saaf hona aur diet ki information aasan words me enter karein.",
+            prakritiCardVata: "Light & Active Body (Vata)",
+            prakritiCardVataSub: "Fast movement, dry skin, variable energy aur hunger",
+            prakritiCardPitta: "Warm & Fast Metabolism (Pitta)",
+            prakritiCardPittaSub: "Tez bhookh, garmi bardasht na hona, acidity aur jalan",
+            prakritiCardKapha: "Calm & Solid Build (Kapha)",
+            prakritiCardKaphaSub: "Steady energy, bhari body, dheema digestion aur shant nature",
+            prakritiCardDual: "Combination ya Balanced",
+            prakritiCardDualSub: "Do doshas ka mix (jaise Pitta-Vata) ya sabhi balanced",
+            ayushObsLabel: "Doctor ke Clinical & Holistic Observations",
+            ayushObsPlaceholder: "Doctor ke observations enter karein (pulse, tongue, lifestyle advice)..."
         }
     };
 
@@ -5184,6 +5292,18 @@ const I18nService = (() => {
                             span.textContent = val;
                         }
                     }
+                }
+            });
+
+            // 1B. Apply data-i18n-placeholder attributes
+            document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+                const key = el.getAttribute("data-i18n-placeholder");
+                let val = dict[key];
+                if (!val && DICTIONARY.en && DICTIONARY.en[key]) {
+                    val = translateText(DICTIONARY.en[key], lang);
+                }
+                if (val) {
+                    el.placeholder = val;
                 }
             });
 

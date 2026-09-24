@@ -43,12 +43,13 @@ function togglePasswordVisibility(inputId, iconEl) {
     }
 }
 
-function handlePatientLogin(e) {
+async function handlePatientLogin(e) {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
     
     const idInput = document.getElementById("loginPatientId");
     const passInput = document.getElementById("loginPassword");
     const errorEl = document.getElementById("loginErrorMsg");
+    const submitBtn = document.querySelector("#patientLoginForm button[type='submit']");
 
     const id = idInput ? idInput.value.trim() : "";
     const pass = passInput ? passInput.value : "";
@@ -63,15 +64,42 @@ function handlePatientLogin(e) {
         return false;
     }
 
+    if (errorEl) errorEl.style.display = "none";
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> लॉगिन हो रहा है...';
+    }
+
     let authResult = { success: false, message: "" };
-    if (typeof ClinicalStorage !== "undefined" && typeof ClinicalStorage.authenticatePatient === "function") {
+
+    try {
+        if (typeof ApiService !== "undefined") {
+            const res = await ApiService.login({
+                email: id,
+                phone: id,
+                patientId: id,
+                id: id,
+                password: pass || "123456",
+                role: "patient"
+            });
+
+            if (res && res.token) {
+                ApiService.setToken(res.token);
+                authResult = {
+                    success: true,
+                    patient: res.user || { id: id, fullName: res.user.name || "Patient" }
+                };
+            }
+        }
+    } catch (apiErr) {
+        console.warn("[PatientLogin] Backend API warning, checking clinical storage:", apiErr.message);
+        if (apiErr.status === 401 && !apiErr.isNetworkError) {
+            authResult = { success: false, message: apiErr.message || "पासवर्ड गलत है।" };
+        }
+    }
+
+    if (!authResult.success && typeof ClinicalStorage !== "undefined" && typeof ClinicalStorage.authenticatePatient === "function") {
         authResult = ClinicalStorage.authenticatePatient(id, pass);
-    } else {
-        // Direct fallback
-        authResult = {
-            success: true,
-            patient: { id: id.toUpperCase().startsWith("AYU") ? id.toUpperCase() : "AYU-2026-DEMO", fullName: "Rajesh Patel" }
-        };
     }
 
     if (!authResult.success) {
@@ -81,17 +109,21 @@ function handlePatientLogin(e) {
         } else {
             alert(authResult.message || "लॉगिन विफल।");
         }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> स्वास्थ्य पोर्टल में प्रवेश करें (Login)';
+        }
         return false;
     }
 
     // Success: save active patient
-    const targetPatientId = (authResult.patient && authResult.patient.id) ? authResult.patient.id : "AYU-2026-DEMO";
+    const targetPatientId = (authResult.patient && (authResult.patient.patientId || authResult.patient.id)) ? (authResult.patient.patientId || authResult.patient.id) : "AYU-2026-DEMO";
     localStorage.setItem("swasthai_active_patient_id", targetPatientId);
     localStorage.setItem("ayushActiveRole", "patient");
 
     if (typeof SpeechService !== "undefined" && typeof SpeechService.speakText === "function") {
         try {
-            SpeechService.speakText(`नमस्ते ${authResult.patient.fullName || ''}, स्वास्थ AI में आपका स्वागत है।`, { lang: "hi-IN" });
+            SpeechService.speakText(`नमस्ते ${authResult.patient.fullName || authResult.patient.name || ''}, स्वास्थ AI में आपका स्वागत है।`, { lang: "hi-IN" });
         } catch(err) {}
     }
 
@@ -99,8 +131,8 @@ function handlePatientLogin(e) {
     return false;
 }
 
-function handlePatientRegister(e) {
-    e.preventDefault();
+async function handlePatientRegister(e) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
     const fullName = document.getElementById("regFullName").value.trim();
     const age = parseInt(document.getElementById("regAge").value, 10) || 30;
     const gender = document.getElementById("regGender").value;
@@ -108,6 +140,7 @@ function handlePatientRegister(e) {
     const allergies = document.getElementById("regAllergies").value.trim() || "No Known Allergies";
     const password = document.getElementById("regPassword").value || "123456";
     const errorEl = document.getElementById("registerErrorMsg");
+    const submitBtn = document.querySelector("#patientRegisterForm button[type='submit']");
 
     if (!fullName || !phone) {
         if (errorEl) {
@@ -117,8 +150,42 @@ function handlePatientRegister(e) {
         return;
     }
 
+    if (errorEl) errorEl.style.display = "none";
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> खाता बन रहा है...';
+    }
+
+    let createdId = "";
+
+    try {
+        if (typeof ApiService !== "undefined") {
+            const res = await ApiService.register({
+                name: fullName,
+                fullName: fullName,
+                email: `${phone.replace(/\D/g, "")}@swasthai.local`,
+                phone: phone,
+                age: age,
+                gender: gender,
+                allergies: allergies,
+                password: password,
+                role: "patient"
+            });
+
+            if (res && res.token) {
+                ApiService.setToken(res.token);
+            }
+            if (res && res.user && res.user.patientId) {
+                createdId = res.user.patientId;
+            }
+        }
+    } catch (apiErr) {
+        console.warn("[PatientRegister] Backend register API warning, saving locally:", apiErr.message);
+    }
+
     // Register patient into storage
     const newPatient = ClinicalStorage.addPatient({
+        id: createdId || undefined,
         fullName: fullName,
         age: age,
         gender: gender,
@@ -131,10 +198,11 @@ function handlePatientRegister(e) {
         patientReportedDiseases: []
     });
 
-    localStorage.setItem("swasthai_active_patient_id", newPatient.id);
+    const activeId = createdId || newPatient.id;
+    localStorage.setItem("swasthai_active_patient_id", activeId);
     localStorage.setItem("ayushActiveRole", "patient");
 
-    alert(`पंजीकरण सफल!\n\nआपकी Patient ID: ${newPatient.id}\nपासवर्ड: ${password}\n\nअब आप अपने स्वास्थ्य पोर्टल में प्रवेश कर रहे हैं।`);
+    alert(`पंजीकरण सफल!\n\nआपकी Patient ID: ${activeId}\nपासवर्ड: ${password}\n\nअब आप अपने स्वास्थ्य पोर्टल में प्रवेश कर रहे हैं।`);
 
     window.location.href = "patient-portal.html";
 }

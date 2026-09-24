@@ -1527,15 +1527,67 @@ body.elderly-mode .elderly-action-bar {
 }
 
 .interim-preview {
-    font-style: italic;
-    color: #64748b;
-    padding: 6px 10px;
-    background: rgba(241, 245, 249, 0.7);
-    border-radius: 6px;
+    font-style: normal;
+    color: #166534;
+    padding: 8px 12px;
+    background: #ecfdf5;
+    border: 1px dashed #34d399;
+    border-radius: 8px;
     font-size: 13px;
+    font-weight: 500;
     display: flex;
     align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    animation: interimPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes interimPulse {
+    0%, 100% { background-color: #ecfdf5; border-color: #34d399; }
+    50% { background-color: #d1fae5; border-color: #10b981; }
+}
+
+.field-extracted-highlight {
+    border-color: #10b981 !important;
+    background-color: #ecfdf5 !important;
+    color: #065f46 !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
+    transition: all 0.4s ease !important;
+}
+
+/* Ayush History Mode Styles */
+.ayush-mode-pill-btn {
+    display: inline-flex;
+    align-items: center;
     gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid #10b981;
+    background: #ecfdf5;
+    color: #065f46;
+    transition: all 0.2s ease;
+}
+
+.ayush-mode-pill-btn:hover {
+    background: #d1fae5;
+}
+
+.ayush-mode-pill-btn.inactive {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.ayush-intake-panel {
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.08);
+    transition: all 0.3s ease;
 }
 
 .manual-turn-add {
@@ -2132,8 +2184,8 @@ body.elderly-mode .elderly-action-bar {
     border: 1.5px solid #e2e8f0;
     border-radius: 12px;
     padding: 14px;
-    min-height: 220px;
-    max-height: 340px;
+    min-height: 160px;
+    max-height: 240px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;

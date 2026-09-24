@@ -99,43 +99,101 @@ const PatientPortal = (() => {
     }
 
     function loadPatientData() {
+        // Determine patient ID from: JWT token → localStorage → demo fallback
         let storedPatientId = localStorage.getItem("swasthai_active_patient_id");
-        if (!storedPatientId) {
-            storedPatientId = "AYU-2026-DEMO";
+        
+        // Try to get from JWT user info in ApiService
+        if (!storedPatientId && typeof ApiService !== "undefined") {
+            const token = ApiService.getToken();
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split(".")[1]));
+                    if (payload.patientId) {
+                        storedPatientId = payload.patientId;
+                        localStorage.setItem("swasthai_active_patient_id", storedPatientId);
+                    }
+                } catch(e) {}
+            }
         }
+        
+        if (!storedPatientId) storedPatientId = "AYU-2026-DEMO";
+
+        // Try to load from backend API first
+        if (typeof ApiService !== "undefined" && ApiService.getToken()) {
+            ApiService.getPatientDossier(storedPatientId)
+                .then(res => {
+                    if (res && res.success && res.data && res.data.patient) {
+                        const p = res.data.patient;
+                        currentPatient = {
+                            id: p.patientId,
+                            patientId: p.patientId,
+                            fullName: p.fullName,
+                            age: p.age,
+                            gender: p.gender,
+                            bloodGroup: p.bloodGroup,
+                            phone: p.phone,
+                            email: p.email,
+                            address: p.address,
+                            allergies: p.allergies,
+                            conditions: p.conditions,
+                            prakriti: p.prakriti,
+                            status: p.status,
+                            registeredDate: p.registeredDate,
+                            patientReportedDiseases: res.data.patientReportedDiseases || [],
+                            pastDoctorRecords: res.data.pastDoctorRecords || []
+                        };
+                        _populatePatientUI(currentPatient);
+                        // Update renders with fresh data
+                        try { renderDiseasesList(); } catch(e) {}
+                        try { renderPastRecordsList(); } catch(e) {}
+                        try { renderHealthSummaryCards(); } catch(e) {}
+                        try { renderHealthReadingsTable(); } catch(e) {}
+                        try { renderPrescriptions(); } catch(e) {}
+                    }
+                })
+                .catch(err => {
+                    console.info("[PatientPortal] Backend dossier not available, using local storage:", err.message);
+                });
+        }
+
+        // Immediate render using local storage (fast path, works offline)
         currentPatient = ClinicalStorage.getPatientById(storedPatientId);
         if (!currentPatient) {
             currentPatient = (ClinicalStorage.getPatients() || [])[0] || {
-                id: "AYU-2026-DEMO",
-                fullName: "Rajesh Patel",
-                age: 58,
-                gender: "Male",
-                phone: "+91 98765 43210",
-                bloodGroup: "B+",
-                allergies: "Penicillin (Severe hives)"
+                id: storedPatientId,
+                fullName: "Patient",
+                age: 35,
+                gender: "N/A",
+                phone: "",
+                bloodGroup: "O+",
+                allergies: "Not specified"
             };
         }
 
         if (currentPatient) {
-            localStorage.setItem("swasthai_active_patient_id", currentPatient.id);
+            localStorage.setItem("swasthai_active_patient_id", currentPatient.id || currentPatient.patientId);
             if (typeof DigitalTwin !== "undefined") {
                 DigitalTwin.renderPanel("dtPatientContainer", "patient", currentPatient.id);
             }
         }
 
-        // Populate header & badge
+        _populatePatientUI(currentPatient);
+    }
+
+    function _populatePatientUI(patient) {
+        if (!patient) return;
         const nameEl = document.getElementById("patientNameHeader");
         const idBadge = document.getElementById("patientIdHeaderBadge");
         const welcomeEl = document.getElementById("welcomePatientName");
         const welcomeId = document.getElementById("welcomePatientId");
         const avatarEl = document.getElementById("patientAvatarEl");
 
-        if (nameEl) nameEl.textContent = currentPatient.fullName;
-        if (idBadge) idBadge.textContent = `ID: ${currentPatient.id}`;
-        if (welcomeEl) welcomeEl.textContent = currentPatient.fullName;
-        if (welcomeId) welcomeId.textContent = currentPatient.id;
+        if (nameEl) nameEl.textContent = patient.fullName;
+        if (idBadge) idBadge.textContent = `ID: ${patient.id || patient.patientId}`;
+        if (welcomeEl) welcomeEl.textContent = patient.fullName;
+        if (welcomeId) welcomeId.textContent = patient.id || patient.patientId;
         
-        const initials = (currentPatient.fullName || "P").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+        const initials = (patient.fullName || "P").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
         if (avatarEl) avatarEl.textContent = initials;
 
         // Populate Clinical Dossier Summary Card
@@ -148,14 +206,14 @@ const PatientPortal = (() => {
         const dEmergency = document.getElementById("dossierEmergency");
         const dAllergies = document.getElementById("dossierAllergiesText");
 
-        if (dFullName) dFullName.textContent = currentPatient.fullName;
-        if (dIdBadge) dIdBadge.textContent = `Patient ID: ${currentPatient.id}`;
+        if (dFullName) dFullName.textContent = patient.fullName;
+        if (dIdBadge) dIdBadge.textContent = `Patient ID: ${patient.id || patient.patientId}`;
         if (dAvatar) dAvatar.textContent = initials;
-        if (dAgeGender) dAgeGender.textContent = `${currentPatient.age || 35} yrs / ${currentPatient.gender || 'Other'}`;
-        if (dBlood) dBlood.textContent = `${currentPatient.bloodGroup || 'Not recorded'}`;
-        if (dPhone) dPhone.textContent = currentPatient.phone || "Not recorded";
-        if (dEmergency) dEmergency.textContent = `${currentPatient.emergencyName || 'Emergency Contact'} (${currentPatient.emergencyPhone || 'N/A'})`;
-        if (dAllergies) dAllergies.textContent = currentPatient.allergies || "No Known Drug Allergies (NKDA)";
+        if (dAgeGender) dAgeGender.textContent = `${patient.age || 35} yrs / ${patient.gender || 'Other'}`;
+        if (dBlood) dBlood.textContent = `${patient.bloodGroup || 'Not recorded'}`;
+        if (dPhone) dPhone.textContent = patient.phone || "Not recorded";
+        if (dEmergency) dEmergency.textContent = `${patient.emergencyName || 'Emergency Contact'} (${patient.emergencyPhone || 'N/A'})`;
+        if (dAllergies) dAllergies.textContent = patient.allergies || "No Known Drug Allergies (NKDA)";
 
         const logoutBtn = document.getElementById("patientLogoutBtn");
         if (logoutBtn) {
@@ -454,19 +512,37 @@ const PatientPortal = (() => {
 
         if (!diseaseName) return;
 
-        ClinicalStorage.addPatientReportedDisease(currentPatient.id, {
-            diseaseName,
-            duration,
-            severity,
-            symptoms
-        });
+        const diseaseData = { diseaseName, duration, severity, symptoms };
+
+        // ===== PRIMARY: Backend API =====
+        if (typeof ApiService !== "undefined") {
+            const patientId = currentPatient ? (currentPatient.id || currentPatient.patientId) : "AYU-2026-DEMO";
+            ApiService.addReportedDisease(patientId, diseaseData)
+                .then(res => {
+                    if (res && res.success && res.data) {
+                        currentPatient.patientReportedDiseases = res.data.patientReportedDiseases || currentPatient.patientReportedDiseases || [];
+                    }
+                    renderDiseasesList();
+                })
+                .catch(err => {
+                    console.warn("[AddDisease] Backend error, using local:", err.message);
+                    // Still saved locally below, so just re-render
+                    if (typeof ClinicalStorage !== "undefined") {
+                        currentPatient = ClinicalStorage.getPatientById(currentPatient.id) || currentPatient;
+                    }
+                    renderDiseasesList();
+                });
+        }
+
+        // ===== FALLBACK / CACHE: Also save locally =====
+        if (typeof ClinicalStorage !== "undefined") {
+            ClinicalStorage.addPatientReportedDisease(currentPatient.id || currentPatient.patientId, diseaseData);
+            currentPatient = ClinicalStorage.getPatientById(currentPatient.id || currentPatient.patientId) || currentPatient;
+        }
 
         alert("बीमारी सफलतापूर्वक दर्ज कर ली गई है और डॉक्टर के पास भेज दी गई है!");
         closeAddDiseaseModal();
         document.getElementById("addDiseaseForm").reset();
-        
-        // Reload and re-render
-        currentPatient = ClinicalStorage.getPatientById(currentPatient.id);
         renderDiseasesList();
     }
 
@@ -531,21 +607,36 @@ const PatientPortal = (() => {
 
         if (!doctorName || !diagnosis) return;
 
-        ClinicalStorage.addPastDoctorRecord(currentPatient.id, {
-            doctorName,
-            clinicOrHospital,
-            diagnosis,
-            year,
-            pastMedicines,
-            notes
-        });
+        const recordData = { doctorName, clinicOrHospital, diagnosis, year, pastMedicines, notes };
+
+        // ===== PRIMARY: Backend API =====
+        if (typeof ApiService !== "undefined") {
+            const patientId = currentPatient ? (currentPatient.id || currentPatient.patientId) : "AYU-2026-DEMO";
+            ApiService.addPastDoctorRecord(patientId, recordData)
+                .then(res => {
+                    if (res && res.success && res.data) {
+                        currentPatient.pastDoctorRecords = res.data.pastDoctorRecords || currentPatient.pastDoctorRecords || [];
+                    }
+                    renderPastRecordsList();
+                })
+                .catch(err => {
+                    console.warn("[AddPastDoctor] Backend error, using local:", err.message);
+                    if (typeof ClinicalStorage !== "undefined") {
+                        currentPatient = ClinicalStorage.getPatientById(currentPatient.id) || currentPatient;
+                    }
+                    renderPastRecordsList();
+                });
+        }
+
+        // ===== FALLBACK / CACHE: Also save locally =====
+        if (typeof ClinicalStorage !== "undefined") {
+            ClinicalStorage.addPastDoctorRecord(currentPatient.id || currentPatient.patientId, recordData);
+            currentPatient = ClinicalStorage.getPatientById(currentPatient.id || currentPatient.patientId) || currentPatient;
+        }
 
         alert("पुराने डॉक्टर का डेटा सफलतापूर्वक सुरक्षित कर लिया गया है!");
         closeAddPastDoctorModal();
         document.getElementById("addPastDoctorForm").reset();
-
-        // Reload and re-render
-        currentPatient = ClinicalStorage.getPatientById(currentPatient.id);
         renderPastRecordsList();
     }
 
@@ -581,14 +672,82 @@ const PatientPortal = (() => {
         });
     }
 
-    function renderPrescriptions() {
+    function renderPrescriptions(prescriptionsData) {
         const container = document.getElementById("patientPrescriptionsContainer");
         if (!container) return;
 
-        const cases = ClinicalStorage.getCases().filter(c => c.patientId === currentPatient.id);
-        const verifiedCases = cases.filter(c => c.currentMedications && c.currentMedications.length > 0);
+        // If we got data from backend, use it directly
+        if (prescriptionsData && Array.isArray(prescriptionsData)) {
+            _renderPrescriptionCards(container, prescriptionsData);
+            return;
+        }
 
+        // ===== PRIMARY: Try Backend API =====
+        if (typeof ApiService !== "undefined") {
+            const patientId = currentPatient ? (currentPatient.id || currentPatient.patientId) : "AYU-2026-DEMO";
+            ApiService.getPrescriptionsForPatient(patientId)
+                .then(res => {
+                    if (res && res.success && res.data && res.data.length > 0) {
+                        _renderPrescriptionCards(container, res.data);
+                        return;
+                    }
+                    // Backend returned empty — try local fallback
+                    _renderPrescriptionsFallback(container);
+                })
+                .catch(err => {
+                    console.info("[Prescriptions] Backend not available, using local:", err.message);
+                    _renderPrescriptionsFallback(container);
+                });
+        } else {
+            _renderPrescriptionsFallback(container);
+        }
+    }
+
+    function _renderPrescriptionCards(container, prescriptions) {
         container.innerHTML = "";
+        if (!prescriptions || prescriptions.length === 0) {
+            container.innerHTML = `
+                <div style="grid-column: 1 / -1; padding: 18px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 8px;">
+                    <i class="fa-solid fa-notes-medical" style="font-size: 24px; color: #1f7a57; margin-bottom: 6px; display: block;"></i>
+                    No prescriptions issued yet. Speak or submit your symptoms to the doctor.
+                </div>
+            `;
+            return;
+        }
+
+        prescriptions.forEach(rx => {
+            const medicines = rx.medicines || [];
+            const rxHeader = document.createElement("div");
+            rxHeader.style.cssText = "grid-column: 1 / -1; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 10px 14px; margin-bottom: 4px; font-size: 12px; color: #166534;";
+            rxHeader.innerHTML = `<i class="fa-solid fa-prescription"></i> <strong>Rx: ${rx.diagnosis}</strong> &nbsp;·&nbsp; Dr: ${rx.doctorName || 'Practitioner'} &nbsp;·&nbsp; Date: ${rx.date || 'Issued'} ${rx.advice ? '<br><span style="color:#374151;">Advice: ' + rx.advice + '</span>' : ''}`;
+            container.appendChild(rxHeader);
+
+            medicines.forEach(med => {
+                const card = document.createElement("div");
+                card.style.cssText = "background: #ffffff; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);";
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <h4 style="margin: 0; font-size: 14px; color: #166534; font-weight: 800;"><i class="fa-solid fa-pills"></i> ${med.name}</h4>
+                        <span class="report-parameter-badge badge-normal">${med.dose || '1 Dose'}</span>
+                    </div>
+                    <div style="font-size: 12px; color: #374151; margin-bottom: 4px;"><strong>Frequency:</strong> ${med.frequency || 'Twice Daily'}</div>
+                    <div style="font-size: 11px; color: #6b7280;">Instructions: ${med.instructions || med.reason || 'Take as prescribed'}</div>
+                `;
+                container.appendChild(card);
+            });
+        });
+    }
+
+    function _renderPrescriptionsFallback(container) {
+        // Fall back to local cases/medications
+        const patientId = currentPatient ? (currentPatient.id || currentPatient.patientId) : null;
+        if (!patientId || typeof ClinicalStorage === "undefined") {
+            container.innerHTML = `<div style="grid-column: 1 / -1; padding: 18px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 8px;"><i class="fa-solid fa-notes-medical" style="font-size: 24px; color: #1f7a57; margin-bottom: 6px; display: block;"></i>No prescriptions issued yet.</div>`;
+            return;
+        }
+
+        const cases = ClinicalStorage.getCases().filter(c => c.patientId === patientId);
+        const verifiedCases = cases.filter(c => c.currentMedications && c.currentMedications.length > 0);
 
         if (verifiedCases.length === 0) {
             container.innerHTML = `
@@ -600,6 +759,7 @@ const PatientPortal = (() => {
             return;
         }
 
+        container.innerHTML = "";
         const activeCase = verifiedCases[0];
         activeCase.currentMedications.forEach(med => {
             const card = document.createElement("div");
@@ -1121,80 +1281,199 @@ const PatientPortal = (() => {
         }
     }
 
-    function submitHealthReading(e) {
+    async function submitHealthReading(e) {
         e.preventDefault();
         const successMsg = document.getElementById("healthReadingSuccessMsg");
         const successText = document.getElementById("healthReadingSuccessText");
         const errorMsg = document.getElementById("healthReadingErrorMsg");
         const errorText = document.getElementById("healthReadingErrorText");
+        const submitBtn = document.querySelector("#addHealthReadingForm button[type='submit']");
 
         if (successMsg) successMsg.style.display = "none";
         if (errorMsg) errorMsg.style.display = "none";
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; }
 
         const editId = document.getElementById("editReadingId").value.trim();
+        const patientId = currentPatient ? (currentPatient.id || currentPatient.patientId) : "AYU-2026-DEMO";
 
         const readingData = {
-            patientId: currentPatient.id,
+            patientId,
             date: document.getElementById("readingDate").value,
             time: document.getElementById("readingTime").value,
-            systolic: document.getElementById("readingSystolic").value,
-            diastolic: document.getElementById("readingDiastolic").value,
-            bloodSugar: document.getElementById("readingBloodSugar").value,
-            heartRate: document.getElementById("readingHeartRate").value,
-            temperature: document.getElementById("readingTemperature").value,
-            spo2: document.getElementById("readingSpO2").value,
-            weight: document.getElementById("readingWeight").value,
-            notes: document.getElementById("readingNotes").value
+            systolic: document.getElementById("readingSystolic").value || undefined,
+            diastolic: document.getElementById("readingDiastolic").value || undefined,
+            bloodSugar: document.getElementById("readingBloodSugar").value || undefined,
+            sugarType: document.getElementById("readingSugarType") ? document.getElementById("readingSugarType").value : "random",
+            heartRate: document.getElementById("readingHeartRate").value || undefined,
+            temperature: document.getElementById("readingTemperature").value || undefined,
+            spo2: document.getElementById("readingSpO2").value || undefined,
+            weight: document.getElementById("readingWeight").value || undefined,
+            notes: document.getElementById("readingNotes").value || ""
         };
 
-        if (editId) readingData.id = editId;
+        if (editId) {
+            readingData.readingId = editId;
+            readingData.id = editId;
+        }
 
-        const result = ClinicalStorage.saveHealthReading(readingData);
+        // ===== PRIMARY: Backend API (MongoDB) =====
+        if (typeof ApiService !== "undefined") {
+            try {
+                const res = await ApiService.saveHealthReading(readingData);
+
+                if (res && res.success) {
+                    let successMessage = editId
+                        ? "Reading updated successfully! Saved to your medical record."
+                        : "Today's reading saved successfully! Your health data is up to date.";
+
+                    // Show vitals screening alerts if present
+                    const evalInfo = res.evalInfo || (res.data && res.data.evalInfo);
+                    if (evalInfo && evalInfo.isAbnormal) {
+                        const allAlerts = [...(evalInfo.abnormalAlerts || []), ...(evalInfo.warnings || [])];
+                        successMessage += `\n\n⚠️ Screening Indicators Detected:\n${allAlerts.join("\n")}\n\nNote: These are screening indicators only — not a medical diagnosis. Consult your doctor.`;
+                    }
+
+                    if (successMsg) {
+                        successText.textContent = successMessage.split("\n")[0]; // First line in banner
+                        successMsg.style.display = "block";
+
+                        // Show alerts panel if abnormal
+                        if (evalInfo && evalInfo.isAbnormal) {
+                            const alertPanel = document.getElementById("healthReadingAlertsPanel");
+                            const alertList = document.getElementById("healthReadingAlertsList");
+                            if (alertPanel && alertList) {
+                                const allAlerts = [...(evalInfo.abnormalAlerts || []), ...(evalInfo.warnings || [])];
+                                alertList.innerHTML = allAlerts.map(a => `<li style="margin-bottom:4px;">⚠️ ${a}</li>`).join("");
+                                alertPanel.style.display = "block";
+                            }
+                        }
+                    }
+
+                    // Also save to local storage as cache
+                    try {
+                        if (typeof ClinicalStorage !== "undefined") {
+                            ClinicalStorage.saveHealthReading({ ...readingData, id: res.data?.readingId || editId || `VIT-${Date.now()}` });
+                        }
+                    } catch(e) {}
+
+                    // Refresh UI
+                    renderHealthSummaryCards();
+                    renderHealthReadingsTable();
+                    try { renderPatientHealthChart(currentChartMetric, currentChartDays); } catch(e) {}
+
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Reading'; }
+                    setTimeout(() => { closeAddReadingModal(); }, 1800);
+                    return;
+                }
+            } catch (apiErr) {
+                console.warn("[HealthReading] Backend API error, falling back to local storage:", apiErr.message);
+                // If it's a validation error from backend (422), show it — don't silently fall back
+                if (apiErr.status === 422 || apiErr.status === 400) {
+                    if (errorMsg) {
+                        errorText.textContent = apiErr.message || "Validation error. Please check your input values.";
+                        errorMsg.style.display = "block";
+                    }
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Reading'; }
+                    return;
+                }
+            }
+        }
+
+        // ===== FALLBACK: Local Storage (offline/demo mode) =====
+        const result = (typeof ClinicalStorage !== "undefined") ? ClinicalStorage.saveHealthReading(readingData) : { success: false, message: "No storage available." };
+
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Reading'; }
 
         if (!result.success) {
             if (errorMsg) {
-                errorText.textContent = result.message;
+                errorText.textContent = result.message || "Could not save reading. Please try again.";
                 errorMsg.style.display = "block";
             }
             return;
         }
 
-        // Show success
         if (successMsg) {
             successText.textContent = result.isUpdate
-                ? "Reading updated successfully!"
-                : "Today's reading saved successfully! Your health data is up to date.";
+                ? "Reading updated (saved locally — backend offline)."
+                : "Reading saved locally. Will sync when backend is available.";
             successMsg.style.display = "block";
         }
 
-        // Refresh UI
         renderHealthSummaryCards();
         renderHealthReadingsTable();
-        renderPatientHealthChart(currentChartMetric, currentChartDays);
-
-        // Auto-close modal after short delay
-        setTimeout(() => {
-            closeAddReadingModal();
-        }, 1400);
+        try { renderPatientHealthChart(currentChartMetric, currentChartDays); } catch(e) {}
+        setTimeout(() => { closeAddReadingModal(); }, 1400);
     }
 
-    function deleteHealthReading(readingId) {
+    async function deleteHealthReading(readingId) {
         if (!confirm("Are you sure you want to delete this reading? This action cannot be undone.")) return;
-        const result = ClinicalStorage.deleteHealthReading(readingId);
-        if (result.success) {
-            renderHealthSummaryCards();
-            renderHealthReadingsTable();
-            renderPatientHealthChart(currentChartMetric, currentChartDays);
-        } else {
-            alert("Could not delete reading: " + result.message);
+
+        // ===== PRIMARY: Backend API =====
+        if (typeof ApiService !== "undefined" && ApiService.getToken()) {
+            try {
+                const res = await ApiService.deleteHealthReading(readingId);
+                if (res && res.success) {
+                    // Also remove from local cache
+                    try { if (typeof ClinicalStorage !== "undefined") ClinicalStorage.deleteHealthReading(readingId); } catch(e) {}
+                    renderHealthSummaryCards();
+                    renderHealthReadingsTable();
+                    try { renderPatientHealthChart(currentChartMetric, currentChartDays); } catch(e) {}
+                    return;
+                }
+            } catch(apiErr) {
+                console.warn("[DeleteHealthReading] Backend error:", apiErr.message);
+            }
+        }
+
+        // Fallback to local storage
+        if (typeof ClinicalStorage !== "undefined") {
+            const result = ClinicalStorage.deleteHealthReading(readingId);
+            if (result.success) {
+                renderHealthSummaryCards();
+                renderHealthReadingsTable();
+                try { renderPatientHealthChart(currentChartMetric, currentChartDays); } catch(e) {}
+            } else {
+                alert("Could not delete reading: " + result.message);
+            }
         }
     }
 
-    function renderHealthSummaryCards() {
+    function renderHealthSummaryCards(summaryData) {
         const container = document.getElementById("vitalsSummaryGrid");
         if (!container || !currentPatient) return;
 
-        const summary = ClinicalStorage.getHealthSummary(currentPatient.id);
+        // If summaryData passed directly (from API call), use it
+        if (summaryData) {
+            _drawHealthSummaryCards(container, summaryData);
+            return;
+        }
+
+        // ===== PRIMARY: Backend API =====
+        if (typeof ApiService !== "undefined") {
+            const patientId = currentPatient ? (currentPatient.id || currentPatient.patientId) : "AYU-2026-DEMO";
+            ApiService.getHealthSummary(patientId)
+                .then(res => {
+                    if (res && res.success) {
+                        _drawHealthSummaryCards(container, res);
+                    } else {
+                        _drawHealthSummaryCardsFallback(container);
+                    }
+                })
+                .catch(() => _drawHealthSummaryCardsFallback(container));
+            return;
+        }
+
+        _drawHealthSummaryCardsFallback(container);
+    }
+
+    function _drawHealthSummaryCardsFallback(container) {
+        const summary = (typeof ClinicalStorage !== "undefined" && currentPatient)
+            ? ClinicalStorage.getHealthSummary(currentPatient.id || currentPatient.patientId)
+            : { hasData: false };
+        _drawHealthSummaryCards(container, summary);
+    }
+
+    function _drawHealthSummaryCards(container, summary) {
 
         if (!summary.hasData) {
             container.innerHTML = `
@@ -1300,12 +1579,43 @@ const PatientPortal = (() => {
         `;
     }
 
-    function renderHealthReadingsTable() {
+    function renderHealthReadingsTable(readingsData) {
         const tbody = document.getElementById("healthReadingsTableBody");
         const countBadge = document.getElementById("readingsCountBadge");
         if (!tbody || !currentPatient) return;
 
-        const readings = ClinicalStorage.getHealthReadings(currentPatient.id);
+        if (readingsData && Array.isArray(readingsData)) {
+            _drawHealthReadingsRows(tbody, countBadge, readingsData);
+            return;
+        }
+
+        // ===== PRIMARY: Backend API =====
+        if (typeof ApiService !== "undefined") {
+            const patientId = currentPatient ? (currentPatient.id || currentPatient.patientId) : "AYU-2026-DEMO";
+            ApiService.getHealthReadings(patientId)
+                .then(res => {
+                    if (res && res.success && res.data) {
+                        _drawHealthReadingsRows(tbody, countBadge, res.data);
+                    } else {
+                        _drawHealthReadingsRowsFallback(tbody, countBadge);
+                    }
+                })
+                .catch(() => _drawHealthReadingsRowsFallback(tbody, countBadge));
+            return;
+        }
+
+        _drawHealthReadingsRowsFallback(tbody, countBadge);
+    }
+
+    function _drawHealthReadingsRowsFallback(tbody, countBadge) {
+        const patientId = currentPatient ? (currentPatient.id || currentPatient.patientId) : null;
+        const readings = (typeof ClinicalStorage !== "undefined" && patientId)
+            ? ClinicalStorage.getHealthReadings(patientId)
+            : [];
+        _drawHealthReadingsRows(tbody, countBadge, readings);
+    }
+
+    function _drawHealthReadingsRows(tbody, countBadge, readings) {
         if (countBadge) countBadge.textContent = `${readings.length} Total Reading${readings.length !== 1 ? "s" : ""}`;
 
         if (readings.length === 0) {
@@ -1321,26 +1631,35 @@ const PatientPortal = (() => {
 
         tbody.innerHTML = "";
         readings.forEach(r => {
-            const ev = ClinicalStorage.evaluateVitals(r);
-            const bpStr = (r.systolic && r.diastolic) ? `${r.systolic}/${r.diastolic}` : "—";
+            // Support both backend evalInfo format and ClinicalStorage evaluateVitals format
+            const evalInfo = r.evalInfo || (typeof ClinicalStorage !== "undefined" && ClinicalStorage.evaluateVitals ? ClinicalStorage.evaluateVitals(r) : {});
+            const ev = {
+                bp: evalInfo.bp || (evalInfo.isAbnormal ? { status: "danger", label: "Alert" } : { status: "normal", label: "Normal" }),
+                bloodSugar: evalInfo.bloodSugar || { status: "normal" },
+                heartRate: evalInfo.heartRate || { status: "normal" },
+                temperature: evalInfo.temperature || { status: "normal" },
+                spo2: evalInfo.spo2 || { status: "normal" },
+                isAbnormal: evalInfo.isAbnormal || false
+            };
+
+            const readingId = r.readingId || r.id || "";
 
             function cellBadge(val, unit, evalObj) {
                 if (!val && val !== 0) return `<span style="color: #94a3b8;">—</span>`;
                 const badgeClass = evalObj && evalObj.status !== "normal"
                     ? (evalObj.status === "danger" ? "vital-badge vital-badge-danger" : (evalObj.status === "info" ? "vital-badge vital-badge-info" : "vital-badge vital-badge-warning"))
                     : "";
-                const label = evalObj && evalObj.status !== "normal" ? ` <span class="${badgeClass}" style="font-size:10px;">${evalObj.label}</span>` : "";
+                const label = evalObj && evalObj.status !== "normal" ? ` <span class="${badgeClass}" style="font-size:10px;">${evalObj.label || ""}</span>` : "";
                 return `<strong>${val}</strong> <span style="font-size:11px;color:#94a3b8;">${unit}</span>${label}`;
             }
 
             const bpEv = ev.bp;
             const bpCellBadge = (r.systolic && r.diastolic)
-                ? `<strong>${r.systolic}/${r.diastolic}</strong> <span style="font-size:11px;color:#94a3b8;">mmHg</span>${bpEv.status !== "normal" ? ` <span class="vital-badge ${bpEv.status === 'danger' ? 'vital-badge-danger' : (bpEv.status === 'info' ? 'vital-badge-info' : 'vital-badge-warning')}" style="font-size:10px;">${bpEv.label}</span>` : ""}`
+                ? `<strong>${r.systolic}/${r.diastolic}</strong> <span style="font-size:11px;color:#94a3b8;">mmHg</span>${bpEv.status !== "normal" ? ` <span class="vital-badge ${bpEv.status === 'danger' ? 'vital-badge-danger' : 'vital-badge-warning'}" style="font-size:10px;">${bpEv.label || ""}</span>` : ""}`
                 : `<span style="color:#94a3b8;">—</span>`;
 
             const dateFmt = r.date ? new Date(r.date + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
             const notesStr = r.notes ? `<span title="${r.notes}" style="cursor:help; max-width:100px; display:inline-block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; color:#475569;">${r.notes}</span>` : `<span style="color:#94a3b8;font-size:11px;">—</span>`;
-
             const rowStyle = ev.isAbnormal ? 'border-left: 3px solid #fca5a5;' : '';
 
             const tr = document.createElement("tr");
@@ -1356,8 +1675,8 @@ const PatientPortal = (() => {
                 <td>${(r.weight != null) ? `<strong>${r.weight}</strong> <span style="font-size:11px;color:#94a3b8;">kg</span>` : '<span style="color:#94a3b8;">—</span>'}</td>
                 <td>${notesStr}</td>
                 <td>
-                    <button class="table-action-btn edit-btn" onclick="PatientPortal.openAddReadingModal('${r.id}')" title="Edit Reading"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button class="table-action-btn delete-btn" onclick="PatientPortal.deleteHealthReading('${r.id}')" title="Delete Reading"><i class="fa-solid fa-trash"></i></button>
+                    <button class="table-action-btn edit-btn" onclick="PatientPortal.openAddReadingModal('${readingId}')" title="Edit Reading"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button class="table-action-btn delete-btn" onclick="PatientPortal.deleteHealthReading('${readingId}')" title="Delete Reading"><i class="fa-solid fa-trash"></i></button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -1377,7 +1696,10 @@ const PatientPortal = (() => {
             opts.days = days;
         }
 
-        const readings = ClinicalStorage.getHealthReadings(currentPatient.id, opts);
+        const patientId = currentPatient ? (currentPatient.id || currentPatient.patientId) : null;
+        const readings = (typeof ClinicalStorage !== "undefined" && patientId)
+            ? ClinicalStorage.getHealthReadings(patientId, opts)
+            : [];
         const sorted = [...readings].reverse(); // oldest first for chart
 
         let labels = sorted.map(r => {

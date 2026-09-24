@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    function loadMetrics() {
+    async function loadMetrics() {
         const metrics = ClinicalStorage.getDashboardMetrics();
 
         setNumberWithAnimation("patientCount", metrics.totalPatients);
@@ -149,6 +149,25 @@ document.addEventListener("DOMContentLoaded", () => {
         setNumberWithAnimation("redFlagCount", metrics.redFlagCount);
         setNumberWithAnimation("attentionCount", metrics.requiringAttention);
         setNumberWithAnimation("followupsDueCount", metrics.followupsDue);
+
+        // Fetch fresh metrics from backend API
+        if (typeof ApiService !== "undefined" && typeof ApiService.getDashboardMetrics === "function") {
+            try {
+                const res = await ApiService.getDashboardMetrics();
+                if (res && res.success && res.data) {
+                    const d = res.data;
+                    setNumberWithAnimation("patientCount", d.totalPatients);
+                    setNumberWithAnimation("casesTodayCount", d.casesToday);
+                    setNumberWithAnimation("pendingReviewCount", d.pendingReview);
+                    setNumberWithAnimation("completedCasesCount", d.completed);
+                    setNumberWithAnimation("redFlagCount", d.redFlagCount);
+                    setNumberWithAnimation("attentionCount", d.requiringAttention);
+                    setNumberWithAnimation("followupsDueCount", d.followupsDue);
+                }
+            } catch (err) {
+                console.warn("[Dashboard] Could not fetch live metrics, using local:", err.message);
+            }
+        }
     }
 
     function setNumberWithAnimation(elementId, targetValue) {

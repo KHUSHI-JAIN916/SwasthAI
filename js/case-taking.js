@@ -112,6 +112,21 @@ document.addEventListener("DOMContentLoaded", () => {
             activeCaseState.allergyStatus = "known";
         }
 
+        if (patient.prakriti) {
+            const exactRad = document.querySelector(`input[name="prakriti"][value="${patient.prakriti}"]`);
+            if (exactRad) {
+                exactRad.checked = true;
+            } else if (patient.prakriti.includes("-") || patient.prakriti.toLowerCase().includes("sama")) {
+                const dualRad = document.querySelector(`input[name="prakriti"][value="Dvandvaja/Sama"]`);
+                if (dualRad) dualRad.checked = true;
+            }
+            if (!activeCaseState.ayushAssessment) {
+                activeCaseState.ayushAssessment = { prakriti: patient.prakriti };
+            } else {
+                activeCaseState.ayushAssessment.prakriti = patient.prakriti;
+            }
+        }
+
         updateSlotTracker();
 
         if (typeof DigitalTwin !== "undefined") {
@@ -489,6 +504,36 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
+        function collectAyushFormData() {
+            const selectedPrakriti = document.querySelector('input[name="prakriti"]:checked');
+            const prakritiVal = selectedPrakriti ? selectedPrakriti.value : "";
+            const manasikaVal = document.getElementById("ayushManasika") ? document.getElementById("ayushManasika").value : "";
+            const agniVal = document.getElementById("ayushAgni") ? document.getElementById("ayushAgni").value : "";
+            const sleepVal = document.getElementById("ayushSleep") ? document.getElementById("ayushSleep").value.trim() : "";
+            const bowelVal = document.getElementById("ayushBowel") ? document.getElementById("ayushBowel").value : "";
+            const lifestyleVal = document.getElementById("ayushLifestyle") ? document.getElementById("ayushLifestyle").value.trim() : "";
+            const dietVal = document.getElementById("ayushDietPattern") ? document.getElementById("ayushDietPattern").value.trim() : "";
+            const habitsVal = document.getElementById("ayushEatingHabits") ? document.getElementById("ayushEatingHabits").value.trim() : "";
+            const notesVal = document.getElementById("ayushObservations") ? document.getElementById("ayushObservations").value.trim() : "";
+
+            activeCaseState.ayushAssessment = {
+                prakriti: prakritiVal || (activeCaseState.ayushAssessment ? activeCaseState.ayushAssessment.prakriti : ""),
+                manasikaPrakriti: manasikaVal,
+                agni: agniVal,
+                lifestyleRhythms: {
+                    nidra: sleepVal,
+                    koshtha: bowelVal,
+                    dinacharya: lifestyleVal
+                },
+                dietaryPatterns: {
+                    agni: agniVal,
+                    rasaDiet: dietVal,
+                    eatingHabits: habitsVal
+                },
+                notes: notesVal
+            };
+        }
+
         // Generate Summary on step 8
         if (generateSummaryBtn) {
             generateSummaryBtn.addEventListener("click", () => {
@@ -498,6 +543,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 activeCaseState.chiefComplaint = complaintVal;
                 activeCaseState.patientName = patientVal;
+
+                collectAyushFormData();
+                const ay = activeCaseState.ayushAssessment;
+                const hasAyush = ay && (ay.prakriti || ay.manasikaPrakriti || ay.agni || ay.notes || (ay.lifestyleRhythms && (ay.lifestyleRhythms.nidra || ay.lifestyleRhythms.koshtha)) || (ay.dietaryPatterns && (ay.dietaryPatterns.rasaDiet || ay.dietaryPatterns.eatingHabits)));
 
                 if (aiCaseSummary) {
                     aiCaseSummary.innerHTML = `
@@ -513,6 +562,17 @@ document.addEventListener("DOMContentLoaded", () => {
                             <h4>Description</h4>
                             <p>${descVal}</p>
                         </div>
+                        ${hasAyush ? `
+                        <div class="summary-section" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-top: 10px;">
+                            <h4 style="color: #166534; display: flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid fa-leaf"></i> Body Type, Daily Habits & Diet Profile
+                            </h4>
+                            <p style="margin-top: 4px; font-size: 13px; color: #14532d;"><strong>Body & Mind Profile:</strong> ${ay.prakriti || 'Not assessed'} ${ay.manasikaPrakriti ? '• ' + ay.manasikaPrakriti : ''}</p>
+                            <p style="margin-top: 4px; font-size: 13px; color: #14532d;"><strong>Daily Habits:</strong> Sleep: ${ay.lifestyleRhythms.nidra || 'Not noted'} | Bowel Regularity: ${ay.lifestyleRhythms.koshtha || 'Not noted'} | Routine: ${ay.lifestyleRhythms.dinacharya || 'Not noted'}</p>
+                            <p style="margin-top: 4px; font-size: 13px; color: #14532d;"><strong>Digestion & Food Habits:</strong> Hunger/Hazma: ${ay.agni || 'Not noted'} | Food Cravings: ${ay.dietaryPatterns.rasaDiet || 'Not noted'} | Eating Habits: ${ay.dietaryPatterns.eatingHabits || 'Not noted'}</p>
+                            ${ay.notes ? `<p style="margin-top: 4px; font-size: 13px; color: #166534; font-style: italic;"><strong>Doctor's Holistic Notes:</strong> ${ay.notes}</p>` : ''}
+                        </div>
+                        ` : ''}
                     `;
                 }
             });
@@ -522,6 +582,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (caseForm) {
             caseForm.addEventListener("submit", (e) => {
                 e.preventDefault();
+                collectAyushFormData();
                 ClinicalStorage.saveOrUpdateCase(activeCaseState);
                 if (caseSuccessModal) caseSuccessModal.classList.add("show-case-modal");
             });

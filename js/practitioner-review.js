@@ -181,7 +181,28 @@ const PractitionerReview = (() => {
             ? currentCase.surgicalHistory.join(", ") : "None reported";
 
         if (currentCase.ayushAssessment) {
-            document.getElementById("dispAyushNotes").textContent = `Prakriti: ${currentCase.ayushAssessment.prakriti || 'Not assessed'} • Notes: ${currentCase.ayushAssessment.notes || 'No specific AYUSH notes'}`;
+            const ay = currentCase.ayushAssessment;
+            const prakritiText = ay.prakriti || (currentPatient && currentPatient.prakriti) || 'Not assessed';
+            const manasikaText = ay.manasikaPrakriti ? ` • Manasika: ${ay.manasikaPrakriti}` : '';
+            const agniText = ay.agni || (ay.dietaryPatterns && ay.dietaryPatterns.agni) ? ` • Agni: ${ay.agni || ay.dietaryPatterns.agni}` : '';
+            const sleepText = ay.lifestyleRhythms && ay.lifestyleRhythms.nidra ? ay.lifestyleRhythms.nidra : '';
+            const bowelText = ay.lifestyleRhythms && ay.lifestyleRhythms.koshtha ? ay.lifestyleRhythms.koshtha : '';
+            const routineText = ay.lifestyleRhythms && ay.lifestyleRhythms.dinacharya ? ay.lifestyleRhythms.dinacharya : '';
+            const dietText = ay.dietaryPatterns && ay.dietaryPatterns.rasaDiet ? ay.dietaryPatterns.rasaDiet : '';
+            const habitsText = ay.dietaryPatterns && ay.dietaryPatterns.eatingHabits ? ay.dietaryPatterns.eatingHabits : '';
+            const notesText = ay.notes || '';
+
+            let ayushHtml = `<div style="font-weight: 700; color: #166534; font-size: 13px;">Body & Mind Profile: ${prakritiText}${manasikaText}${agniText}</div>`;
+            if (sleepText || bowelText || routineText) {
+                ayushHtml += `<div style="margin-top: 5px; font-size: 12px; color: #14532d;"><strong>Daily Habits (Sleep & Bowel):</strong> Sleep: ${sleepText || 'N/A'} | Bowel: ${bowelText || 'N/A'} | Routine: ${routineText || 'N/A'}</div>`;
+            }
+            if (dietText || habitsText) {
+                ayushHtml += `<div style="margin-top: 4px; font-size: 12px; color: #14532d;"><strong>Food & Eating Habits:</strong> Cravings: ${dietText || 'N/A'} • Habits: ${habitsText || 'N/A'}</div>`;
+            }
+            if (notesText) {
+                ayushHtml += `<div style="margin-top: 4px; font-size: 12px; color: #166534; font-style: italic;"><strong>Doctor's Notes:</strong> ${notesText}</div>`;
+            }
+            document.getElementById("dispAyushNotes").innerHTML = ayushHtml;
         }
 
         if (currentCase.clinicalImpression) {
@@ -690,7 +711,19 @@ const PractitionerReview = (() => {
     let docCurrentChartCustomStart = null;
     let docCurrentChartCustomEnd = null;
 
-    function renderHealthMonitoring() {
+    async function renderHealthMonitoring() {
+        if (typeof ApiService !== "undefined" && currentPatient) {
+            try {
+                const res = await ApiService.getHealthReadings(currentPatient.id);
+                if (res && res.success && res.data) {
+                    if (typeof ClinicalStorage !== "undefined") {
+                        res.data.forEach(r => ClinicalStorage.saveHealthReading(r));
+                    }
+                }
+            } catch (err) {
+                console.warn("[PractitionerReview] Could not fetch readings from backend, using local:", err.message);
+            }
+        }
         renderDoctorHealthReadingsTable();
         renderDoctorHealthChart(docCurrentChartMetric, docCurrentChartDays);
     }

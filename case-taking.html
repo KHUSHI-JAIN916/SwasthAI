@@ -212,6 +212,9 @@
 
         <div class="topbar-right">
 
+            <!-- Global Language Switcher Container -->
+            <div id="globalLanguageSwitcherContainer" class="lang-switcher-wrapper"></div>
+
             <button class="icon-btn">
 
                 <i class="fa-regular fa-bell"></i>
@@ -1120,12 +1123,12 @@
 
                         <div>
 
-                            <h3>
-                                AYUSH Assessment
+                            <h3 data-i18n="ayushStep7Title">
+                                Body Type, Daily Habits & Diet (AYUSH Profile)
                             </h3>
 
-                            <p>
-                                Record traditional AYUSH observations.
+                            <p data-i18n="ayushStep7Sub">
+                                Record body constitution, sleep, bowel habits, and diet in easy, everyday words.
                             </p>
 
                         </div>
@@ -1133,81 +1136,143 @@
                     </div>
 
 
+                    <div style="margin-bottom: 12px; font-weight: 600; font-size: 13px; color: #166534; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-user-check"></i> <span data-i18n="ayushSection1Title">1. Body & Mind Profile (Constitution)</span>
+                    </div>
+
                     <div class="prakriti-grid">
 
-
                         <label class="prakriti-card">
-
                             <input
                                 type="radio"
                                 name="prakriti"
-                                value="Vata"
+                                value="Light & Active (Vata)"
                             >
-
-                            <span class="prakriti-name">
-                                Vata
+                            <span class="prakriti-name" data-i18n="prakritiCardVata">
+                                Light & Active (Vata)
                             </span>
-
-                            <small>
-                                Movement & energy characteristics
+                            <small data-i18n="prakritiCardVataSub">
+                                Quick movements, dry skin, variable energy & appetite
                             </small>
-
                         </label>
 
-
                         <label class="prakriti-card">
-
                             <input
                                 type="radio"
                                 name="prakriti"
-                                value="Pitta"
+                                value="Warm & Fast Metabolism (Pitta)"
                             >
-
-                            <span class="prakriti-name">
-                                Pitta
+                            <span class="prakriti-name" data-i18n="prakritiCardPitta">
+                                Warm & Fast Metabolism (Pitta)
                             </span>
-
-                            <small>
-                                Metabolism & transformation characteristics
+                            <small data-i18n="prakritiCardPittaSub">
+                                Sharp hunger, heat sensitive, acidity & burning prone
                             </small>
-
                         </label>
 
-
                         <label class="prakriti-card">
-
                             <input
                                 type="radio"
                                 name="prakriti"
-                                value="Kapha"
+                                value="Calm & Solid Build (Kapha)"
                             >
-
-                            <span class="prakriti-name">
-                                Kapha
+                            <span class="prakriti-name" data-i18n="prakritiCardKapha">
+                                Calm & Solid Build (Kapha)
                             </span>
-
-                            <small>
-                                Structure & stability characteristics
+                            <small data-i18n="prakritiCardKaphaSub">
+                                Steady energy, heavy build, slow digestion & calm nature
                             </small>
+                        </label>
 
+                        <label class="prakriti-card">
+                            <input
+                                type="radio"
+                                name="prakriti"
+                                value="Combination or Balanced (Dual / Sama)"
+                            >
+                            <span class="prakriti-name" data-i18n="prakritiCardDual">
+                                Combination or Balanced
+                            </span>
+                            <small data-i18n="prakritiCardDualSub">
+                                Mix of two types (e.g. Pitta-Vata) or all balanced
+                            </small>
                         </label>
 
                     </div>
 
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; margin-bottom: 16px;">
+                        <div class="case-input-group" style="margin-bottom: 0;">
+                            <label for="ayushManasika" data-i18n="ayushManasikaLabel" style="font-size: 12px; font-weight: 700; color: #166534;">Mental Temperament & Stress Level</label>
+                            <select id="ayushManasika" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 13px;">
+                                <option value="">Select Mind & Stress State</option>
+                                <option value="Calm, Clear & Balanced (Shant Swabhav)">Calm, Clear & Balanced (Shant Swabhav)</option>
+                                <option value="Restless, High-Stress & Anxious (Chinta / Tanav)">Restless, High-Stress & Anxious (Chinta / Tanav)</option>
+                                <option value="Low Energy, Tired & Sluggish (Thakan / Alasya)">Low Energy, Tired & Sluggish (Thakan / Alasya)</option>
+                                <option value="Mixed / Variable Stress">Mixed / Variable Stress</option>
+                            </select>
+                        </div>
+                        <div class="case-input-group" style="margin-bottom: 0;">
+                            <label for="ayushAgni" data-i18n="ayushAgniLabel" style="font-size: 12px; font-weight: 700; color: #166534;">Digestion & Hunger Level (Hazma)</label>
+                            <select id="ayushAgni" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 13px;">
+                                <option value="">Select Digestion State</option>
+                                <option value="Normal & Healthy Digestion (Sahi samay par hazma)">Normal & Healthy Digestion (Sahi samay par hazma)</option>
+                                <option value="Slow Digestion & Heaviness after meals (Bhari pet)">Slow Digestion & Heaviness after meals (Bhari pet)</option>
+                                <option value="High Acidity, Burning Sensation & Fast Hunger (Tez jalan)">High Acidity, Burning Sensation & Fast Hunger (Tez jalan)</option>
+                                <option value="Irregular Digestion, Gas & Bloating (Afara / Pet phoolna)">Irregular Digestion, Gas & Bloating (Afara / Pet phoolna)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 18px; margin-bottom: 12px; font-weight: 600; font-size: 13px; color: #166534; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="ayushSection2Title">2. Daily Habits & Body Rhythms (Lifestyle)</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                        <div class="case-input-group" style="margin-bottom: 0;">
+                            <label for="ayushSleep" data-i18n="ayushSleepLabel" style="font-size: 12px; font-weight: 700; color: #374151;">Sleep Duration & Quality (Neend)</label>
+                            <input type="text" id="ayushSleep" data-i18n-placeholder="ayushSleepPlaceholder" placeholder="e.g. 7-8 hrs sound sleep, or disturbed, insomnia" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 13px;">
+                        </div>
+                        <div class="case-input-group" style="margin-bottom: 0;">
+                            <label for="ayushBowel" data-i18n="ayushBowelLabel" style="font-size: 12px; font-weight: 700; color: #374151;">Bowel Regularity (Pet Saaf Hona)</label>
+                            <select id="ayushBowel" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 13px;">
+                                <option value="">Select Bowel Rhythm</option>
+                                <option value="Daily Regular & Smooth (Normal)">Daily Regular & Smooth (Normal)</option>
+                                <option value="Constipated / Hard Stools (Kabz - Pet saaf nahi)">Constipated / Hard Stools (Kabz - Pet saaf nahi)</option>
+                                <option value="Loose Stools / Frequent Motion (Jaldi pet kharab)">Loose Stools / Frequent Motion (Jaldi pet kharab)</option>
+                            </select>
+                        </div>
+                        <div class="case-input-group" style="margin-bottom: 0;">
+                            <label for="ayushLifestyle" data-i18n="ayushLifestyleLabel" style="font-size: 12px; font-weight: 700; color: #374151;">Daily Work & Exercise Routine</label>
+                            <input type="text" id="ayushLifestyle" data-i18n-placeholder="ayushLifestylePlaceholder" placeholder="e.g. Desk job for 8 hrs, moderate stress, 30m walk" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 13px;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 18px; margin-bottom: 12px; font-weight: 600; font-size: 13px; color: #166534; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-utensils"></i> <span data-i18n="ayushSection3Title">3. Food Habits & Meal Timings (Diet)</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+                        <div class="case-input-group" style="margin-bottom: 0;">
+                            <label for="ayushDietPattern" data-i18n="ayushDietLabel" style="font-size: 12px; font-weight: 700; color: #374151;">Food Preferences & Taste Cravings</label>
+                            <input type="text" id="ayushDietPattern" data-i18n-placeholder="ayushDietPlaceholder" placeholder="e.g. Vegetarian, craves spicy (teekha) & fried food" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 13px;">
+                        </div>
+                        <div class="case-input-group" style="margin-bottom: 0;">
+                            <label for="ayushEatingHabits" data-i18n="ayushEatingHabitsLabel" style="font-size: 12px; font-weight: 700; color: #374151;">Meal Timings & Bad Eating Habits</label>
+                            <input type="text" id="ayushEatingHabits" data-i18n-placeholder="ayushEatingHabitsPlaceholder" placeholder="e.g. Late dinner at 11 PM, skipping breakfast, eating fast" style="width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 13px;">
+                        </div>
+                    </div>
 
                     <div class="case-input-group">
-
-                        <label>
-                            Practitioner Observations
+                        <label for="ayushObservations" data-i18n="ayushObsLabel" style="font-size: 12px; font-weight: 700; color: #374151;">
+                            Practitioner Clinical & Holistic Observations
                         </label>
-
                         <textarea
                             id="ayushObservations"
-                            placeholder="Enter AYUSH-based observations..."
+                            data-i18n-placeholder="ayushObsPlaceholder"
+                            placeholder="Enter doctor's holistic observations (general energy, tongue, pulse, lifestyle advice)..."
+                            style="min-height: 80px;"
                         ></textarea>
-
                     </div>
-
                 </div>
 
             </div>
@@ -1385,6 +1450,7 @@
     </div>
 </div>
 
+<script src="js/services/api-service.js"></script>
 <script src="js/models/clinical-state.js"></script>
 <script src="js/storage/clinical-storage.js"></script>
 <script src="js/services/ai-service.js"></script>

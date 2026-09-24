@@ -57,12 +57,13 @@ function togglePasswordVisibility(inputId, iconEl) {
     }
 }
 
-function handleDoctorLogin(e) {
-    e.preventDefault();
-    const hospitalName = document.getElementById("loginHospitalName").value;
-    const docId = document.getElementById("loginDoctorId").value.trim();
-    const password = document.getElementById("loginDoctorPassword").value;
+async function handleDoctorLogin(e) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+    const hospitalName = document.getElementById("loginHospitalName") ? document.getElementById("loginHospitalName").value : "AIIMS Partner Hospital";
+    const docId = document.getElementById("loginDoctorId") ? document.getElementById("loginDoctorId").value.trim() : "";
+    const password = document.getElementById("loginDoctorPassword") ? document.getElementById("loginDoctorPassword").value : "";
     const errorEl = document.getElementById("doctorLoginError");
+    const submitBtn = e && e.target ? e.target.querySelector("button[type='submit']") : null;
 
     if (!docId) {
         if (errorEl) {
@@ -72,12 +73,50 @@ function handleDoctorLogin(e) {
         return;
     }
 
-    // Determine Doctor Name
+    if (errorEl) errorEl.style.display = "none";
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> प्रमाणित हो रहा है...';
+    }
+
     let doctorName = "Dr. Sharma";
     if (docId.toLowerCase().includes("verma")) {
         doctorName = "Dr. Verma";
     } else if (docId.startsWith("Dr.") || docId.startsWith("dr.")) {
         doctorName = docId;
+    }
+
+    try {
+        if (typeof ApiService !== "undefined") {
+            const res = await ApiService.login({
+                email: docId,
+                id: docId,
+                password: password || "123456",
+                hospitalName: hospitalName,
+                role: "practitioner"
+            });
+
+            if (res && res.token) {
+                ApiService.setToken(res.token);
+            }
+            if (res && res.user && res.user.name) {
+                doctorName = res.user.name;
+            }
+        }
+    } catch (err) {
+        console.warn("[DoctorLogin] Backend login API warning, using local authentication:", err.message);
+        // If wrong password, show message
+        if (err.status === 401 && !err.isNetworkError) {
+            if (errorEl) {
+                errorEl.textContent = err.message || "लॉगिन विफल। कृपया पासवर्ड जांचें।";
+                errorEl.style.display = "block";
+            }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Login to Dashboard';
+            }
+            return;
+        }
     }
 
     // Store doctor session details in localStorage
@@ -104,22 +143,25 @@ function handleDoctorLogin(e) {
     }
 
     if (typeof SpeechService !== "undefined") {
-        SpeechService.speakText(`स्वागत है ${doctorName} जी, ${hospitalName} पोर्टल में।`, { lang: "hi-IN" });
+        try {
+            SpeechService.speakText(`स्वागत है ${doctorName} जी, ${hospitalName} पोर्टल में।`, { lang: "hi-IN" });
+        } catch(e) {}
     }
 
     // Redirect to Doctor Dashboard
     window.location.href = "dashboard.html";
 }
 
-function handleDoctorRegister(e) {
-    e.preventDefault();
+async function handleDoctorRegister(e) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
     const hospName = document.getElementById("regHospitalName").value.trim();
     const docName = document.getElementById("regDoctorName").value.trim();
     const specialty = document.getElementById("regSpecialty").value.trim();
     const license = document.getElementById("regLicense").value.trim();
     const contact = document.getElementById("regDoctorContact").value.trim();
-    const password = document.getElementById("regDoctorPassword").value;
+    const password = document.getElementById("regDoctorPassword").value || "123456";
     const errorEl = document.getElementById("doctorRegisterError");
+    const submitBtn = e && e.target ? e.target.querySelector("button[type='submit']") : null;
 
     if (!hospName || !docName || !contact) {
         if (errorEl) {
@@ -129,10 +171,39 @@ function handleDoctorRegister(e) {
         return;
     }
 
+    if (errorEl) errorEl.style.display = "none";
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> खाता बन रहा है...';
+    }
+
+    const formattedDocName = docName.startsWith("Dr.") ? docName : "Dr. " + docName;
+
+    try {
+        if (typeof ApiService !== "undefined") {
+            const res = await ApiService.register({
+                name: formattedDocName,
+                email: contact.includes("@") ? contact : `${contact.replace(/\D/g, "")}@ayush.local`,
+                phone: contact,
+                password: password,
+                hospitalName: hospName,
+                specialty: specialty,
+                license: license,
+                role: "practitioner"
+            });
+
+            if (res && res.token) {
+                ApiService.setToken(res.token);
+            }
+        }
+    } catch (err) {
+        console.warn("[DoctorRegister] Backend register API warning, proceeding locally:", err.message);
+    }
+
     // Save session
     const doctorSession = {
         id: "DOC-" + Date.now().toString().slice(-4),
-        name: docName.startsWith("Dr.") ? docName : "Dr. " + docName,
+        name: formattedDocName,
         hospitalName: hospName,
         specialty: specialty,
         license: license,

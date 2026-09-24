@@ -149,6 +149,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 createdPatient = ClinicalStorage.addPatient(newPatient);
             }
 
+            // ===== PRIMARY: Save to MongoDB via Backend API =====
+            if (typeof ApiService !== "undefined" && typeof ApiService.createPatient === "function") {
+                ApiService.createPatient(newPatient)
+                    .then(res => {
+                        if (res && res.success && res.data) {
+                            createdPatient.id = res.data.patientId || res.data.id || createdPatient.id;
+                            if (typeof ClinicalStorage !== "undefined") {
+                                ClinicalStorage.savePatients(ClinicalStorage.getPatients());
+                            }
+                            const pBadge = document.querySelector(".patient-id-badge strong");
+                            if (pBadge && createdPatient.id) {
+                                pBadge.innerHTML = `${createdPatient.id}<br><span style="font-size: 11px; color: #166534; font-weight: normal;">Patient Portal Password: 123456</span>`;
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        console.warn("[AddPatient] Backend API warning, saved locally:", err.message);
+                    });
+            }
+
             // Update success modal with generated ID & credentials
             const patientIdEl = document.querySelector(".patient-id-badge strong");
             if (patientIdEl && createdPatient.id) {

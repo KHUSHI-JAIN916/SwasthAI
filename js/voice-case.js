@@ -17,44 +17,74 @@ document.addEventListener("DOMContentLoaded", () => {
     const menuToggle = document.getElementById("menuToggle");
     const sidebar = document.querySelector(".sidebar");
 
+    const simulateVoiceBtn = document.getElementById("simulateVoiceBtn");
+    const fileProtocolWarning = document.getElementById("fileProtocolWarning");
+
     let isRecording = false;
+    let activeSimulator = null;
 
     if (menuToggle && sidebar) {
         menuToggle.addEventListener("click", () => sidebar.classList.toggle("show"));
     }
 
+    // Show warning banner if running on direct file:// protocol
+    if (window.location.protocol === "file:" && fileProtocolWarning) {
+        fileProtocolWarning.style.display = "block";
+    }
+
     if (!SpeechService.isSupported()) {
-        if (voiceRecordBtn) voiceRecordBtn.disabled = true;
-        if (voiceStatus) voiceStatus.textContent = "Speech recognition not supported";
-        if (voiceHint) voiceHint.textContent = "Please use Google Chrome or Microsoft Edge for voice features.";
-        return;
+        if (voiceRecordBtn) {
+            voiceRecordBtn.style.opacity = "0.7";
+            voiceRecordBtn.title = "Speech recognition API not supported in this browser. Please use Chrome/Edge or use Simulate Voice.";
+        }
+        if (voiceStatus) voiceStatus.textContent = "Speech Recognition Notice";
+        if (voiceHint) voiceHint.textContent = "Your browser does not support the Web Speech API directly. You can use 'Simulate Patient Voice' to test case taking.";
+    }
+
+    function resetButtons() {
+        isRecording = false;
+        if (voiceCircle) voiceCircle.classList.remove("recording");
+        if (voiceRecordBtn) {
+            voiceRecordBtn.classList.remove("recording");
+            voiceRecordBtn.innerHTML = `<i class="fa-solid fa-microphone"></i> Start Recording`;
+        }
+        if (simulateVoiceBtn) {
+            simulateVoiceBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Simulate Patient Voice`;
+        }
     }
 
     if (voiceRecordBtn) {
-        voiceRecordBtn.addEventListener("click", () => {
+        voiceRecordBtn.addEventListener("click", async () => {
+            if (activeSimulator) {
+                activeSimulator.stop();
+                activeSimulator = null;
+                resetButtons();
+                return;
+            }
+
             if (!isRecording) {
                 const lang = languageSelect ? languageSelect.value : "en-IN";
-                SpeechService.startRecognition({
+                if (voiceStatus) voiceStatus.textContent = "Requesting microphone access...";
+                if (voiceHint) voiceHint.textContent = "Please allow microphone access in your browser prompt.";
+
+                await SpeechService.startRecognition({
                     lang: lang,
                     onInterim: (interim) => {
-                        if (voiceStatus) voiceStatus.textContent = "Listening...";
-                        if (voiceHint) voiceHint.textContent = `Interim: "${interim.slice(-35)}..."`;
+                        if (voiceStatus) voiceStatus.textContent = "Listening to patient...";
+                        if (voiceHint) voiceHint.textContent = `Speaking: "${interim.slice(-40)}..."`;
                     },
                     onFinal: (finalText, confidence) => {
                         voiceTranscript.value += (voiceTranscript.value ? " " : "") + finalText;
                         if (voiceHint) {
-                            voiceHint.innerHTML = `<span class="conf-badge ${confidence >= 85 ? 'conf-high' : 'conf-medium'}">Confidence: ${confidence}%</span> Words recognized clearly.`;
+                            voiceHint.innerHTML = `<span class="conf-badge ${confidence >= 85 ? 'conf-high' : 'conf-medium'}">Confidence: ${confidence}%</span> Speech recognized clearly.`;
                         }
                     },
-                    onError: (errMsg) => {
-                        isRecording = false;
-                        if (voiceCircle) voiceCircle.classList.remove("recording");
-                        if (voiceRecordBtn) {
-                            voiceRecordBtn.classList.remove("recording");
-                            voiceRecordBtn.innerHTML = `<i class="fa-solid fa-microphone"></i> Start Recording`;
+                    onError: (errMsg, errType) => {
+                        resetButtons();
+                        if (voiceStatus) voiceStatus.textContent = "Microphone / Voice Notice";
+                        if (voiceHint) {
+                            voiceHint.innerHTML = `<span style="color:#b91c1c;">${errMsg}</span> <br><span style="font-size:12px; color:#6b7280;">Tip: Click 'Simulate Patient Voice' below to test clinical case dictation instantly.</span>`;
                         }
-                        if (voiceStatus) voiceStatus.textContent = "Audio Quality Warning";
-                        if (voiceHint) voiceHint.textContent = "Some words may not have been understood correctly. Please retry or edit transcript manually.";
                     },
                     onStatusChange: (statusObj) => {
                         if (statusObj.status === "listening") {
@@ -65,27 +95,63 @@ document.addEventListener("DOMContentLoaded", () => {
                                 voiceRecordBtn.innerHTML = `<i class="fa-solid fa-stop"></i> Stop Recording`;
                             }
                             if (voiceStatus) voiceStatus.textContent = "Listening to patient...";
-                            if (voiceHint) voiceHint.textContent = "Speak symptoms, duration, location and medications naturally.";
+                            if (voiceHint) voiceHint.textContent = "Speak symptoms, duration, pain location and medications clearly.";
                         } else {
-                            isRecording = false;
-                            if (voiceCircle) voiceCircle.classList.remove("recording");
-                            if (voiceRecordBtn) {
-                                voiceRecordBtn.classList.remove("recording");
-                                voiceRecordBtn.innerHTML = `<i class="fa-solid fa-microphone"></i> Start Recording`;
-                            }
-                            if (voiceStatus) voiceStatus.textContent = "Recording complete";
+                            resetButtons();
+                            if (voiceStatus) voiceStatus.textContent = statusObj.message || "Recording stopped";
                         }
                     }
                 });
             } else {
                 SpeechService.stopRecognition();
-                isRecording = false;
-                if (voiceCircle) voiceCircle.classList.remove("recording");
-                if (voiceRecordBtn) {
-                    voiceRecordBtn.classList.remove("recording");
-                    voiceRecordBtn.innerHTML = `<i class="fa-solid fa-microphone"></i> Start Recording`;
-                }
+                resetButtons();
             }
+        });
+    }
+
+    // Simulated Voice Dictation (1-Click demonstration)
+    if (simulateVoiceBtn) {
+        simulateVoiceBtn.addEventListener("click", () => {
+            if (isRecording) {
+                SpeechService.stopRecognition();
+            }
+
+            if (activeSimulator) {
+                activeSimulator.stop();
+                activeSimulator = null;
+                resetButtons();
+                if (voiceStatus) voiceStatus.textContent = "Simulation paused";
+                return;
+            }
+
+            const lang = languageSelect ? languageSelect.value : "en-IN";
+            isRecording = true;
+            if (voiceCircle) voiceCircle.classList.add("recording");
+            simulateVoiceBtn.innerHTML = `<i class="fa-solid fa-stop"></i> Stop Simulation`;
+            if (voiceStatus) voiceStatus.textContent = "Simulating patient voice dictation...";
+            if (voiceHint) voiceHint.textContent = "Transcribing spoken clinical symptoms in real time...";
+
+            activeSimulator = SpeechService.simulateVoiceInput({
+                lang,
+                onInterim: (interim) => {
+                    if (voiceHint) voiceHint.textContent = `Speaking: "${interim}"`;
+                },
+                onFinal: (finalText, confidence) => {
+                    voiceTranscript.value += (voiceTranscript.value ? "\n" : "") + finalText;
+                    if (voiceHint) {
+                        voiceHint.innerHTML = `<span class="conf-badge conf-high">Recognized (${confidence}%)</span> ${finalText.slice(0, 45)}...`;
+                    }
+                },
+                onStatusChange: (statusObj) => {
+                    if (voiceStatus) voiceStatus.textContent = statusObj.message;
+                },
+                onComplete: () => {
+                    activeSimulator = null;
+                    resetButtons();
+                    if (voiceStatus) voiceStatus.textContent = "Voice transcription complete (100%)";
+                    if (voiceHint) voiceHint.textContent = "Review your voice transcript below and click 'Send to Case Examination'.";
+                }
+            });
         });
     }
 

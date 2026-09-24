@@ -234,58 +234,66 @@
                         </div>
                     </div>
 
-                    <!-- Speaker Attribution & Sample Dialogue Row -->
-                    <div class="speaker-toggle-row">
-                        <span style="font-size: 12px; font-weight: 700; color: #475569;" data-i18n="speakingTurnLabel">
-                            <i class="fa-solid fa-user-tag"></i> Speaking Turn:
-                        </span>
-                        <div class="speaker-btn-group">
-                            <button type="button" class="speaker-btn active doctor" id="setDoctorSpeakerBtn" data-i18n="speakerDoctor">
-                                👨‍⚕️ Doctor
-                            </button>
-                            <button type="button" class="speaker-btn patient" id="setPatientSpeakerBtn" data-i18n="speakerPatient">
-                                👤 Patient
-                            </button>
+                    <!-- AI Auto Speaker Diarization Indicator -->
+                    <div class="speaker-toggle-row" style="background: #f0fdf4; padding: 10px 14px; border-radius: 8px; border: 1px solid #bbf7d0; margin: 12px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #16a34a; color: #fff; font-size: 11px;">
+                                <i class="fa-solid fa-brain"></i>
+                            </span>
+                            <span style="font-size: 12.5px; font-weight: 700; color: #166534;">
+                                AI Auto Speaker Detection Active
+                            </span>
                         </div>
-                    </div>
-
-                    <!-- Quick Demo Dialogue Pre-loader for Instant Testing -->
-                    <div class="sample-dialogue-bar">
-                        <span style="font-size: 11.5px; font-weight: 700; color: #64748b;">
-                            <i class="fa-solid fa-flask"></i> Quick Demo:
+                        <span style="font-size: 11.5px; color: #15803d; font-weight: 600;">
+                            <i class="fa-solid fa-sparkles"></i> AI automatically identifies Doctor vs Patient from clinical dialogue!
                         </span>
-                        <button type="button" class="sample-btn" id="loadEnglishSampleBtn" title="Load sample English doctor-patient conversation">
-                            <i class="fa-solid fa-file-lines"></i> English Sample
-                        </button>
-                        <button type="button" class="sample-btn" id="loadHindiSampleBtn" title="Load sample Hindi doctor-patient conversation">
-                            <i class="fa-solid fa-language"></i> हिन्दी बातचीत (Hindi)
-                        </button>
-                    </div>
-
-                    <!-- Transcript Stream Display -->
-                    <div class="transcript-stream" id="transcriptStream">
-                        <!-- Dialogue turns injected dynamically via JS -->
                     </div>
 
                     <!-- Interim Speech Preview (Real-time Speech Recognition) -->
-                    <div class="interim-preview" id="interimPreview" style="display: none;">
+                    <div class="interim-preview" id="interimPreview" style="display: none; margin: 8px 0;">
                         <i class="fa-solid fa-circle-notch fa-spin" style="color: #1f7a57;"></i>
                         <span id="interimText">Listening...</span>
                     </div>
 
+                    <!-- Edge / Network Helper Notice -->
+                    <div id="browserSpeechNotice" style="display: none; background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; padding: 10px 14px; border-radius: 8px; font-size: 12.5px; margin: 8px 0; line-height: 1.45;">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #ea580c;"></i>
+                        <strong>Microphone Speech Notice:</strong> Microsoft Edge speech server connection failed.
+                        <div style="margin-top: 4px;">
+                            👉 For seamless speech recognition, please open in <strong>Google Chrome</strong> (native Google STT). Or click <strong>Simulate Voice</strong> below to test live notes extraction instantly!
+                        </div>
+                    </div>
+
+                    <!-- Live Scribe Status Bar -->
+                    <div class="sample-dialogue-bar" style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0 6px 0;">
+                        <span style="font-size: 12px; font-weight: 700; color: #475569;">
+                            <i class="fa-solid fa-microphone-lines" style="color: #16a34a;"></i> Live Scribe Conversation Stream
+                        </span>
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" class="sample-btn" id="simulateVoiceBtn" title="Test voice dialogue automatically" style="color: #0f766e; border-color: #99f6e4; background: #f0fdfa; font-weight: 700;">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Simulate Voice
+                            </button>
+                            <button type="button" class="sample-btn" id="clearTranscriptBtnTop" title="Clear conversation to start fresh" style="color: #e11d48; border-color: #fecdd3; background: #fff1f2;">
+                                <i class="fa-solid fa-trash"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Manual Line Input & Clear -->
-                    <div class="manual-turn-add" style="margin-top: 10px;">
-                        <input type="text" id="manualTurnInput" placeholder="Type or correct conversation turn..." />
-                        <button type="button" class="btn-scribe start" id="addTurnBtn" style="padding: 6px 12px;">
-                            <span data-i18n="addTurnBtn">Add</span>
-                        </button>
-                        <button type="button" class="btn-scribe pause" id="clearTranscriptBtn" title="Clear Transcript" style="padding: 6px 10px;">
-                            <i class="fa-solid fa-trash"></i>
+                    <div class="manual-turn-add" style="margin-bottom: 8px;">
+                        <input type="text" id="manualTurnInput" placeholder="Type conversation turn or speak into mic..." />
+                        <button type="button" class="btn-scribe start" id="addTurnBtn" style="padding: 7px 14px; white-space: nowrap;">
+                            <i class="fa-solid fa-plus"></i> <span data-i18n="addTurnBtn">Add Turn</span>
                         </button>
                     </div>
 
+                    <!-- Transcript Stream Display -->
+                    <div class="transcript-stream" id="transcriptStream" style="min-height: 180px; max-height: 250px;">
+                        <!-- Dialogue turns injected dynamically via JS -->
+                    </div>
+
                     <!-- AI Note Generation Trigger (Req 4) -->
-                    <div class="generate-ai-action">
+                    <div class="generate-ai-action" style="margin-top: 8px;">
                         <button type="button" class="btn-generate-ai" id="generateAiNotesBtn">
                             <i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="generateNotesBtn">Generate AI Notes</span>
                         </button>
@@ -347,10 +355,15 @@
                             </div>
                         </div>
 
-                        <!-- 3. MEDICAL HISTORY -->
+                        <!-- 3. MEDICAL HISTORY & AYUSH INTAKE MODE -->
                         <div class="notes-form-section">
-                            <div class="notes-section-title">
-                                <i class="fa-solid fa-notes-medical" style="color: #7c3aed;"></i> <span data-i18n="sectionHistory">3. Medical History</span>
+                            <div class="notes-section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                <div>
+                                    <i class="fa-solid fa-notes-medical" style="color: #7c3aed;"></i> <span data-i18n="sectionHistory">3. Medical History & AYUSH Intake</span>
+                                </div>
+                                <button type="button" class="ayush-mode-pill-btn" id="toggleAyushModeBtn" title="Toggle Ayurvedic Medical Intake Mode">
+                                    <i class="fa-solid fa-leaf"></i> <span id="ayushModeBtnText" data-i18n="ayushModeBtnOn">🌿 AYUSH Lifestyle Mode: ON</span>
+                                </button>
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div class="notes-input-group">
@@ -370,6 +383,77 @@
                                 <div class="notes-input-group">
                                     <label for="noteCurrentMedications" data-i18n="labelMedications">Current Medications</label>
                                     <input type="text" id="noteCurrentMedications" value="Not mentioned">
+                                </div>
+                            </div>
+
+                            <!-- AYUSH & LIFESTYLE INTAKE PANEL (COMMON EVERYDAY LANGUAGE) -->
+                            <div id="ayushIntakePanel" class="ayush-intake-panel" style="margin-top: 12px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 12px 14px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #bbf7d0; padding-bottom: 8px; margin-bottom: 10px;">
+                                    <span style="font-size: 12px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                                        <i class="fa-solid fa-leaf" style="color: #15803d;"></i> <span data-i18n="ayushPanelTitle">Body Type, Daily Habits & Diet Profile</span>
+                                    </span>
+                                    <span data-i18n="ayushPanelBadge" style="font-size: 10.5px; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-weight: 700; border: 1px solid #86efac;">
+                                        🌿 AYUSH Lifestyle Mode
+                                    </span>
+                                </div>
+
+                                <!-- 1. BODY & MIND PROFILE -->
+                                <div style="margin-bottom: 10px;">
+                                    <div style="font-size: 11.5px; font-weight: 700; color: #15803d; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">
+                                        <i class="fa-solid fa-user-check"></i> <span data-i18n="ayushSection1Title">1. Body & Mind Profile (Constitution)</span>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                        <div class="notes-input-group">
+                                            <label for="noteAyushPrakriti" data-i18n="ayushPrakritiLabel" style="font-size: 11px; font-weight: 700; color: #166534;">Body Type & Energy (Prakriti)</label>
+                                            <input type="text" id="noteAyushPrakriti" data-i18n-placeholder="ayushPrakritiPlaceholder" placeholder="e.g. Warm & Fast Metabolism (Pitta), Light & Active (Vata), or Balanced" value="Not mentioned" style="background: #ffffff;">
+                                        </div>
+                                        <div class="notes-input-group">
+                                            <label for="noteAyushManasika" data-i18n="ayushManasikaLabel" style="font-size: 11px; font-weight: 700; color: #166534;">Mental Temperament & Stress State</label>
+                                            <input type="text" id="noteAyushManasika" data-i18n-placeholder="ayushManasikaPlaceholder" placeholder="e.g. Calm & Focused, Restless / High Stress, or Tired & Sluggish" value="Not mentioned" style="background: #ffffff;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 2. DAILY HABITS & BODY RHYTHMS -->
+                                <div style="margin-bottom: 10px;">
+                                    <div style="font-size: 11.5px; font-weight: 700; color: #15803d; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">
+                                        <i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="ayushSection2Title">2. Daily Habits & Body Rhythms (Lifestyle)</span>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                        <div class="notes-input-group">
+                                            <label for="noteAyushSleep" data-i18n="ayushSleepLabel" style="font-size: 11px; font-weight: 700; color: #166534;">Sleep Duration & Quality (Neend)</label>
+                                            <input type="text" id="noteAyushSleep" data-i18n-placeholder="ayushSleepPlaceholder" placeholder="e.g. 7-8 hrs sound sleep, or Disturbed / Light sleep, Insomnia" value="Not mentioned" style="background: #ffffff;">
+                                        </div>
+                                        <div class="notes-input-group">
+                                            <label for="noteAyushBowel" data-i18n="ayushBowelLabel" style="font-size: 11px; font-weight: 700; color: #166534;">Bowel Regularity (Pet Saaf Hona)</label>
+                                            <input type="text" id="noteAyushBowel" data-i18n-placeholder="ayushBowelPlaceholder" placeholder="e.g. Daily regular & smooth, Constipated / Hard stools (Kabz), or Loose" value="Not mentioned" style="background: #ffffff;">
+                                        </div>
+                                    </div>
+                                    <div class="notes-input-group" style="margin-top: 6px;">
+                                        <label for="noteAyushLifestyle" data-i18n="ayushLifestyleLabel" style="font-size: 11px; font-weight: 700; color: #166534;">Daily Work Routine & Physical Exercise</label>
+                                        <input type="text" id="noteAyushLifestyle" data-i18n-placeholder="ayushLifestylePlaceholder" placeholder="e.g. Desk job for 8 hrs, moderate work stress, daily 30m walk" value="Not mentioned" style="background: #ffffff;">
+                                    </div>
+                                </div>
+
+                                <!-- 3. DIGESTION & FOOD HABITS -->
+                                <div>
+                                    <div style="font-size: 11.5px; font-weight: 700; color: #15803d; margin-bottom: 4px; display: flex; align-items: center; gap: 5px;">
+                                        <i class="fa-solid fa-utensils"></i> <span data-i18n="ayushSection3Title">3. Digestion & Food Habits (Diet & Hazma)</span>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                        <div class="notes-input-group">
+                                            <label for="noteAyushAgni" data-i18n="ayushAgniLabel" style="font-size: 11px; font-weight: 700; color: #166534;">Digestion & Hunger Level (Hazma)</label>
+                                            <input type="text" id="noteAyushAgni" data-i18n-placeholder="ayushAgniPlaceholder" placeholder="e.g. Normal on-time, Slow digestion & heaviness, High acidity, or Gas/bloating" value="Not mentioned" style="background: #ffffff;">
+                                        </div>
+                                        <div class="notes-input-group">
+                                            <label for="noteAyushDietPattern" data-i18n="ayushDietLabel" style="font-size: 11px; font-weight: 700; color: #166534;">Food Preferences & Taste Cravings</label>
+                                            <input type="text" id="noteAyushDietPattern" data-i18n-placeholder="ayushDietPlaceholder" placeholder="e.g. Vegetarian, craves spicy & oily foods, or prefers sweets" value="Not mentioned" style="background: #ffffff;">
+                                        </div>
+                                    </div>
+                                    <div class="notes-input-group" style="margin-top: 6px;">
+                                        <label for="noteAyushEatingHabits" data-i18n="ayushEatingHabitsLabel" style="font-size: 11px; font-weight: 700; color: #166534;">Meal Timings & Bad Eating Habits</label>
+                                        <input type="text" id="noteAyushEatingHabits" data-i18n-placeholder="ayushEatingHabitsPlaceholder" placeholder="e.g. Late dinner at 11 PM, skipping breakfast, irregular meal timings" value="Not mentioned" style="background: #ffffff;">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -517,6 +601,7 @@
     </div>
 
     <!-- JAVASCRIPT -->
+    <script src="js/services/api-service.js"></script>
     <script src="js/models/clinical-state.js"></script>
     <script src="js/storage/clinical-storage.js"></script>
     <script src="js/services/ai-service.js"></script>

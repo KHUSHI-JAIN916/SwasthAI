@@ -17,13 +17,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let allPatients = [];
 
-    function loadPatients() {
+    async function loadPatients() {
         if (typeof ClinicalStorage !== "undefined") {
             allPatients = ClinicalStorage.getPatients();
         } else {
             allPatients = JSON.parse(localStorage.getItem("ayushPatients")) || [];
         }
         renderPatientTable();
+
+        if (typeof ApiService !== "undefined" && typeof ApiService.getPatients === "function") {
+            try {
+                const res = await ApiService.getPatients();
+                if (res && res.success && res.data && res.data.length > 0) {
+                    allPatients = res.data;
+                    if (typeof ClinicalStorage !== "undefined") {
+                        ClinicalStorage.savePatients(res.data);
+                    }
+                    renderPatientTable();
+                }
+            } catch (err) {
+                console.warn("[Patients] API fetch skipped, using local cache:", err.message);
+            }
+        }
     }
 
     function renderPatientTable() {

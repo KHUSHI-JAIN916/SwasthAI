@@ -674,10 +674,11 @@ const AIService = (() => {
             }
         }
 
-        return extractNotesRuleBased(transcriptText, patientInfo);
+        const activeLang = options.lang || (typeof I18nService !== "undefined" && typeof I18nService.getLanguage === "function" ? I18nService.getLanguage() : "en");
+        return extractNotesRuleBased(transcriptText, patientInfo, activeLang);
     }
 
-    function extractNotesRuleBased(transcriptText, patientInfo = {}) {
+    function extractNotesRuleBased(transcriptText, patientInfo = {}, targetLang = "en") {
         const text = transcriptText || "";
         const lower = text.toLowerCase();
         const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
@@ -686,10 +687,10 @@ const AIService = (() => {
         const doctorLines = [];
         const patientLines = [];
         lines.forEach(line => {
-            if (/^doctor\s*:/i.test(line)) {
-                doctorLines.push(line.replace(/^doctor\s*:/i, "").trim());
-            } else if (/^patient\s*:/i.test(line)) {
-                patientLines.push(line.replace(/^patient\s*:/i, "").trim());
+            if (/^(?:👨‍⚕️\s*)?doctor\s*:/i.test(line)) {
+                doctorLines.push(line.replace(/^(?:👨‍⚕️\s*)?doctor\s*:/i, "").trim());
+            } else if (/^(?:👤\s*)?patient\s*:/i.test(line)) {
+                patientLines.push(line.replace(/^(?:👤\s*)?patient\s*:/i, "").trim());
             }
         });
 
@@ -700,31 +701,44 @@ const AIService = (() => {
 
         // Extract Complaint
         const complaintMatches = [];
-        if (/fever|bukhar|tap|temperature/i.test(text)) complaintMatches.push("Fever");
-        if (/headache|sir dard|sar dard|mathe me dard/i.test(text)) complaintMatches.push("Headache");
-        if (/stomach (?:pain|ache)|pet (?:me|mein) dard|abdominal pain|acidity|gas/i.test(text)) complaintMatches.push("Abdominal pain / Acidity");
+        if (/fever|bukhar|tap|temperature|pyrexia/i.test(text) && !/no fever|bukhar nahi/i.test(lower)) complaintMatches.push("Fever");
+        if (/headache|sir dard|sar dard|mathe me dard|head pain|migraine/i.test(text)) complaintMatches.push("Headache");
+        if (/cold|sardi|zukaam|zukam|runny nose|naak behna/i.test(text)) complaintMatches.push("Cold / Coryza");
+        if (/throat pain|gale me dard|sore throat|gale me kharash/i.test(text)) complaintMatches.push("Sore throat");
+        if (/stomach (?:pain|ache)|pet (?:me|mein) dard|abdominal pain/i.test(text)) complaintMatches.push("Abdominal pain");
+        if (/acidity|gas|heartburn|jalan|badhazmi|indigestion/i.test(text)) complaintMatches.push("Acidity / Indigestion");
         if (/cough|khansi/i.test(text) && !/no cough|khansi nahi/i.test(lower)) complaintMatches.push("Cough");
-        if (/joint pain|ghutne (?:me|mein) dard|sandhishoola/i.test(text)) complaintMatches.push("Joint pain");
+        if (/joint pain|ghutne (?:me|mein) dard|sandhishoola|knee pain/i.test(text)) complaintMatches.push("Joint pain");
+        if (/body (?:pain|ache)|badan dard|body pain|badan me dard/i.test(text)) complaintMatches.push("Body ache");
+        if (/back pain|kamar dard|peeth dard/i.test(text)) complaintMatches.push("Back pain");
         if (/vomiting|ulti/i.test(text) && !/no vomiting|ulti nahi/i.test(lower)) complaintMatches.push("Vomiting");
-        if (/chest pain|chhati me dard/i.test(text) && !/no chest pain|chhati me dard nahi/i.test(lower)) complaintMatches.push("Chest discomfort");
-        if (/throat pain|gale me dard|sore throat/i.test(text)) complaintMatches.push("Sore throat");
-        if (/weakness|kamzori|thakan|fatigue/i.test(text)) complaintMatches.push("Fatigue / Weakness");
+        if (/nausea|matli|jee ghabrana/i.test(text)) complaintMatches.push("Nausea");
+        if (/loose motion|diarrhea|dast|pet kharab/i.test(text) && !/no loose motion|dast nahi/i.test(lower)) complaintMatches.push("Diarrhea");
+        if (/chest pain|chhati me dard|seene me dard/i.test(text) && !/no chest pain|chhati me dard nahi|seene me dard nahi/i.test(lower)) complaintMatches.push("Chest discomfort");
+        if (/breathlessness|saans lene me dikkat|shortness of breath|saans phoolna/i.test(text) && !/no breathlessness|saans lene me dikkat nahi/i.test(lower)) complaintMatches.push("Breathlessness");
+        if (/weakness|kamzori|thakan|fatigue|chakkar|dizziness/i.test(text)) complaintMatches.push("Fatigue / Weakness");
+        if (/itching|khujli|rash|daane/i.test(text)) complaintMatches.push("Skin rash / Pruritus");
 
         if (complaintMatches.length > 0) {
             mainComplaint = complaintMatches.join(", ");
         } else {
-            // Fallback to searching first patient utterance
+            // Fallback to searching first patient utterance or first dialogue utterance
             if (patientLines.length > 0) {
                 const firstPatientLine = patientLines[0];
-                if (firstPatientLine.length < 120) {
+                if (firstPatientLine.length < 150) {
                     mainComplaint = firstPatientLine;
+                }
+            } else if (lines.length > 0) {
+                const firstCleaned = lines[0].replace(/^(?:👨‍⚕️\s*|👤\s*)?(?:doctor|patient)\s*:\s*/i, "").trim();
+                if (firstCleaned.length < 150) {
+                    mainComplaint = firstCleaned;
                 }
             }
         }
 
         // Extract Duration
-        const durMatch = text.match(/(?:for|since|last|pichle|se)\s*(\d+\s*(?:days?|weeks?|months?|hours?|din|hafte|mahine))/i) ||
-                         text.match(/(\d+\s*(?:days?|weeks?|months?|hours?|din|hafte|mahine)\s*(?:se|ago|duration))/i);
+        const durMatch = text.match(/((?:one|two|three|four|five|six|seven|\d+|ek|do|teen|char|paanch|chheh|saat)\s*(?:days?|weeks?|months?|hours?|din|hafte|mahine)\s*(?:se|ago|duration)?)/i) ||
+                         text.match(/(?:for|since|last|pichle|se)\s*((?:one|two|three|four|five|six|seven|\d+|ek|do|teen|char|paanch|chheh|saat)\s*(?:days?|weeks?|months?|hours?|din|hafte|mahine))/i);
         if (durMatch) {
             duration = durMatch[1].trim();
         } else if (/yesterday|kal se/i.test(text)) {
@@ -734,7 +748,7 @@ const AIService = (() => {
         }
 
         // Extract Severity
-        if (/severe|unbearable|bahut tez|tez dard|bura haal|extreme|high/i.test(text)) {
+        if (/severe|unbearable|bahut tez|tez dard|\btez\b|bura haal|extreme|high|\bzyada\b/i.test(text)) {
             severity = "Severe";
         } else if (/moderate|theek thak|medium/i.test(text)) {
             severity = "Moderate";
@@ -747,15 +761,25 @@ const AIService = (() => {
         const negativeSymptoms = [];
 
         // Check Present
-        if (/fever|bukhar/i.test(lower)) presentSymptoms.push("Fever");
-        if (/headache|sir dard|sar dard/i.test(lower)) presentSymptoms.push("Headache");
-        if (/body (?:pain|ache)|badan dard/i.test(lower)) presentSymptoms.push("Body ache");
+        if (/fever|bukhar|tap|temperature|pyrexia/i.test(lower) && !/no fever|bukhar nahi/i.test(lower)) presentSymptoms.push("Fever");
+        if (/headache|sir dard|sar dard|mathe me dard/i.test(lower)) presentSymptoms.push("Headache");
+        if (/cold|sardi|zukaam|zukam|runny nose|naak behna/i.test(lower)) presentSymptoms.push("Cold / Coryza");
+        if (/sore throat|throat pain|gale me dard|gale me kharash/i.test(lower)) presentSymptoms.push("Sore throat");
+        if (/body (?:pain|ache)|badan dard|body pain/i.test(lower)) presentSymptoms.push("Body ache");
+        if (/back pain|kamar dard|peeth dard/i.test(lower)) presentSymptoms.push("Back pain");
+        if (/joint pain|ghutne (?:me|mein) dard|sandhishoola|knee pain/i.test(lower)) presentSymptoms.push("Joint pain");
         if (/nausea|matli|jee ghabrana/i.test(lower)) presentSymptoms.push("Nausea");
+        if (/vomiting|ulti/i.test(lower) && !/no vomiting|ulti nahi/i.test(lower)) presentSymptoms.push("Vomiting");
         if (/chills|shivering|thand lagna/i.test(lower)) presentSymptoms.push("Chills / Shivering");
-        if (/loose motion|diarrhea|dast/i.test(lower) && !/no loose motion|dast nahi/i.test(lower)) presentSymptoms.push("Diarrhea");
+        if (/loose motion|diarrhea|dast|pet kharab/i.test(lower) && !/no loose motion|dast nahi/i.test(lower)) presentSymptoms.push("Diarrhea");
         if (/cough|khansi/i.test(lower) && !/no cough|khansi nahi/i.test(lower)) presentSymptoms.push("Cough");
         if (/swelling|sujan/i.test(lower)) presentSymptoms.push("Swelling");
-        if (/burning|jalan|heartburn/i.test(lower)) presentSymptoms.push("Heartburn / Burning sensation");
+        if (/burning|jalan|heartburn|acidity|gas/i.test(lower)) presentSymptoms.push("Heartburn / Acidity");
+        if (/weakness|kamzori|thakan|fatigue/i.test(lower)) presentSymptoms.push("Fatigue / Weakness");
+        if (/dizziness|chakkar/i.test(lower) && !/no dizziness|chakkar nahi/i.test(lower)) presentSymptoms.push("Dizziness");
+        if (/chest pain|chhati me dard|seene me dard/i.test(lower) && !/no chest pain|chhati me dard nahi/i.test(lower)) presentSymptoms.push("Chest discomfort");
+        if (/breathlessness|saans lene me dikkat|saans phoolna/i.test(lower) && !/no breathlessness|saans lene me dikkat nahi/i.test(lower)) presentSymptoms.push("Shortness of breath");
+        if (/itching|khujli|rash|daane/i.test(lower)) presentSymptoms.push("Pruritus / Rash");
 
         // Check Explicit Negative Symptoms
         if (/no cough|don't have cough|khansi nahi|not having cough|cough nahi/i.test(lower)) negativeSymptoms.push("No cough");
@@ -856,8 +880,8 @@ const AIService = (() => {
         // 5. ASSESSMENT
         let assessment = "Not mentioned";
         const assessmentKeywords = [
-            /(?:looks like|seems like|indicates|impression is|diagnos(?:is|ed)|likely|suspecting|condition is|cause of)\s*([^.,\n]+)/i,
-            /(?:tension-type headache|viral prodrome|viral fever|acute gastritis|upper respiratory tract infection|urti|migraine|sandhivata|amlapitta)/i
+            /(?:looks like|seems like|indicates|impression is|diagnos(?:is|ed)|likely|suspecting|condition is|cause of|lag raha hai|ho sakta hai)\s*([^.,\n]+)/i,
+            /(?:tension-type headache|viral prodrome|viral fever|viral infection|acute gastritis|upper respiratory tract infection|urti|migraine|sandhivata|amlapitta|influenza|flu|seasonal infection|gastroenteritis|bronchitis)/i
         ];
 
         for (const kw of assessmentKeywords) {
@@ -933,6 +957,254 @@ const AIService = (() => {
             doctorNotes = observationMatches[0].trim();
         }
 
+        // Helper for language-aware phrase selection
+        const langPick = (enText, hiText, hinglishText) => {
+            if (targetLang === "hi") return hiText || enText;
+            if (targetLang === "hinglish") return hinglishText || hiText || enText;
+            if (targetLang !== "en" && typeof I18nService !== "undefined" && typeof I18nService.translateText === "function") {
+                return I18nService.translateText(enText, targetLang);
+            }
+            return enText;
+        };
+
+        const notMentionedStr = langPick("Not mentioned", "उल्लेख नहीं", "Not mentioned");
+
+        // 8. AYUSH HISTORY MODE (AYURVEDIC INTAKE PARAMETERS - DYNAMIC TARGET LANGUAGE)
+        // 1) Body & Mind Constitution
+        let ayushPrakriti = patientInfo.prakriti || notMentionedStr;
+        let ayushManasika = notMentionedStr;
+
+        if (/vata[- ]pitta|pitta[- ]vata/i.test(lower)) {
+            ayushPrakriti = langPick(
+                "Warm & Active Body Type (Pitta-Vata)",
+                "गर्म व सक्रिय शरीर (पित्त-वात)",
+                "Warm & Active Body Type (Pitta-Vata)"
+            );
+        } else if (/pitta[- ]kapha|kapha[- ]pitta/i.test(lower)) {
+            ayushPrakriti = langPick(
+                "Warm & Calm Body Type (Pitta-Kapha)",
+                "गर्म व शांत शरीर (पित्त-कफ)",
+                "Warm & Calm Body Type (Pitta-Kapha)"
+            );
+        } else if (/vata[- ]kapha|kapha[- ]vata/i.test(lower)) {
+            ayushPrakriti = langPick(
+                "Active & Solid Body Type (Vata-Kapha)",
+                "सक्रिय व मजबूत शरीर (वात-कफ)",
+                "Active & Solid Body Type (Vata-Kapha)"
+            );
+        } else if (/\bvata\b|vata body|vata dosha/i.test(lower)) {
+            ayushPrakriti = langPick(
+                "Light & Active Body Type (Airy / Active - Vata)",
+                "हल्का व सक्रिय शरीर (वात)",
+                "Light & Active Body Type (Vata)"
+            );
+        } else if (/\bpitta\b|pitta body|pitta dosha/i.test(lower)) {
+            ayushPrakriti = langPick(
+                "Warm & Fast Metabolism (Fiery / Acidity prone - Pitta)",
+                "गर्म व तेज़ चयापचय (पित्त)",
+                "Warm & Fast Metabolism (Pitta)"
+            );
+        } else if (/\bkapha\b|kapha body|kapha dosha/i.test(lower)) {
+            ayushPrakriti = langPick(
+                "Calm & Solid Build (Earthy / Slow metabolism - Kapha)",
+                "शांत व मजबूत शरीर (कफ)",
+                "Calm & Solid Build (Kapha)"
+            );
+        } else if (/tridosh|sama prakriti/i.test(lower)) {
+            ayushPrakriti = langPick(
+                "Balanced Body Energy (Sama / All doshas balanced)",
+                "संतुलित शरीर ऊर्जा (सम प्रकृति)",
+                "Balanced Body Energy (Sama / All doshas balanced)"
+            );
+        }
+
+        if (/satva|calm nature|peaceful|positive/i.test(lower)) {
+            ayushManasika = langPick(
+                "Calm, Clear & Balanced Mind (Peaceful)",
+                "शांत, एकाग्र व संतुलित मन (शांत स्वभाव)",
+                "Calm, Clear & Balanced Mind (Shant Swabhav)"
+            );
+        } else if (/rajas|anger|restless|stress|anxious|irritable/i.test(lower)) {
+            ayushManasika = langPick(
+                "Restless, High-Stress & Anxious",
+                "अशांत, अत्यधिक तनाव व चिंता (तनावग्रस्त)",
+                "Restless, High-Stress & Anxious (Chinta / Tanav)"
+            );
+        } else if (/tamas|lethargic|dull|depressed|lazy/i.test(lower)) {
+            ayushManasika = langPick(
+                "Low Energy, Tired & Sluggish",
+                "कम ऊर्जा, थकान व सुस्ती (थकावट)",
+                "Low Energy, Tired & Sluggish (Thakan / Alasya)"
+            );
+        }
+
+        // 2) Daily Lifestyle & Body Rhythms
+        let ayushSleep = notMentionedStr;
+        let ayushBowel = notMentionedStr;
+        let ayushLifestyle = notMentionedStr;
+
+        // Sleep / Neend
+        if (/insomnia|neend nahi aati|disturbed sleep|bura sapna|sleeplessness/i.test(lower)) {
+            ayushSleep = langPick(
+                "Disturbed Sleep / Insomnia",
+                "टूटी-फूटी नींद / अनिद्रा (नींद ठीक नहीं आती)",
+                "Disturbed Sleep / Insomnia (Neend theek nahi aati)"
+            );
+        } else if (/sound sleep|good sleep|neend theek hai|deep sleep/i.test(lower)) {
+            ayushSleep = langPick(
+                "Deep & Restful Sleep",
+                "गहरी व आरामदायक नींद",
+                "Deep & Restful Sleep (Achhi neend)"
+            );
+        } else if (/daytime sleep|din me sona|divaswapna/i.test(lower)) {
+            ayushSleep = langPick(
+                "Daytime Sleeping Habit",
+                "दिन में सोने की आदत",
+                "Daytime Sleeping Habit (Din me sona)"
+            );
+        } else {
+            const sleepHrsMatch = text.match(/(\d+)\s*(?:hours?|ghante)\s*(?:sleep|neend)/i);
+            if (sleepHrsMatch) {
+                ayushSleep = langPick(
+                    `${sleepHrsMatch[1]} hours sleep per night`,
+                    `${sleepHrsMatch[1]} घंटे प्रति रात नींद`,
+                    `${sleepHrsMatch[1]} ghante sleep per night`
+                );
+            }
+        }
+
+        // Bowel / Pet Saaf Hona
+        if (/constipation|kabz|pet saaf nahi|krura koshtha|hard stool/i.test(lower)) {
+            ayushBowel = langPick(
+                "Hard Stools / Constipation",
+                "कब्ज़ / कड़ा मल (पेट साफ नहीं होता)",
+                "Hard Stools / Constipation (Kabz - Pet saaf nahi hota)"
+            );
+        } else if (/loose stool|mrudu koshtha|frequent motions|pet kharab rehta hai/i.test(lower)) {
+            ayushBowel = langPick(
+                "Loose / Frequent Stools",
+                "दस्त / बार-बार पेट खराब होना",
+                "Loose / Frequent Stools (Pet jaldi kharab hona)"
+            );
+        } else if (/regular bowel|pet saaf hota hai|madhyama koshtha/i.test(lower)) {
+            ayushBowel = langPick(
+                "Daily Regular & Smooth",
+                "रोजाना सामान्य व साफ पेट",
+                "Daily Regular & Smooth (Pet theek saaf hota hai)"
+            );
+        }
+
+        // Routine & Work Stress
+        const lifestyleSignals = [];
+        if (/sedentary|sitting job|desk job|exercise nahi|no physical activity/i.test(lower)) {
+            lifestyleSignals.push(langPick(
+                "Sitting desk job (No regular exercise)",
+                "बैठकर काम (डेस्क जॉब / व्यायाम नहीं)",
+                "Sitting desk job (No regular exercise)"
+            ));
+        }
+        if (/yoga|pranayama|morning walk|brisk walk/i.test(lower)) {
+            lifestyleSignals.push(langPick(
+                "Active daily routine (Regular walking / yoga)",
+                "सक्रिय दिनचर्या (रोजाना टहलना / योग)",
+                "Active daily routine (Regular walking / yoga)"
+            ));
+        }
+        if (/work stress|tension|busy schedule|overwork|chinta/i.test(lower)) {
+            lifestyleSignals.push(langPick(
+                "High mental & work stress",
+                "मानसिक व कार्य तनाव (चिंता / दबाव)",
+                "High mental & work stress (Chinta / Tanav)"
+            ));
+        }
+        if (lifestyleSignals.length > 0) ayushLifestyle = lifestyleSignals.join("; ");
+
+        // 3) Digestion & Food Habits (Hazma & Diet)
+        let ayushAgni = notMentionedStr;
+        let ayushDietPattern = notMentionedStr;
+        let ayushEatingHabits = notMentionedStr;
+
+        // Hazma / Hunger
+        if (/bhookh nahi lagti|mandagni|low appetite|poor digestion|bloating|apach/i.test(lower)) {
+            ayushAgni = langPick(
+                "Slow Digestion, Heaviness & Low Appetite",
+                "धीमा पाचन, भारीपन व भूख कम लगना",
+                "Slow Digestion, Heaviness & Low Appetite (Bhookh kam lagna aur pet bhari rehna)"
+            );
+        } else if (/hyperacidity|tikshnagni|khatti dakar|tez bhookh|burning acid|acidity|jalan/i.test(lower)) {
+            ayushAgni = langPick(
+                "High Acidity, Burning Sensation & Fast Hunger",
+                "तेज़ एसिडिटी, पेट व सीने में जलन और तीव्र भूख",
+                "High Acidity, Burning Sensation & Fast Hunger (Tez jalan aur bhookh)"
+            );
+        } else if (/vishmagni|irregular appetite|kabhi bhookh kabhi nahi/i.test(lower)) {
+            ayushAgni = langPick(
+                "Irregular Digestion, Gas & Bloating",
+                "अनियमित पाचन, गैस व पेट फूलना",
+                "Irregular Digestion, Gas & Bloating (Kabhi bhookh, kabhi gas/afara)"
+            );
+        } else if (/good appetite|bhookh theek hai|samagni|proper digestion/i.test(lower)) {
+            ayushAgni = langPick(
+                "Normal & Healthy Digestion",
+                "सामान्य व स्वस्थ पाचन (समय पर भूख)",
+                "Normal & Healthy Digestion (Sahi samay par hazma)"
+            );
+        }
+
+        // Diet Type & Taste Cravings
+        const dietSignals = [];
+        if (/vegetarian|shakahari/i.test(lower)) {
+            dietSignals.push(langPick("Vegetarian", "शाकाहारी", "Vegetarian (Shakahari)"));
+        }
+        if (/non-?veg|mansahari/i.test(lower)) {
+            dietSignals.push(langPick("Non-Vegetarian", "मांसाहारी", "Non-Vegetarian (Mansahari)"));
+        }
+        if (/spicy|mirch masale|katu rasa/i.test(lower)) {
+            dietSignals.push(langPick("Spicy Food Cravings", "तीखा व मसालेदार भोजन पसंद", "Spicy Food Cravings (Teekha / Masaledar)"));
+        }
+        if (/oily|tala bhuna|snigdha/i.test(lower)) {
+            dietSignals.push(langPick("Oily & Deep-Fried Food", "तला-भुना व चिकनाई युक्त भोजन", "Oily & Deep-Fried Food (Tala-bhuna)"));
+        }
+        if (/meetha|sweet craving|madhura/i.test(lower)) {
+            dietSignals.push(langPick("Prefers Sweets & Sugary Items", "मीठा खाने की तीव्र चाह", "Prefers Sweets & Sugary Items (Meetha)"));
+        }
+        if (/salt|namkeen|lavana/i.test(lower)) {
+            dietSignals.push(langPick("Salty & Savory Snacks", "नमकीन व चटपटा भोजन पसंद", "Salty & Savory Snacks (Namkeen)"));
+        }
+        if (dietSignals.length > 0) ayushDietPattern = dietSignals.join(", ");
+
+        // Meal Timings & Bad Eating Habits
+        const timingSignals = [];
+        if (/late dinner|der raat khana|ratri bhojana/i.test(lower)) {
+            timingSignals.push(langPick(
+                "Late Night Dinners",
+                "देर रात भोजन करने की आदत",
+                "Late Night Dinners (Der raat ka khana)"
+            ));
+        }
+        if (/skip breakfast|irregular meals|asamaya ashana/i.test(lower)) {
+            timingSignals.push(langPick(
+                "Irregular Meal Timings / Skipping Meals",
+                "भोजन का अनियमित समय / नाश्ता छोड़ना",
+                "Irregular Meal Timings (Bina time khana / Skipping meals)"
+            ));
+        }
+        if (/cold water with meal|chilled water|sheetala jala/i.test(lower)) {
+            timingSignals.push(langPick(
+                "Cold water intake during meals",
+                "भोजन के साथ ठंडा / फ्रिज का पानी पीना",
+                "Cold water intake during meals (Khane ke sath thanda pani)"
+            ));
+        }
+        if (/milk with (?:salt|fish|citrus)|viruddha/i.test(lower)) {
+            timingSignals.push(langPick(
+                "Incompatible food combinations (e.g. milk with citrus/salty items)",
+                "गलत खाद्य संयोजन (उदा. दूध के साथ खट्टे या नमकीन पदार्थ)",
+                "Bad food combinations (Jaise milk with citrus / salty items)"
+            ));
+        }
+        if (timingSignals.length > 0) ayushEatingHabits = timingSignals.join("; ");
+
         return {
             complaint: {
                 main: mainComplaint,
@@ -948,6 +1220,22 @@ const AIService = (() => {
                 surgeries: pastSurgeries,
                 allergies: allergies,
                 medications: currentMedications
+            },
+            ayush: {
+                prakriti: {
+                    dosha: ayushPrakriti,
+                    manasika: ayushManasika
+                },
+                lifestyle: {
+                    sleep: ayushSleep,
+                    bowel: ayushBowel,
+                    routineAndStress: ayushLifestyle
+                },
+                diet: {
+                    agni: ayushAgni,
+                    patternsAndRasa: ayushDietPattern,
+                    timingsAndIncompatibilities: ayushEatingHabits
+                }
             },
             vitals: {
                 bloodPressure: bloodPressure,

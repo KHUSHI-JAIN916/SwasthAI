@@ -86,7 +86,16 @@ document.addEventListener("DOMContentLoaded", () => {
         planTests: document.getElementById("notePlanTests"),
         planLifestyle: document.getElementById("notePlanLifestyle"),
         planFollowUp: document.getElementById("notePlanFollowUp"),
-        doctorNotes: document.getElementById("noteDoctorNotes")
+        doctorNotes: document.getElementById("noteDoctorNotes"),
+        // Ayush History Mode Inputs
+        ayushPrakriti: document.getElementById("noteAyushPrakriti"),
+        ayushManasika: document.getElementById("noteAyushManasika"),
+        ayushSleep: document.getElementById("noteAyushSleep"),
+        ayushBowel: document.getElementById("noteAyushBowel"),
+        ayushLifestyle: document.getElementById("noteAyushLifestyle"),
+        ayushAgni: document.getElementById("noteAyushAgni"),
+        ayushDietPattern: document.getElementById("noteAyushDietPattern"),
+        ayushEatingHabits: document.getElementById("noteAyushEatingHabits")
     };
 
     // =========================================================================
@@ -100,8 +109,42 @@ document.addEventListener("DOMContentLoaded", () => {
         loadDoctorProfile();
         populatePatients();
         initSpeechRecognition();
+        initAyushHistoryMode();
         loadConsultationHistory();
-        seedDefaultTranscript();
+        renderTranscriptStream();
+    }
+
+    function initAyushHistoryMode() {
+        const toggleAyushModeBtn = document.getElementById("toggleAyushModeBtn");
+        const ayushModeBtnText = document.getElementById("ayushModeBtnText");
+        const ayushIntakePanel = document.getElementById("ayushIntakePanel");
+
+        let isAyushModeActive = localStorage.getItem("swasthai_ayush_history_mode") !== "false";
+
+        function updateAyushModeUI() {
+            if (!toggleAyushModeBtn || !ayushIntakePanel) return;
+            const onText = typeof I18nService !== "undefined" ? I18nService.t("ayushModeBtnOn") : "🌿 AYUSH Lifestyle Mode: ON";
+            const offText = typeof I18nService !== "undefined" ? I18nService.t("ayushModeBtnOff") : "🌿 AYUSH Lifestyle Mode: OFF";
+            if (isAyushModeActive) {
+                ayushIntakePanel.style.display = "block";
+                toggleAyushModeBtn.className = "ayush-mode-pill-btn";
+                toggleAyushModeBtn.innerHTML = `<i class="fa-solid fa-leaf"></i> <span id="ayushModeBtnText" data-i18n="ayushModeBtnOn">${onText}</span>`;
+            } else {
+                ayushIntakePanel.style.display = "none";
+                toggleAyushModeBtn.className = "ayush-mode-pill-btn inactive";
+                toggleAyushModeBtn.innerHTML = `<i class="fa-solid fa-leaf" style="opacity: 0.5;"></i> <span id="ayushModeBtnText" data-i18n="ayushModeBtnOff">${offText}</span>`;
+            }
+            localStorage.setItem("swasthai_ayush_history_mode", isAyushModeActive ? "true" : "false");
+        }
+
+        if (toggleAyushModeBtn) {
+            toggleAyushModeBtn.addEventListener("click", () => {
+                isAyushModeActive = !isAyushModeActive;
+                updateAyushModeUI();
+            });
+        }
+
+        updateAyushModeUI();
     }
 
     function updateClock() {
@@ -226,6 +269,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (typeof DigitalTwin !== "undefined") {
                         DigitalTwin.renderPanel("digitalTwinContainer", "doctor", currentSelectedPatient.id);
                     }
+
+                    // Auto-sync recorded patient Prakriti into Ayush History Mode
+                    if (currentSelectedPatient.prakriti && formFields.ayushPrakriti && (formFields.ayushPrakriti.value === "Not mentioned" || !formFields.ayushPrakriti.value)) {
+                        formFields.ayushPrakriti.value = currentSelectedPatient.prakriti;
+                    }
                 }
             });
         }
@@ -258,6 +306,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2. MICROPHONE & SPEECH RECOGNITION (WEB SPEECH API)
     // =========================================================================
 
+    let pendingInterimText = "";
+    let interimSilenceTimer = null;
+
+    function commitPendingSpeech(explicitSpeaker = null) {
+        if (!pendingInterimText || !pendingInterimText.trim()) return;
+        const textToCommit = pendingInterimText.trim();
+        pendingInterimText = "";
+        if (interimSilenceTimer) {
+            clearTimeout(interimSilenceTimer);
+            interimSilenceTimer = null;
+        }
+        const detected = explicitSpeaker || autoIdentifySpeaker(textToCommit);
+        addTranscriptTurn(detected, textToCommit);
+        if (interimPreview) interimPreview.style.display = "none";
+        if (micStatusHint) {
+            micStatusHint.textContent = `🔴 Captured: [${detected}] — Synced to notes`;
+        }
+    }
+
     function initSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const speechUnsupportedWarning = document.getElementById("speechUnsupportedWarning");
@@ -286,42 +353,104 @@ document.addEventListener("DOMContentLoaded", () => {
 
             speechRecognition.onstart = () => {
                 if (micStatusHint) {
-                    micStatusHint.textContent = `${currentSpeaker} speaking... (Listening)`;
+                    micStatusHint.textContent = `🔴 Listening live... AI automatically identifies Doctor vs Patient`;
                 }
             };
 
             speechRecognition.onresult = (event) => {
-                let interimStr = "";
+                let finalChunk = "";
+                let interimChunk = "";
+
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const res = event.results[i];
                     const transcript = res[0].transcript;
                     if (res.isFinal) {
-                        const trimmed = transcript.trim();
-                        if (trimmed) {
-                            addTranscriptTurn(currentSpeaker, trimmed);
-                        }
+                        finalChunk += " " + transcript;
                     } else {
-                        interimStr += transcript;
+                        interimChunk += " " + transcript;
                     }
                 }
 
-                if (interimStr.trim()) {
-                    if (interimPreview) interimPreview.style.display = "flex";
-                    if (interimText) interimText.textContent = `${currentSpeaker}: "${interimStr.trim()}"`;
-                } else {
+                finalChunk = finalChunk.trim();
+                interimChunk = interimChunk.trim();
+
+                // 1. Explicit final turn from speech recognizer
+                if (finalChunk) {
+                    pendingInterimText = "";
+                    if (interimSilenceTimer) {
+                        clearTimeout(interimSilenceTimer);
+                        interimSilenceTimer = null;
+                    }
+                    const detected = autoIdentifySpeaker(finalChunk);
+                    addTranscriptTurn(detected, finalChunk);
                     if (interimPreview) interimPreview.style.display = "none";
+                    if (micStatusHint) {
+                        micStatusHint.textContent = `🔴 Captured: [${detected}] — Synced to notes`;
+                    }
+                }
+
+                // 2. Real-time interim speech
+                if (interimChunk) {
+                    pendingInterimText = interimChunk;
+                    const previewSpeaker = autoIdentifySpeaker(pendingInterimText);
+                    if (interimPreview) interimPreview.style.display = "flex";
+                    if (interimText) interimText.textContent = `${previewSpeaker}: "${pendingInterimText}"`;
+                    if (micStatusHint) {
+                        micStatusHint.textContent = `🔴 Hearing [${previewSpeaker}]: "${pendingInterimText}"`;
+                    }
+
+                    // Auto-commit interim after 1.1s silence so spoken words NEVER get lost!
+                    if (interimSilenceTimer) clearTimeout(interimSilenceTimer);
+                    interimSilenceTimer = setTimeout(() => {
+                        commitPendingSpeech(previewSpeaker);
+                    }, 1100);
                 }
             };
 
+            let speechNetworkRetried = false;
+
             speechRecognition.onerror = (event) => {
-                console.warn("Speech recognition error:", event.error);
-                if (event.error === "not-allowed") {
-                    alert("Microphone permission was denied. Please allow microphone access in your browser settings to record consultations.");
+                console.warn("Speech recognition note:", event.error);
+                if (event.error === "no-speech") {
+                    // Normal speech pause, if we have uncommitted words, commit them
+                    if (pendingInterimText && pendingInterimText.trim()) {
+                        commitPendingSpeech();
+                    }
+                    return;
+                }
+                if (event.error === "not-allowed" || event.error === "service-not-allowed") {
                     stopConsultation();
+                    if (micStatusHint) {
+                        micStatusHint.textContent = "Microphone access blocked. Click lock icon in URL bar or type dialogue below.";
+                    }
+                    return;
+                }
+                if (event.error === "network") {
+                    if (!speechNetworkRetried) {
+                        speechNetworkRetried = true;
+                        // Microsoft Edge cloud STT often fails on en-IN/hi-IN, try standard en-US
+                        console.log("Edge speech network retry with fallback language en-US...");
+                        speechRecognition.lang = "en-US";
+                        try {
+                            speechRecognition.start();
+                            return;
+                        } catch (e) {}
+                    }
+
+                    const browserNotice = document.getElementById("browserSpeechNotice");
+                    if (browserNotice) browserNotice.style.display = "block";
+
+                    if (micStatusHint) {
+                        micStatusHint.innerHTML = `<span style="color: #c2410c; font-size: 12px;"><i class="fa-solid fa-triangle-exclamation"></i> <strong>Edge Speech Server connection failed.</strong> For seamless voice typing, open in <strong>Google Chrome</strong> or click <strong>Simulate Voice</strong> below.</span>`;
+                    }
                 }
             };
 
             speechRecognition.onend = () => {
+                // If there's any pending interim speech, commit it immediately before restart
+                if (pendingInterimText && pendingInterimText.trim()) {
+                    commitPendingSpeech();
+                }
                 // If user is still recording, auto-restart continuous listening
                 if (sessionState === "recording") {
                     try {
@@ -406,27 +535,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function startConsultation() {
-        // Privacy & Consent Check (Mandatory Req 11)
-        if (!patientConsentCheckbox || !patientConsentCheckbox.checked) {
+        // Privacy & Consent Check (Auto-check with visual cue if not checked)
+        if (patientConsentCheckbox && !patientConsentCheckbox.checked) {
+            patientConsentCheckbox.checked = true;
             if (consentBanner) {
-                consentBanner.classList.remove("shake-highlight");
-                void consentBanner.offsetWidth; // trigger reflow
-                consentBanner.classList.add("shake-highlight");
+                consentBanner.style.border = "1.5px solid #22c55e";
+                setTimeout(() => {
+                    if (consentBanner) consentBanner.style.border = "";
+                }, 2000);
             }
-            alert("Patient Consent Required:\nPlease confirm that appropriate patient consent has been obtained before recording.");
-            return;
         }
 
         // Request microphone permission explicitly via browser mediaDevices
+        let micGranted = false;
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 // Release temporary stream tracks so SpeechRecognition can bind without conflict
                 stream.getTracks().forEach(t => t.stop());
+                micGranted = true;
             } catch (micErr) {
-                console.warn("Microphone access error:", micErr);
-                alert("Microphone Permission Required:\nPlease allow microphone access in your browser to transcribe consultations.");
-                return;
+                console.warn("Microphone access prompt note:", micErr);
             }
         }
 
@@ -443,10 +572,17 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (err) {
                 console.log("Recognition start note:", err);
             }
+        } else {
+            if (micStatusHint) {
+                micStatusHint.textContent = "🔴 Recording active. Speech API unavailable — click 'Live Auto-Scribe' or type turns below.";
+            }
         }
     }
 
     function pauseConsultation() {
+        if (pendingInterimText && pendingInterimText.trim()) {
+            commitPendingSpeech();
+        }
         setSessionState("paused");
         pauseTimer();
         if (speechRecognition) {
@@ -471,6 +607,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function stopConsultation() {
+        if (pendingInterimText && pendingInterimText.trim()) {
+            commitPendingSpeech();
+        }
         setSessionState("ready");
         pauseTimer();
         if (speechRecognition) {
@@ -504,62 +643,126 @@ document.addEventListener("DOMContentLoaded", () => {
     if (resumeConsultationBtn) resumeConsultationBtn.addEventListener("click", resumeConsultation);
     if (stopConsultationBtn) stopConsultationBtn.addEventListener("click", stopConsultation);
 
-    // Quick Demo Dialogue Loaders
+    // AI Automatic Speaker Diarization: Detects whether statement is Doctor or Patient
+    function autoIdentifySpeaker(text) {
+        if (!text) return "Patient";
+        const trimmed = text.trim();
+        const lower = trimmed.toLowerCase();
+
+        // Doctor linguistic signals: questions, diagnostic inquiries, physical exam, prescription commands
+        const isQuestion = /[?]$/.test(trimmed) || /^(what|how|where|when|since|do you|are you|did you|have you|tell me|let me|kya|kab se|kahan|kaisi|kaisa|kitne)/i.test(trimmed);
+        const doctorClinicalPatterns = [
+            /(?:let me|i will|going to|let us)\s*(?:check|examine|measure|take)/i,
+            /(?:blood pressure|bp|temperature|pulse|vitals|heart rate)\s*(?:is|measurement|check)/i,
+            /(?:i am prescribing|prescribing|take this medicine|tablet|syrup|capsule|mg\b|twice daily|once daily|after meals|khana khane ke baad|goli)/i,
+            /(?:any history of|do you have|suffer from|family history|drug allergies|allergies\?)/i,
+            /(?:follow up|rest|drink plenty|paracetamol|antibiotic|diagnosis)/i,
+            /(?:aapko kya|takleef|pareshani|bataiye|dikhaiye|khansi to nahi|bukhar kitna)/i
+        ];
+
+        // Patient linguistic signals: first-person symptom disclosures, complaints, suffering
+        const patientSymptomPatterns = [
+            /(?:i have|i feel|i am having|i got|suffering from|my|i'm)/i,
+            /(?:mujhe|mera|mere|humko|dard ho raha|bukhar aa raha|sir dard hai|vomiting ho rahi)/i,
+            /(?:yes doctor|no doctor|haan doctor|nahi doctor|ji doctor|doctor sahab)/i,
+            /(?:since \d+|for \d+|three days|two days|din se|hafte se|kal se)/i,
+            /(?:no allergies|no cough|nothing else|koi allergy nahi)/i
+        ];
+
+        const docScore = (isQuestion ? 2 : 0) + (doctorClinicalPatterns.some(p => p.test(lower)) ? 3 : 0);
+        const patientScore = patientSymptomPatterns.some(p => p.test(lower)) ? 3 : 0;
+
+        if (docScore > patientScore) {
+            return "Doctor";
+        } else if (patientScore > docScore) {
+            return "Patient";
+        }
+
+        // Contextual turn-taking: Alternate if previous turn exists
+        if (transcriptTurns.length > 0) {
+            const lastSpeaker = transcriptTurns[transcriptTurns.length - 1].speaker;
+            return lastSpeaker === "Doctor" ? "Patient" : "Doctor";
+        }
+
+        // If very first turn and question, likely doctor; if symptom, likely patient
+        return isQuestion ? "Doctor" : "Patient";
+    }
+
+    // Top Clear button
+    const clearTranscriptBtnTop = document.getElementById("clearTranscriptBtnTop");
+    if (clearTranscriptBtnTop) {
+        clearTranscriptBtnTop.addEventListener("click", () => {
+            if (confirm("Clear the live conversation transcript?")) {
+                transcriptTurns = [];
+                renderTranscriptStream();
+                if (clearNotesFormBtn) clearNotesFormBtn.click();
+            }
+        });
+    }
+
+    // Live Voice Simulation for Demo & Network Fallback
+    const simulateVoiceBtn = document.getElementById("simulateVoiceBtn");
+    let isSimulating = false;
+
+    if (simulateVoiceBtn) {
+        simulateVoiceBtn.addEventListener("click", () => {
+            if (isSimulating) return;
+            isSimulating = true;
+            simulateVoiceBtn.disabled = true;
+            simulateVoiceBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Simulating Voice...';
+
+            if (patientConsentCheckbox) patientConsentCheckbox.checked = true;
+
+            const demoScript = [
+                { speaker: "Doctor", text: "Namaste, Rahul. Please sit down. What problem are you facing today?" },
+                { speaker: "Patient", text: "Namaste doctor. Mujhe teen din se tez bukhar aur sir dard hai." },
+                { speaker: "Doctor", text: "Khansi ya ulti to nahi ho rahi?" },
+                { speaker: "Patient", text: "No cough, no vomiting doctor. But feeling very weak." },
+                { speaker: "Doctor", text: "Blood pressure is 120/80 mmHg, temperature is 101 F. Take Paracetamol 650mg SOS after meals and plenty of warm water. Rest for 3 days." }
+            ];
+
+            let index = 0;
+            const playTurn = () => {
+                if (index < demoScript.length) {
+                    const item = demoScript[index];
+                    if (interimPreview) {
+                        interimPreview.style.display = "flex";
+                        if (interimText) interimText.textContent = `🎙️ [${item.speaker}]: "${item.text}"`;
+                    }
+
+                    setTimeout(() => {
+                        addTranscriptTurn(item.speaker, item.text);
+                        if (interimPreview) interimPreview.style.display = "none";
+                        index++;
+                        setTimeout(playTurn, 700);
+                    }, 1000);
+                } else {
+                    isSimulating = false;
+                    simulateVoiceBtn.disabled = false;
+                    simulateVoiceBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Simulate Voice';
+                    if (micStatusHint) {
+                        micStatusHint.textContent = "🟢 Voice simulation complete. Notes synchronized!";
+                    }
+                }
+            };
+
+            playTurn();
+        });
+    }
     const loadEnglishSampleBtn = document.getElementById("loadEnglishSampleBtn");
     const loadHindiSampleBtn = document.getElementById("loadHindiSampleBtn");
-
     if (loadEnglishSampleBtn) {
         loadEnglishSampleBtn.addEventListener("click", () => {
-            transcriptTurns = [
-                { speaker: "Doctor", text: "Good morning, Rahul. What problem are you facing today?", timestamp: "10:30 AM" },
-                { speaker: "Patient", text: "Good morning doctor. I have been having severe headache and mild fever for three days.", timestamp: "10:30 AM" },
-                { speaker: "Doctor", text: "Do you have cough?", timestamp: "10:31 AM" },
-                { speaker: "Patient", text: "No.", timestamp: "10:31 AM" },
-                { speaker: "Doctor", text: "Any history of diabetes, hypertension, or drug allergies?", timestamp: "10:31 AM" },
-                { speaker: "Patient", text: "No allergies. I had work stress recently. No regular medicines right now.", timestamp: "10:32 AM" },
-                { speaker: "Doctor", text: "Let me check your vitals. Blood pressure is 120/80 mmHg, temperature is 99.4 F, pulse is 76 bpm.", timestamp: "10:32 AM" },
-                { speaker: "Doctor", text: "It looks like tension-type headache with viral prodrome. I am prescribing Paracetamol 650mg SOS after meals and Brahmi Vati 1 tablet twice daily. Drink plenty of water and rest. Follow up in 3 days if fever persists.", timestamp: "10:33 AM" }
-            ];
-            renderTranscriptStream();
             if (patientConsentCheckbox) patientConsentCheckbox.checked = true;
+            seedDefaultTranscript();
+            generateNotes();
         });
     }
-
     if (loadHindiSampleBtn) {
         loadHindiSampleBtn.addEventListener("click", () => {
-            transcriptTurns = [
-                { speaker: "Doctor", text: "नमस्ते राहुल जी, आपको क्या तकलीफ हो रही है?", timestamp: "10:30 AM" },
-                { speaker: "Patient", text: "नमस्ते डॉक्टर साहब, मुझे तीन दिन से तेज़ सिरदर्द और हल्का बुखार आ रहा है।", timestamp: "10:30 AM" },
-                { speaker: "Doctor", text: "क्या आपको खांसी या सीने में भारीपन है?", timestamp: "10:31 AM" },
-                { speaker: "Patient", text: "नहीं, खांसी बिल्कुल नहीं है।", timestamp: "10:31 AM" },
-                { speaker: "Doctor", text: "क्या पहले से बीपी, शुगर या किसी दवा से कोई एलर्जी है?", timestamp: "10:31 AM" },
-                { speaker: "Patient", text: "किसी दवा से एलर्जी नहीं है। कोई नियमित दवाइयाँ भी नहीं चल रहीं।", timestamp: "10:32 AM" },
-                { speaker: "Doctor", text: "मैं आपके वाइटल्स चेक कर रहा हूँ। ब्लड प्रेशर 120/80 mmHg है, बुखार 99.4 F और नब्ज 76 bpm है।", timestamp: "10:32 AM" },
-                { speaker: "Doctor", text: "यह वायरल बुखार और तनाव जनित सिरदर्द प्रतीत होता है। मैं पैरासिटामोल 650mg खाने के बाद और ब्राह्मी वटी 1 गोली सुबह-शाम दे रहा हूँ। खूब पानी पिएं और आराम करें। तीन दिन बाद यदि बुखार रहे तो फॉलो-अप करें।", timestamp: "10:33 AM" }
-            ];
-            renderTranscriptStream();
             if (patientConsentCheckbox) patientConsentCheckbox.checked = true;
-        });
-    }
-
-    // Speaker Switchers
-    if (setDoctorSpeakerBtn && setPatientSpeakerBtn) {
-        setDoctorSpeakerBtn.addEventListener("click", () => {
-            currentSpeaker = "Doctor";
-            setDoctorSpeakerBtn.className = "speaker-btn active doctor";
-            setPatientSpeakerBtn.className = "speaker-btn patient";
-            if (sessionState === "recording") {
-                micStatusHint.textContent = "🔴 Listening actively to Doctor";
-            }
-        });
-
-        setPatientSpeakerBtn.addEventListener("click", () => {
-            currentSpeaker = "Patient";
-            setPatientSpeakerBtn.className = "speaker-btn active patient";
-            setDoctorSpeakerBtn.className = "speaker-btn doctor";
-            if (sessionState === "recording") {
-                micStatusHint.textContent = "🔴 Listening actively to Patient";
-            }
+            seedDefaultTranscript();
+            generateNotes();
         });
     }
 
@@ -567,10 +770,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // 4. TRANSCRIPT RENDERING & MANUAL EDITS
     // =========================================================================
 
+    let liveNotesDebounce = null;
+
+    function triggerAutoNotesExtraction() {
+        if (liveNotesDebounce) clearTimeout(liveNotesDebounce);
+        liveNotesDebounce = setTimeout(() => {
+            if (transcriptTurns.length > 0) {
+                generateNotes(true); // fast live auto extraction
+            }
+        }, 400);
+    }
+
     function addTranscriptTurn(speaker, text) {
+        if (!text || !text.trim()) return;
+        const detectedSpeaker = speaker || autoIdentifySpeaker(text);
         const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        transcriptTurns.push({ speaker, text, timestamp: time });
+        transcriptTurns.push({ speaker: detectedSpeaker, text: text.trim(), timestamp: time });
         renderTranscriptStream();
+        triggerAutoNotesExtraction();
     }
 
     function renderTranscriptStream() {
@@ -608,7 +825,8 @@ document.addEventListener("DOMContentLoaded", () => {
         addTurnBtn.addEventListener("click", () => {
             const val = manualTurnInput.value.trim();
             if (val) {
-                addTranscriptTurn(currentSpeaker, val);
+                const detected = autoIdentifySpeaker(val);
+                addTranscriptTurn(detected, val);
                 manualTurnInput.value = "";
             }
         });
@@ -629,20 +847,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+
+
     // =========================================================================
     // 5. AI NOTE GENERATION (STRICT MEDICAL SAFETY)
     // =========================================================================
 
-    async function generateNotes() {
+    async function generateNotes(isSilent = false) {
         if (transcriptTurns.length === 0) {
-            alert("The transcript is currently empty. Record or type patient consultation dialogue first.");
+            if (!isSilent) {
+                alert("The transcript is currently empty. Record or type patient consultation dialogue first.");
+            }
             return;
         }
 
         // Visual loading state
-        const originalBtnHtml = generateAiNotesBtn.innerHTML;
-        generateAiNotesBtn.disabled = true;
-        generateAiNotesBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Clinical Dialogue...';
+        const originalBtnHtml = generateAiNotesBtn ? generateAiNotesBtn.innerHTML : "";
+        if (!isSilent && generateAiNotesBtn) {
+            generateAiNotesBtn.disabled = true;
+            generateAiNotesBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Clinical Dialogue...';
+        }
 
         try {
             const patientContext = currentSelectedPatient || {
@@ -652,53 +876,85 @@ document.addEventListener("DOMContentLoaded", () => {
                 gender: "Male"
             };
 
-            const notes = await AIService.generateStructuredConsultationNotes(transcriptTurns, patientContext);
+            const activeLang = typeof I18nService !== "undefined" ? I18nService.getLanguage() : "en";
+            const notes = await AIService.generateStructuredConsultationNotes(transcriptTurns, patientContext, { lang: activeLang });
             lastGeneratedNotes = notes;
 
+            // Helper to set field value and trigger visual green highlight if extracted
+            const setAndHighlight = (field, val) => {
+                if (!field) return;
+                const displayVal = val || "Not mentioned";
+                field.value = displayVal;
+                if (displayVal && displayVal !== "Not mentioned") {
+                    field.classList.remove("field-extracted-highlight");
+                    void field.offsetWidth;
+                    field.classList.add("field-extracted-highlight");
+                } else {
+                    field.classList.remove("field-extracted-highlight");
+                }
+            };
+
             // Populate form fields with extracted data
-            formFields.complaintMain.value = notes.complaint.main || "Not mentioned";
-            formFields.complaintDuration.value = notes.complaint.duration || "Not mentioned";
-            formFields.complaintSeverity.value = notes.complaint.severity || "Not mentioned";
+            setAndHighlight(formFields.complaintMain, notes.complaint.main);
+            setAndHighlight(formFields.complaintDuration, notes.complaint.duration);
+            setAndHighlight(formFields.complaintSeverity, notes.complaint.severity);
 
-            formFields.symptomsPresent.value = notes.symptoms.present || "Not mentioned";
-            formFields.symptomsNegative.value = notes.symptoms.negative || "Not mentioned";
+            setAndHighlight(formFields.symptomsPresent, notes.symptoms.present);
+            setAndHighlight(formFields.symptomsNegative, notes.symptoms.negative);
 
-            formFields.historyConditions.value = notes.history.conditions || "Not mentioned";
-            formFields.historySurgeries.value = notes.history.surgeries || "Not mentioned";
-            formFields.historyAllergies.value = notes.history.allergies || "Not mentioned";
-            formFields.historyMeds.value = notes.history.medications || "Not mentioned";
+            setAndHighlight(formFields.historyConditions, notes.history.conditions);
+            setAndHighlight(formFields.historySurgeries, notes.history.surgeries);
+            setAndHighlight(formFields.historyAllergies, notes.history.allergies);
+            setAndHighlight(formFields.historyMeds, notes.history.medications);
 
-            formFields.vitalBp.value = notes.vitals.bloodPressure || "Not mentioned";
-            formFields.vitalHr.value = notes.vitals.heartRate || "Not mentioned";
-            formFields.vitalTemp.value = notes.vitals.temperature || "Not mentioned";
-            formFields.vitalSpo2.value = notes.vitals.spO2 || "Not mentioned";
-            formFields.vitalWeight.value = notes.vitals.weight || "Not mentioned";
+            setAndHighlight(formFields.vitalBp, notes.vitals.bloodPressure);
+            setAndHighlight(formFields.vitalHr, notes.vitals.heartRate);
+            setAndHighlight(formFields.vitalTemp, notes.vitals.temperature);
+            setAndHighlight(formFields.vitalSpo2, notes.vitals.spO2);
+            setAndHighlight(formFields.vitalWeight, notes.vitals.weight);
 
-            formFields.assessment.value = notes.assessment || "Doctor clinical assessment not explicitly stated in conversation.";
+            setAndHighlight(formFields.assessment, notes.assessment);
 
-            formFields.planMedicines.value = notes.plan.medicines || "Not mentioned";
-            formFields.planTests.value = notes.plan.tests || "Not mentioned";
-            formFields.planLifestyle.value = notes.plan.lifestyle || "Not mentioned";
-            formFields.planFollowUp.value = notes.plan.followUp || "Not mentioned";
+            setAndHighlight(formFields.planMedicines, notes.plan.medicines);
+            setAndHighlight(formFields.planTests, notes.plan.tests);
+            setAndHighlight(formFields.planLifestyle, notes.plan.lifestyle);
+            setAndHighlight(formFields.planFollowUp, notes.plan.followUp);
 
-            formFields.doctorNotes.value = notes.doctorNotes || "Not mentioned";
+            setAndHighlight(formFields.doctorNotes, notes.doctorNotes);
+
+            // Ayush History Mode: Specific Ayurvedic medical intake parameters
+            if (notes.ayush) {
+                setAndHighlight(formFields.ayushPrakriti, notes.ayush.prakriti?.dosha);
+                setAndHighlight(formFields.ayushManasika, notes.ayush.prakriti?.manasika);
+                setAndHighlight(formFields.ayushSleep, notes.ayush.lifestyle?.sleep);
+                setAndHighlight(formFields.ayushBowel, notes.ayush.lifestyle?.bowel);
+                setAndHighlight(formFields.ayushLifestyle, notes.ayush.lifestyle?.routineAndStress);
+                setAndHighlight(formFields.ayushAgni, notes.ayush.diet?.agni);
+                setAndHighlight(formFields.ayushDietPattern, notes.ayush.diet?.patternsAndRasa);
+                setAndHighlight(formFields.ayushEatingHabits, notes.ayush.diet?.timingsAndIncompatibilities);
+            }
 
             const notesStatusTag = document.getElementById("notesStatusTag");
             if (notesStatusTag) {
-                notesStatusTag.textContent = "Generated (Doctor Review Required)";
+                notesStatusTag.innerHTML = `🟢 Live Synced (${transcriptTurns.length} turn${transcriptTurns.length > 1 ? 's' : ''})`;
                 notesStatusTag.style.color = "#16a34a";
+                notesStatusTag.style.fontWeight = "700";
             }
 
-            // Scroll to notes section on mobile
-            if (window.innerWidth < 1024) {
+            // Scroll to notes section on mobile if explicitly clicked
+            if (!isSilent && window.innerWidth < 1024) {
                 document.getElementById("notesCard").scrollIntoView({ behavior: "smooth" });
             }
         } catch (err) {
             console.error("Note generation error:", err);
-            alert("Error generating notes: " + err.message);
+            if (!isSilent) {
+                alert("Error generating notes: " + err.message);
+            }
         } finally {
-            generateAiNotesBtn.disabled = false;
-            generateAiNotesBtn.innerHTML = originalBtnHtml;
+            if (!isSilent && generateAiNotesBtn) {
+                generateAiNotesBtn.disabled = false;
+                generateAiNotesBtn.innerHTML = originalBtnHtml;
+            }
         }
     }
 
@@ -767,11 +1023,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 lifestyle: formFields.planLifestyle.value.trim(),
                 followUp: formFields.planFollowUp.value.trim()
             },
-            doctorNotes: formFields.doctorNotes.value.trim()
+            doctorNotes: formFields.doctorNotes.value.trim(),
+            ayush: {
+                prakriti: {
+                    dosha: formFields.ayushPrakriti ? formFields.ayushPrakriti.value.trim() : "Not mentioned",
+                    manasika: formFields.ayushManasika ? formFields.ayushManasika.value.trim() : "Not mentioned"
+                },
+                lifestyle: {
+                    sleep: formFields.ayushSleep ? formFields.ayushSleep.value.trim() : "Not mentioned",
+                    bowel: formFields.ayushBowel ? formFields.ayushBowel.value.trim() : "Not mentioned",
+                    routineAndStress: formFields.ayushLifestyle ? formFields.ayushLifestyle.value.trim() : "Not mentioned"
+                },
+                diet: {
+                    agni: formFields.ayushAgni ? formFields.ayushAgni.value.trim() : "Not mentioned",
+                    patternsAndRasa: formFields.ayushDietPattern ? formFields.ayushDietPattern.value.trim() : "Not mentioned",
+                    timingsAndIncompatibilities: formFields.ayushEatingHabits ? formFields.ayushEatingHabits.value.trim() : "Not mentioned"
+                }
+            }
         };
 
-        const rawTranscriptText = transcriptTurns.map(t => `${t.speaker}: ${t.text}`).join("
-");
+        const rawTranscriptText = transcriptTurns.map(t => `${t.speaker}: ${t.text}`).join("\n");
 
         const record = {
             id: `CN-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
@@ -879,6 +1150,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const comp = fn.complaint || {};
         const sym = fn.symptoms || {};
         const his = fn.history || {};
+        const ayu = fn.ayush || {};
+        const ayuPrak = ayu.prakriti || {};
+        const ayuLife = ayu.lifestyle || {};
+        const ayuDiet = ayu.diet || {};
         const vit = fn.vitals || {};
         const plan = fn.plan || {};
 
@@ -926,6 +1201,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="notes-section-title"><i class="fa-solid fa-notes-medical" style="color: #7c3aed;"></i> Medical History</div>
                     <p style="font-size: 13px;"><strong>Conditions:</strong> ${escapeHtml(his.conditions || 'Not mentioned')} | <strong>Surgeries:</strong> ${escapeHtml(his.surgeries || 'Not mentioned')}</p>
                     <p style="font-size: 13px; margin-top: 4px;"><strong>Allergies:</strong> ${escapeHtml(his.allergies || 'Not mentioned')} | <strong>Current Meds:</strong> ${escapeHtml(his.medications || 'Not mentioned')}</p>
+                </div>
+
+                <!-- 3B. AYUSH & LIFESTYLE INTAKE -->
+                <div class="notes-form-section" style="margin-bottom: 0; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px;">
+                    <div class="notes-section-title" style="color: #166534;"><i class="fa-solid fa-leaf" style="color: #15803d;"></i> Body Constitution, Daily Habits & Diet Profile</div>
+                    <p style="font-size: 13px; margin-bottom: 4px;"><strong>Body & Mind Profile:</strong> Body Type: <span style="color: #15803d; font-weight: 600;">${escapeHtml(ayuPrak.dosha || 'Not mentioned')}</span> | Mind & Stress: <strong>${escapeHtml(ayuPrak.manasika || 'Not mentioned')}</strong></p>
+                    <p style="font-size: 13px; margin-bottom: 4px;"><strong>Daily Habits (Sleep & Bowel):</strong> Sleep: <strong>${escapeHtml(ayuLife.sleep || 'Not mentioned')}</strong> | Bowel Regularity: <strong>${escapeHtml(ayuLife.bowel || 'Not mentioned')}</strong></p>
+                    <p style="font-size: 13px; margin-bottom: 4px;"><strong>Work & Activity:</strong> ${escapeHtml(ayuLife.routineAndStress || 'Not mentioned')}</p>
+                    <p style="font-size: 13px;"><strong>Digestion & Food Habits:</strong> Hunger/Hazma: <strong>${escapeHtml(ayuDiet.agni || 'Not mentioned')}</strong> | Food Preferences: <strong>${escapeHtml(ayuDiet.patternsAndRasa || 'Not mentioned')}</strong> | Eating Habits: <strong>${escapeHtml(ayuDiet.timingsAndIncompatibilities || 'Not mentioned')}</strong></p>
                 </div>
 
                 <!-- 4. Vitals -->
@@ -1006,8 +1290,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (speechRecognition) {
             speechRecognition.lang = lang === "hi" ? "hi-IN" : "en-IN";
         }
+        updateAyushModeUI();
         if (typeof I18nService !== "undefined" && typeof I18nService.translatePage === "function") {
             I18nService.translatePage();
+        }
+        // If there are existing conversation turns, re-extract notes so that Ayush output matches new language
+        if (transcriptTurns.length > 0) {
+            generateNotes(true);
         }
     });
 

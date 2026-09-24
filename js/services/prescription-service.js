@@ -265,6 +265,39 @@ const PrescriptionService = (() => {
         activeCase.practitionerNotes = `Prescription issued by ${doctorName}.\nDiagnosis: ${diagnosis}\nAdvice: ${advice}\nTests: ${tests}`;
         ClinicalStorage.saveOrUpdateCase(activeCase);
 
+        // ===== PRIMARY: Send to Backend API (MongoDB) =====
+        const prescriptionPayload = {
+            prescriptionId: `RX-${Date.now()}`,
+            patientId: patient.id,
+            patientName: patient.fullName,
+            doctorName: doctorName || "Dr. Sharma",
+            caseId: activeCase.id,
+            diagnosis: diagnosis,
+            medicines: medicinesList.map(m => ({
+                name: m.name,
+                form: m.name.includes("(") ? m.name.split("(")[1].replace(")", "") : "Tablet",
+                dose: m.dose,
+                frequency: m.frequency,
+                instructions: m.instructions,
+                duration: m.duration,
+                reason: m.reason || diagnosis
+            })),
+            advice: advice,
+            recommendedTests: tests,
+            followupDate: followupDate,
+            status: "active"
+        };
+
+        if (typeof ApiService !== "undefined" && typeof ApiService.createPrescription === "function") {
+            ApiService.createPrescription(prescriptionPayload)
+                .then(res => {
+                    console.log("✅ [PrescriptionService] Saved to MongoDB:", res);
+                })
+                .catch(err => {
+                    console.warn("⚠️ [PrescriptionService] Backend API offline, saved to local cache:", err.message);
+                });
+        }
+
         // 2. Add follow up appointment
         if (followupDate) {
             ClinicalStorage.addFollowup({

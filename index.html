@@ -318,6 +318,7 @@
 
 <!-- SCRIPTS -->
 <script src="js/models/clinical-state.js"></script>
+<script src="js/services/api-service.js"></script>
 <script src="js/storage/clinical-storage.js"></script>
 <script src="js/services/speech-service.js"></script>
 <script src="js/services/i18n-service.js"></script>
@@ -355,11 +356,34 @@
         });
     });
 
-    function handlePatientQuickLogin() {
+    async function handlePatientQuickLogin() {
         const name = document.getElementById("modalPatientName").value.trim() || "New Patient";
         const phone = document.getElementById("modalPatientPhone").value.trim() || "9876543210";
 
-        // Check if patient exists
+        let targetId = "AYU-2026-DEMO";
+
+        try {
+            if (typeof ApiService !== "undefined") {
+                const res = await ApiService.login({
+                    id: phone,
+                    email: phone,
+                    phone: phone,
+                    password: "123456",
+                    role: "patient"
+                });
+
+                if (res && res.token) {
+                    ApiService.setToken(res.token);
+                    if (res.user && res.user.patientId) {
+                        targetId = res.user.patientId;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn("[IndexModal] Patient login check:", e.message);
+        }
+
+        // Check if patient exists in storage
         const patients = ClinicalStorage.getPatients();
         let targetPatient = patients.find(p => p.fullName.toLowerCase() === name.toLowerCase() || p.phone === phone || p.id === phone);
 
@@ -374,18 +398,43 @@
                 allergies: "No known allergies",
                 status: "active"
             });
+            targetId = targetPatient.id;
+        } else {
+            targetId = targetPatient.id;
         }
 
-        localStorage.setItem("swasthai_active_patient_id", targetPatient.id);
+        localStorage.setItem("swasthai_active_patient_id", targetId);
+        localStorage.setItem("ayushActiveRole", "patient");
         window.location.href = "patient-portal.html";
     }
 
-    function handleDoctorModalLogin() {
+    async function handleDoctorModalLogin() {
+        const email = document.getElementById("modalDocEmail") ? document.getElementById("modalDocEmail").value.trim() : "doctor@ayush.com";
+        const pass = document.getElementById("modalDocPass") ? document.getElementById("modalDocPass").value : "123456";
+
+        try {
+            if (typeof ApiService !== "undefined") {
+                const res = await ApiService.login({
+                    email: email,
+                    id: email,
+                    password: pass,
+                    role: "practitioner"
+                });
+
+                if (res && res.token) {
+                    ApiService.setToken(res.token);
+                }
+            }
+        } catch (e) {
+            console.warn("[IndexModal] Doctor login check:", e.message);
+        }
+
         localStorage.setItem("ayushCurrentUser", JSON.stringify({
             name: "Dr. Sharma",
-            email: "doctor@ayush.com",
+            email: email,
             role: "Doctor / Practitioner"
         }));
+        localStorage.setItem("ayushActiveRole", "practitioner");
         window.location.href = "dashboard.html";
     }
 </script>

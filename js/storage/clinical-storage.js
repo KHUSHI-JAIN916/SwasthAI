@@ -1155,6 +1155,11 @@ const ClinicalStorage = (() => {
         patients.unshift(patient);
         savePatients(patients);
 
+        // Sync with backend API
+        if (typeof ApiService !== "undefined" && typeof ApiService.createPatient === "function") {
+            ApiService.createPatient(patient).catch(e => console.warn("[ClinicalStorage] Background patient sync:", e.message));
+        }
+
         // Add timeline event
         addTimelineEvent({
             patientId: patient.id,
@@ -1337,6 +1342,15 @@ const ClinicalStorage = (() => {
         }
         saveCases(cases);
 
+        // Sync with backend API
+        if (typeof ApiService !== "undefined") {
+            if (index >= 0 && typeof ApiService.updateCase === "function") {
+                ApiService.updateCase(caseData.id, caseData).catch(e => console.warn("[ClinicalStorage] Background case update sync:", e.message));
+            } else if (typeof ApiService.createCase === "function") {
+                ApiService.createCase(caseData).catch(e => console.warn("[ClinicalStorage] Background case create sync:", e.message));
+            }
+        }
+
         logAudit(
             index >= 0 ? "Updated Case" : "Created Case",
             getActiveRole(),
@@ -1353,6 +1367,15 @@ const ClinicalStorage = (() => {
         const targetCase = cases.find(c => c.id === caseId);
         if (targetCase) {
             const oldStatus = targetCase.status;
+            targetCase.status = newStatus;
+            targetCase.updatedAt = new Date().toISOString();
+            saveCases(cases);
+
+            if (typeof ApiService !== "undefined" && typeof ApiService.updateCase === "function") {
+                ApiService.updateCase(caseId, { status: newStatus }).catch(e => console.warn("[ClinicalStorage] Status update sync:", e.message));
+            }
+        }
+    }
             targetCase.status = newStatus;
             targetCase.updatedAt = new Date().toISOString();
             saveCases(cases);
@@ -2009,6 +2032,103 @@ const ClinicalStorage = (() => {
         };
     }
 
+    function getConsultationNotes(patientId) {
+        try {
+            const raw = localStorage.getItem(KEYS.CONSULTATION_NOTES);
+            let all = raw ? JSON.parse(raw) : [];
+            if (!Array.isArray(all)) all = [];
+            if (patientId) {
+                return all.filter(n => n.patientId === patientId);
+            }
+            return all;
+        } catch (e) {
+            console.error("Error reading consultation notes:", e);
+            return [];
+        }
+    }
+
+    function getConsultationNoteById(id) {
+        const all = getConsultationNotes();
+        return all.find(n => n.id === id) || null;
+    }
+
+    function saveConsultationNote(noteData) {
+        if (!noteData) return { success: false, message: "No data provided." };
+        let all = getConsultationNotes();
+        const index = all.findIndex(n => n.id === noteData.id);
+        if (index !== -1) {
+            all[index] = { ...all[index], ...noteData, updatedAt: new Date().toISOString() };
+        } else {
+            all.unshift({
+                ...noteData,
+                id: noteData.id || `CN-${Date.now()}`,
+                createdAt: new Date().toISOString()
+            });
+        }
+        localStorage.setItem(KEYS.CONSULTATION_NOTES, JSON.stringify(all));
+        return { success: true, note: noteData };
+    }
+
+    function deleteConsultationNote(id) {
+        let all = getConsultationNotes();
+        all = all.filter(n => n.id !== id);
+        localStorage.setItem(KEYS.CONSULTATION_NOTES, JSON.stringify(all));
+        return { success: true };
+    }
+
+    async function syncWithBackend() {
+        if (typeof ApiService === "undefined") return;
+        try {
+            // 1. Sync Patients
+            const patRes = await ApiService.getPatients().catch(() => null);
+            if (patRes && patRes.data && patRes.data.length > 0) {
+                const local = getPatients();
+                const merged = [...patRes.data];
+                // preserve any local-only drafts
+                local.forEach(lp => {
+                    if (!merged.some(mp => mp.id === lp.id)) {
+                        merged.push(lp);
+                    }
+                });
+                savePatients(merged);
+            }
+
+            // 2. Sync Cases
+            const caseRes = await ApiService.getCases().catch(() => null);
+            if (caseRes && caseRes.data && caseRes.data.length > 0) {
+                const localCases = getCases();
+                const mergedCases = [...caseRes.data];
+                localCases.forEach(lc => {
+                    if (!mergedCases.some(mc => mc.id === lc.id)) {
+                        mergedCases.push(lc);
+                    }
+                });
+                saveCases(mergedCases);
+            }
+
+            console.log("🔄 [ClinicalStorage] Synchronized clinical cache with MongoDB backend.");
+        } catch (err) {
+            console.warn("[ClinicalStorage] Background sync skipped:", err.message);
+        }
+    }
+
+    function logoutUser() {
+        if (typeof ApiService !== "undefined" && typeof ApiService.removeToken === "function") {
+            ApiService.removeToken();
+        }
+        localStorage.removeItem("ayushCurrentUser");
+        localStorage.removeItem("swasthai_active_patient_id");
+        localStorage.removeItem("swasthai_current_hospital");
+        localStorage.removeItem("swasthai_jwt_token");
+        sessionStorage.clear();
+        window.location.href = "index.html";
+    }
+
+    // Trigger auto-sync on load
+    if (typeof window !== "undefined") {
+        setTimeout(syncWithBackend, 500);
+    }
+
     return {
         KEYS,
         getPatients,
@@ -2033,6 +2153,7 @@ const ClinicalStorage = (() => {
         getActiveRole,
         setActiveRole,
         logoutUser,
+        syncWithBackend,
         getAttentionQueue,
         getDashboardMetrics,
         authenticatePatient,
