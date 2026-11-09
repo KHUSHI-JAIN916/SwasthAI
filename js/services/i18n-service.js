@@ -29,6 +29,45 @@ const I18nService = (() => {
             doctorPortalSubtitle: "Case taking, clinical review workspace, attention queue, and patient timeline.",
             enterPatientPortal: "Open Patient Portal",
             enterDoctorPortal: "Open Doctor Portal",
+            patientPortalLoginTitle: "Patient Health Portal Login",
+            patientPortalLoginSub: "Keep your diseases, symptoms & past prescriptions safe",
+            tabPatientLogin: "Patient Login",
+            tabPatientRegister: "Register New Account",
+            loginFieldId: "Patient ID or Mobile Number",
+            loginFieldPassword: "Password",
+            defaultDemoPassword: "Default Demo Password:",
+            enterPortalBtn: "Enter Portal",
+            areYouDoctor: "Are you a doctor or clinic?",
+            addDiseaseCardTitle: "Add New Disease / Problem",
+            addDiseaseCardSub: "Send current problem & symptoms to doctor",
+            addPastDoctorCardTitle: "Add Past Doctor Records / Prescription",
+            addPastDoctorCardSub: "Past doctor name, clinic & medicines",
+            modalAddDiseaseTitle: "Add New Disease / Problem",
+            modalDiseaseNameLabel: "Disease Name / Primary Issue *",
+            modalDiseaseNamePlaceholder: "e.g. Joint Pain (Arthritis), Migraine, Asthma",
+            modalDurationLabel: "Duration",
+            modalDurationPlaceholder: "e.g. 6 months, 2 weeks",
+            modalSeverityLabel: "Severity",
+            severityMild: "Mild",
+            severityModerate: "Moderate",
+            severitySevere: "Severe",
+            modalSymptomsLabel: "Symptoms & Additional Details",
+            modalSymptomsPlaceholder: "e.g. Morning stiffness, swelling while walking...",
+            modalSaveDiseaseBtn: "Save Disease & Send to Doctor",
+            modalAddPastDoctorTitle: "Add Past Doctor Record / Previous Treatment",
+            modalDoctorNameLabel: "Doctor Name *",
+            modalDoctorNamePlaceholder: "e.g. Dr. R. K. Sharma",
+            modalClinicNameLabel: "Clinic / Hospital Name",
+            modalClinicNamePlaceholder: "e.g. City Hospital, Delhi",
+            modalDiagnosisLabel: "Diagnosis / Disease *",
+            modalDiagnosisPlaceholder: "e.g. High Blood Pressure, Acidity",
+            modalYearDateLabel: "Year / Date",
+            modalYearDatePlaceholder: "e.g. 2023 or Aug 2024",
+            modalPastMedsLabel: "Previous Medications Prescribed",
+            modalPastMedsPlaceholder: "e.g. Amlodipine 5mg, Pantocid 40mg",
+            modalPastNotesLabel: "Doctor Advice / Previous Tests",
+            modalPastNotesPlaceholder: "e.g. Advised low salt diet, Echo test normal...",
+            modalSavePastRecordBtn: "Save Record",
             
             // Patient Portal
             patientWelcome: "Hello",
@@ -114,6 +153,45 @@ const I18nService = (() => {
             doctorPortalSubtitle: "केस-टेकिंग, समीक्षा कार्यक्षेत्र और मरीज़ हिस्ट्री।",
             enterPatientPortal: "मरीज़ पोर्टल खोलें",
             enterDoctorPortal: "डॉक्टर पोर्टल खोलें",
+            patientPortalLoginTitle: "मरीज़ स्वास्थ्य पोर्टल लॉगिन",
+            patientPortalLoginSub: "अपनी बीमारी, लक्षण व पुराने डॉक्टर के पर्चे सुरक्षित रखें",
+            tabPatientLogin: "मरीज़ लॉगिन (Login)",
+            tabPatientRegister: "नया खाता बनाएं (Register)",
+            loginFieldId: "Patient ID या मोबाइल नंबर",
+            loginFieldPassword: "पासवर्ड (Password)",
+            defaultDemoPassword: "डिफ़ॉल्ट डेमो पासवर्ड:",
+            enterPortalBtn: "पोर्टल में प्रवेश करें (Enter Portal)",
+            areYouDoctor: "क्या आप डॉक्टर या क्लिनिक हैं?",
+            addDiseaseCardTitle: "नई बीमारी / तकलीफ जोड़ें",
+            addDiseaseCardSub: "वर्तमान समस्या व लक्षण डॉक्टर को भेजें",
+            addPastDoctorCardTitle: "पुराने डॉक्टर का डेटा / पर्चा जोड़ें",
+            addPastDoctorCardSub: "पुराने डॉक्टर का नाम, क्लिनिक व दवाइयां",
+            modalAddDiseaseTitle: "नई बीमारी / तकलीफ जोड़ें",
+            modalDiseaseNameLabel: "बीमारी का नाम / मुख्य समस्या *",
+            modalDiseaseNamePlaceholder: "उदा. जोड़ों का दर्द (Arthritis), माइग्रेन, अस्थमा",
+            modalDurationLabel: "कब से है (Duration)",
+            modalDurationPlaceholder: "उदा. 6 महीने से, 2 हफ्ते से",
+            modalSeverityLabel: "तीव्रता (Severity)",
+            severityMild: "हल्का (Mild)",
+            severityModerate: "मध्यम (Moderate)",
+            severitySevere: "गंभीर (Severe)",
+            modalSymptomsLabel: "लक्षण व अतिरिक्त विवरण",
+            modalSymptomsPlaceholder: "उदा. सुबह उठते ही अकड़न, चलने में सूजन...",
+            modalSaveDiseaseBtn: "बीमारी सेव करें व डॉक्टर को भेजें",
+            modalAddPastDoctorTitle: "पुराने डॉक्टर का डेटा / पिछला इलाज जोड़ें",
+            modalDoctorNameLabel: "डॉक्टर का नाम *",
+            modalDoctorNamePlaceholder: "उदा. Dr. R. K. Sharma",
+            modalClinicNameLabel: "क्लिनिक / अस्पताल का नाम",
+            modalClinicNamePlaceholder: "उदा. City Hospital, Delhi",
+            modalDiagnosisLabel: "निदान / बीमारी (Diagnosis) *",
+            modalDiagnosisPlaceholder: "उदा. High Blood Pressure, Acidity",
+            modalYearDateLabel: "साल / तारीख (Year/Date)",
+            modalYearDatePlaceholder: "उदा. 2023 या Aug 2024",
+            modalPastMedsLabel: "पिछली दवाइयां जो दी गई थीं",
+            modalPastMedsPlaceholder: "उदा. Amlodipine 5mg, Pantocid 40mg",
+            modalPastNotesLabel: "डॉक्टर के निर्देश / कोई पुरानी जांच",
+            modalPastNotesPlaceholder: "उदा. नमक कम खाने की सलाह दी थी, इको टेस्ट नॉर्मल था...",
+            modalSavePastRecordBtn: "पुराना रिकॉर्ड सुरक्षित करें (Save Record)",
             
             // Patient Portal
             patientWelcome: "नमस्ते",
@@ -421,6 +499,24 @@ const I18nService = (() => {
         { en: "No patients match your search criteria.", hi: "आपकी खोज के अनुसार कोई मरीज़ नहीं मिला।", hinglish: "Aapke search ke mutabik koi patient nahi mila." },
         { en: "Offline Mode Active", hi: "ऑफ़लाइन मोड सक्रिय", hinglish: "Offline Mode Active" },
 
+        // Patient Login (patient-login.html)
+        { en: "Patient Health Portal Login", hi: "मरीज़ स्वास्थ्य पोर्टल लॉगिन", hinglish: "Patient Health Portal Login" },
+        { en: "Keep your diseases, symptoms & past prescriptions safe", hi: "अपनी बीमारी, लक्षण व पुराने डॉक्टर के पर्चे सुरक्षित रखें", hinglish: "Apni bimari, symptoms aur purane parchayein safe rakhein" },
+        { en: "Patient Login", hi: "मरीज़ लॉगिन", hinglish: "Patient Login" },
+        { en: "New Account", hi: "नया खाता बनाएं", hinglish: "Naya Account Banaayein" },
+        { en: "Patient Login (Login)", hi: "मरीज़ लॉगिन (Login)", hinglish: "Patient Login (Login)" },
+        { en: "Register New Account", hi: "नया खाता बनाएं (Register)", hinglish: "Naya Account (Register)" },
+        { en: "Patient ID or Mobile Number", hi: "Patient ID या मोबाइल नंबर", hinglish: "Patient ID ya Mobile Number" },
+        { en: "Password", hi: "पासवर्ड", hinglish: "Password" },
+        { en: "Password (Password)", hi: "पासवर्ड (Password)", hinglish: "Password (Password)" },
+        { en: "Enter Portal", hi: "पोर्टल में प्रवेश करें", hinglish: "Portal me Enter Karein" },
+        { en: "Enter Portal (Enter Portal)", hi: "पोर्टल में प्रवेश करें (Enter Portal)", hinglish: "Portal me Enter Karein" },
+        { en: "Default Demo Password:", hi: "डिफ़ॉल्ट डेमो पासवर्ड:", hinglish: "Default Demo Password:" },
+        { en: "Are you a doctor or clinic?", hi: "क्या आप डॉक्टर या क्लिनिक हैं?", hinglish: "Kya aap doctor ya clinic hain?" },
+        { en: "Open Doctor Portal", hi: "डॉक्टर पोर्टल खोलें", hinglish: "Doctor Portal Kholein" },
+        { en: "Home", hi: "होम", hinglish: "Home" },
+        { en: "Home (Home)", hi: "होम (Home)", hinglish: "Home (Home)" },
+
         // Common Buttons & Actions
         { en: "Save", hi: "सुरक्षित करें", hinglish: "Save" },
         { en: "Cancel", hi: "रद्द करें", hinglish: "Cancel" },
@@ -451,7 +547,7 @@ const I18nService = (() => {
     function buildIndex() {
         lookupMap.clear();
         PHRASE_BOOK.forEach(item => {
-            ["en", "hi", "hinglish"].forEach(lang => {
+            ["en", "hi", "hinglish", "mr", "bn", "ta", "te"].forEach(lang => {
                 const val = item[lang];
                 if (!val) return;
 
@@ -481,18 +577,32 @@ const I18nService = (() => {
     }
 
     function setLanguage(lang) {
-        if (!DICTIONARY[lang]) lang = "en";
+        const supported = ["en", "hi", "hinglish", "mr", "bn", "ta", "te"];
+        if (!supported.includes(lang) && !DICTIONARY[lang]) lang = "en";
         currentLang = lang;
         localStorage.setItem(STORAGE_KEY, lang);
         
         // Disconnect observer briefly to prevent loops during translation
         if (observer) observer.disconnect();
         
+        // Clear cached original texts when switching back to English or another language so full translation re-evaluates
+        clearNodeCache(document.body);
+
         applyTranslations(lang);
         updateSwitcherUI();
         
         initMutationObserver();
         window.dispatchEvent(new CustomEvent("languageChanged", { detail: { lang } }));
+    }
+
+    function clearNodeCache(node) {
+        if (!node) return;
+        if (node.__origText !== undefined) delete node.__origText;
+        if (node.__origPlaceholder !== undefined) delete node.__origPlaceholder;
+        if (node.__origTitle !== undefined) delete node.__origTitle;
+        for (let child = node.firstChild; child; child = child.nextSibling) {
+            clearNodeCache(child);
+        }
     }
 
     function getLanguage() {
@@ -520,7 +630,7 @@ const I18nService = (() => {
         const norm = normalizeKey(trimmed);
         let match = lookupMap.get(norm);
         if (match) {
-            const translated = match[targetLang] || match.en;
+            const translated = match[targetLang] || match.hi || match.en;
             return lead + translated + trail;
         }
 
@@ -532,33 +642,22 @@ const I18nService = (() => {
             const baseNorm = normalizeKey(baseText);
             const baseMatch = lookupMap.get(baseNorm);
             if (baseMatch) {
-                const translated = baseMatch[targetLang] || baseMatch.en;
+                const translated = baseMatch[targetLang] || baseMatch.hi || baseMatch.en;
                 return lead + translated + trailingPunct + trail;
             }
         }
 
-        // 3. Dynamic patterns: "Showing X to Y of Z patients"
-        if (/Showing\s+\d+.*of\s+\d+.*patients/i.test(trimmed) || /\d+.*में से.*मरीज़.*दिखा/i.test(trimmed)) {
-            const numMatch = trimmed.match(/(\d[\d,\.–\-]*)\s*(?:of|में से)\s*(\d[\d,]*)/i);
-            const range = numMatch ? numMatch[1] : "1–5";
-            const total = numMatch ? numMatch[2] : "1,248";
-            if (targetLang === "hi") return `${lead}${total} में से ${range} मरीज़ दिखाए जा रहे हैं${trail}`;
-            if (targetLang === "hinglish") return `${lead}Showing ${range} of ${total} patients${trail}`;
-            return `${lead}Showing ${range} of ${total} patients${trail}`;
-        }
-
-        // 4. Dynamic pattern: "ID: AYU-..."
-        if (/^ID:\s*/i.test(trimmed)) {
-            const idPart = trimmed.replace(/^ID:\s*/i, "");
-            if (targetLang === "hi") return `${lead}मरीज़ ID: ${idPart}${trail}`;
-            return `${lead}ID: ${idPart}${trail}`;
-        }
-
-        // 5. Dynamic pattern: "Age: XX" or "Age / Gender"
-        if (/^Age:\s*(\d+)/i.test(trimmed)) {
-            const ageVal = trimmed.replace(/^Age:\s*/i, "");
-            if (targetLang === "hi") return `${lead}आयु: ${ageVal}${trail}`;
-            return `${lead}Age: ${ageVal}${trail}`;
+        // 3. Parenthetical bilingual text extraction (e.g. "बीमारी का नाम / मुख्य समस्या *" or "हल्का (Mild)")
+        if (trimmed.includes("/") || trimmed.includes("(")) {
+            const parts = trimmed.split(/[\/\(\)]+/).map(p => p.trim()).filter(Boolean);
+            for (let part of parts) {
+                const pNorm = normalizeKey(part);
+                const pMatch = lookupMap.get(pNorm);
+                if (pMatch) {
+                    const translated = pMatch[targetLang] || pMatch.en;
+                    if (translated) return lead + translated + trail;
+                }
+            }
         }
 
         return text;
@@ -576,7 +675,13 @@ const I18nService = (() => {
 
             // Translate placeholders on inputs and textareas
             if (tag === "INPUT" || tag === "TEXTAREA") {
-                if (node.placeholder) {
+                if (node.hasAttribute("data-i18n")) {
+                    const key = node.getAttribute("data-i18n");
+                    const dict = DICTIONARY[targetLang] || DICTIONARY.en;
+                    if (dict[key]) {
+                        node.placeholder = dict[key];
+                    }
+                } else if (node.placeholder) {
                     if (!node.__origPlaceholder) node.__origPlaceholder = node.placeholder;
                     const translated = translateText(node.__origPlaceholder, targetLang);
                     if (translated) node.placeholder = translated;
@@ -616,8 +721,10 @@ const I18nService = (() => {
                     node.__origText = raw;
                 }
                 const translated = translateText(node.__origText, targetLang);
-                if (translated !== raw) {
+                if (translated && translated !== raw) {
                     node.textContent = translated;
+                } else if (targetLang === "en" && node.textContent !== node.__origText) {
+                    node.textContent = node.__origText;
                 }
             }
         } else {
@@ -731,6 +838,10 @@ const I18nService = (() => {
                     <option class="lang-option notranslate" value="hi" ${currentLang === 'hi' ? 'selected' : ''}>🇮🇳 हिंदी (Hindi)</option>
                     <option class="lang-option notranslate" value="hinglish" ${currentLang === 'hinglish' ? 'selected' : ''}>🗣️ Hinglish</option>
                     <option class="lang-option notranslate" value="en" ${currentLang === 'en' ? 'selected' : ''}>🇬🇧 English</option>
+                    <option class="lang-option notranslate" value="mr" ${currentLang === 'mr' ? 'selected' : ''}>🇮🇳 मराठी (Marathi)</option>
+                    <option class="lang-option notranslate" value="bn" ${currentLang === 'bn' ? 'selected' : ''}>🇮🇳 বাংলা (Bengali)</option>
+                    <option class="lang-option notranslate" value="ta" ${currentLang === 'ta' ? 'selected' : ''}>🇮🇳 தமிழ் (Tamil)</option>
+                    <option class="lang-option notranslate" value="te" ${currentLang === 'te' ? 'selected' : ''}>🇮🇳 తెలుగు (Telugu)</option>
                 </select>
             `;
         });

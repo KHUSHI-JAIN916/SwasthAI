@@ -53,7 +53,11 @@ const PatientPortal = (() => {
     }
 
     function loadPatientData() {
-        const storedPatientId = localStorage.getItem("swasthai_active_patient_id") || "AYU-2026-DEMO";
+        const storedPatientId = localStorage.getItem("swasthai_active_patient_id");
+        if (!storedPatientId) {
+            window.location.href = "patient-login.html";
+            return;
+        }
         currentPatient = ClinicalStorage.getPatientById(storedPatientId);
         if (!currentPatient) {
             currentPatient = ClinicalStorage.getPatients()[0];
@@ -177,22 +181,49 @@ const PatientPortal = (() => {
         }
     }
 
-    function toggleBodySymptom(symptomText) {
+    function toggleBodySymptom(elementOrText, defaultText) {
         const textInput = document.getElementById("patientSymptomInput");
         if (!textInput) return;
 
-        if (textInput.value.includes(symptomText)) {
-            textInput.value = textInput.value.replace(symptomText, "").trim();
+        let cardElement = null;
+        let symptomText = defaultText;
+
+        if (elementOrText && typeof elementOrText === "object" && elementOrText.nodeType) {
+            cardElement = elementOrText;
+            const span = cardElement.querySelector("span");
+            symptomText = span ? span.textContent.trim() : defaultText;
+        } else if (typeof elementOrText === "string") {
+            symptomText = elementOrText;
+        }
+
+        // Determine localized text if possible
+        const lang = (typeof I18nService !== "undefined") ? I18nService.getLanguage() : "hi";
+        let displaySymptom = symptomText;
+        if (symptomText.includes("Headache")) displaySymptom = (lang === "hi") ? "सिरदर्द व चक्कर" : "Headache & Dizziness";
+        else if (symptomText.includes("Stomach")) displaySymptom = (lang === "hi") ? "पेट दर्द व गैस" : "Stomach Pain & Acidity";
+        else if (symptomText.includes("Chest")) displaySymptom = (lang === "hi") ? "छाती में दर्द व भारीपन" : "Chest Pain & Heaviness";
+        else if (symptomText.includes("Joint")) displaySymptom = (lang === "hi") ? "जोड़ों व घुटने का दर्द" : "Joint Pain & Arthritis";
+        else if (symptomText.includes("Fever")) displaySymptom = (lang === "hi") ? "तेज़ बुखार व कंपकंपी" : "Fever & Shivering";
+        else if (symptomText.includes("Cough")) displaySymptom = (lang === "hi") ? "खांसी व गले में खराश" : "Cough & Sore Throat";
+        else if (symptomText.includes("Skin")) displaySymptom = (lang === "hi") ? "त्वचा पर खुजली व एलर्जी" : "Skin Rash & Itching";
+        else if (symptomText.includes("Sugar")) displaySymptom = (lang === "hi") ? "शुगर व कमजोरी" : "Sugar & Weakness";
+
+        if (cardElement) {
+            cardElement.classList.toggle("selected");
+        }
+
+        if (textInput.value.includes(displaySymptom)) {
+            textInput.value = textInput.value.replace(new RegExp(",?\\s*" + displaySymptom.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')), "").trim();
+            if (textInput.value.startsWith(",")) textInput.value = textInput.value.substring(1).trim();
         } else {
-            textInput.value += (textInput.value ? ", " : "") + symptomText;
+            textInput.value += (textInput.value ? ", " : "") + displaySymptom;
         }
 
         // Voice audio feedback
-        const lang = I18nService.getLanguage();
-        const cleanName = symptomText.indexOf("(") !== -1 ? symptomText.split("(")[0].trim() : symptomText;
-        const feedback = lang === "hi" ? "लक्षण जोड़ा गया: " + cleanName : "Added symptom: " + cleanName;
+        const cleanName = displaySymptom.indexOf("(") !== -1 ? displaySymptom.split("(")[0].trim() : displaySymptom;
+        const feedback = (lang === "hi") ? "लक्षण जोड़ा गया: " + cleanName : "Added symptom: " + cleanName;
         if (typeof SpeechService !== "undefined") {
-            SpeechService.speakText(feedback, { lang: lang === "hi" ? "hi-IN" : "en-IN", rate: 0.9 });
+            SpeechService.speakText(feedback, { lang: (lang === "hi") ? "hi-IN" : "en-IN", rate: 0.9 });
         }
     }
 
@@ -320,7 +351,13 @@ const PatientPortal = (() => {
        DISEASE MANAGEMENT & PAST DOCTOR RECORDS
        ========================================================================= */
     function openAddDiseaseModal() {
-        document.getElementById("addDiseaseModal").classList.add("active");
+        const modal = document.getElementById("addDiseaseModal");
+        if (modal) {
+            modal.classList.add("active");
+            if (typeof I18nService !== "undefined") {
+                I18nService.translatePage();
+            }
+        }
     }
 
     function closeAddDiseaseModal() {
@@ -384,7 +421,13 @@ const PatientPortal = (() => {
     }
 
     function openAddPastDoctorModal() {
-        document.getElementById("addPastDoctorModal").classList.add("active");
+        const modal = document.getElementById("addPastDoctorModal");
+        if (modal) {
+            modal.classList.add("active");
+            if (typeof I18nService !== "undefined") {
+                I18nService.translatePage();
+            }
+        }
     }
 
     function closeAddPastDoctorModal() {

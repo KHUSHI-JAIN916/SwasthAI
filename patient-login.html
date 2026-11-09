@@ -126,10 +126,14 @@
         <div style="display: flex; align-items: center; gap: 12px;">
             <div id="globalLanguageSwitcherContainer" class="lang-switcher-wrapper">
                 <i class="fa-solid fa-language" style="color: #1f7a57;"></i>
-                <select class="lang-dropdown global-lang-select">
-                    <option value="hi">हिंदी (Hindi)</option>
-                    <option value="hinglish">Hinglish</option>
-                    <option value="en">English</option>
+                <select class="lang-dropdown global-lang-select notranslate">
+                    <option value="hi">🇮🇳 हिंदी (Hindi)</option>
+                    <option value="hinglish">🗣️ Hinglish</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="mr">🇮🇳 मराठी (Marathi)</option>
+                    <option value="bn">🇮🇳 বাংলা (Bengali)</option>
+                    <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
+                    <option value="te">🇮🇳 తెలుగు (Telugu)</option>
                 </select>
             </div>
 
@@ -151,10 +155,10 @@
                 <div style="width: 58px; height: 58px; background: #dcfce7; color: #16a34a; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 12px auto;">
                     <i class="fa-solid fa-hands-holding-child"></i>
                 </div>
-                <h2 style="font-size: 22px; font-weight: 900; color: #111827; margin: 0 0 6px 0;">
+                <h2 style="font-size: 22px; font-weight: 900; color: #111827; margin: 0 0 6px 0;" data-i18n="patientPortalLoginTitle">
                     मरीज़ स्वास्थ्य पोर्टल लॉगिन
                 </h2>
-                <p style="font-size: 13px; color: #64748b; margin: 0;">
+                <p style="font-size: 13px; color: #64748b; margin: 0;" data-i18n="patientPortalLoginSub">
                     अपनी बीमारी, लक्षण व पुराने डॉक्टर के पर्चे सुरक्षित रखें
                 </p>
             </div>
@@ -162,17 +166,17 @@
             <!-- TABS -->
             <div class="tab-btn-group">
                 <button type="button" class="auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">
-                    <i class="fa-solid fa-right-to-bracket"></i> मरीज़ लॉगिन (Login)
+                    <i class="fa-solid fa-right-to-bracket"></i> <span data-i18n="tabPatientLogin">मरीज़ लॉगिन (Login)</span>
                 </button>
                 <button type="button" class="auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">
-                    <i class="fa-solid fa-user-plus"></i> नया खाता बनाएं (Register)
+                    <i class="fa-solid fa-user-plus"></i> <span data-i18n="tabPatientRegister">नया खाता बनाएं (Register)</span>
                 </button>
             </div>
 
             <!-- ================= 1. LOGIN FORM ================= -->
             <form id="patientLoginForm" onsubmit="handlePatientLogin(event)">
                 <div style="margin-bottom: 16px;">
-                    <label class="input-label">Patient ID या मोबाइल नंबर</label>
+                    <label class="input-label" data-i18n="loginFieldId">Patient ID या मोबाइल नंबर</label>
                     <input type="text" id="loginPatientId" class="auth-input" placeholder="उदा. AYU-2026-DEMO या 9876543210" required>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
                         <span class="quick-demo-badge" onclick="fillDemoCredentials('AYU-2026-DEMO', '123456')">
@@ -185,18 +189,18 @@
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <label class="input-label">पासवर्ड (Password)</label>
+                    <label class="input-label" data-i18n="loginFieldPassword">पासवर्ड (Password)</label>
                     <div style="position: relative;">
                         <input type="password" id="loginPassword" class="auth-input" placeholder="पासवर्ड दर्ज करें" value="123456" required>
                         <i class="fa-solid fa-eye" id="togglePassIcon" onclick="togglePasswordVisibility('loginPassword', this)" style="position: absolute; right: 14px; top: 14px; color: #94a3b8; cursor: pointer;"></i>
                     </div>
-                    <span style="font-size: 11px; color: #64748b; margin-top: 4px; display: block;">डिफ़ॉल्ट डेमो पासवर्ड: <strong>123456</strong></span>
+                    <span style="font-size: 11px; color: #64748b; margin-top: 4px; display: block;"><span data-i18n="defaultDemoPassword">डिफ़ॉल्ट डेमो पासवर्ड:</span> <strong>123456</strong></span>
                 </div>
 
                 <div id="loginErrorMsg" style="display: none; background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-bottom: 14px;"></div>
 
                 <button type="submit" style="width: 100%; padding: 14px; background: #16a34a; color: #ffffff; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; transition: background 0.2s;">
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i> पोर्टल में प्रवेश करें (Enter Portal)
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> <span data-i18n="enterPortalBtn">पोर्टल में प्रवेश करें (Enter Portal)</span>
                 </button>
             </form>
 
@@ -245,9 +249,9 @@
             </form>
 
             <div style="margin-top: 24px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 16px;">
-                <span style="font-size: 13px; color: #64748b;">क्या आप डॉक्टर या क्लिनिक हैं?</span>
+                <span style="font-size: 13px; color: #64748b;" data-i18n="areYouDoctor">Are you a doctor or clinic?</span>
                 <a href="dashboard.html" style="color: #2563eb; font-weight: 800; font-size: 13px; text-decoration: none; margin-left: 6px;">
-                    डॉक्टर पोर्टल खोलें &rarr;
+                    <span data-i18n="enterDoctorPortal">Open Doctor Portal</span> &rarr;
                 </a>
             </div>
 

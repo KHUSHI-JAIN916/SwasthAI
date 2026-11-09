@@ -101,10 +101,6 @@
                 <i class="fa-solid fa-volume-high"></i> <span data-i18n="audioGuideBtn">Audio Help</span>
             </button>
 
-            <!-- Switch to Doctor Portal Link -->
-            <a href="dashboard.html" class="sih-btn" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 12px; font-weight: 700; text-decoration: none; padding: 6px 12px; border-radius: 6px;">
-                <i class="fa-solid fa-user-doctor"></i> <span data-i18n="enterDoctorPortal">Doctor Portal</span>
-            </a>
 
             <!-- Patient Profile & Logout -->
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -150,8 +146,8 @@
                     <i class="fa-solid fa-plus-circle"></i>
                 </div>
                 <div>
-                    <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #166534;">नई बीमारी / तकलीफ जोड़ें</h4>
-                    <span style="font-size: 12px; color: #64748b;">वर्तमान समस्या व लक्षण डॉक्टर को भेजें</span>
+                    <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #166534;" data-i18n="addDiseaseCardTitle">नई बीमारी / तकलीफ जोड़ें</h4>
+                    <span style="font-size: 12px; color: #64748b;" data-i18n="addDiseaseCardSub">वर्तमान समस्या व लक्षण डॉक्टर को भेजें</span>
                 </div>
             </button>
 
@@ -160,8 +156,8 @@
                     <i class="fa-solid fa-book-medical"></i>
                 </div>
                 <div>
-                    <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #0369a1;">पुराने डॉक्टर का डेटा / पर्चा जोड़ें</h4>
-                    <span style="font-size: 12px; color: #64748b;">पुराने डॉक्टर का नाम, क्लिनिक व दवाइयां</span>
+                    <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #0369a1;" data-i18n="addPastDoctorCardTitle">पुराने डॉक्टर का डेटा / पर्चा जोड़ें</h4>
+                    <span style="font-size: 12px; color: #64748b;" data-i18n="addPastDoctorCardSub">पुराने डॉक्टर का नाम, क्लिनिक व दवाइयां</span>
                 </div>
             </button>
         </div>
@@ -275,44 +271,44 @@
                 </div>
 
                 <div class="body-symptom-grid">
-                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom('सिरदर्द व चक्कर (Headache & Dizziness)')">
+                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom(this, 'Headache & Dizziness')">
                         <i class="fa-solid fa-head-side-virus"></i>
-                        <span data-i18n="symptomHead">सिरदर्द / चक्कर</span>
+                        <span data-i18n="symptomHead">Headache / Dizziness</span>
                     </div>
 
-                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom('पेट में दर्द व गैस (Stomach Pain & Acidity)')">
+                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom(this, 'Stomach Pain & Acidity')">
                         <i class="fa-solid fa-hand-holding-droplet"></i>
-                        <span data-i18n="symptomStomach">पेट दर्द / गैस</span>
+                        <span data-i18n="symptomStomach">Stomach Pain / Acidity</span>
                     </div>
 
-                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom('छाती में दर्द व भारीपन (Chest Pain & Heaviness)')">
+                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom(this, 'Chest Pain & Heaviness')">
                         <i class="fa-solid fa-heart-pulse"></i>
-                        <span data-i18n="symptomChest">छाती में दर्द</span>
+                        <span data-i18n="symptomChest">Chest Pain / Heaviness</span>
                     </div>
 
-                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom('जोड़ों व घुटने का दर्द (Joint Pain & Arthritis)')">
+                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom(this, 'Joint Pain & Arthritis')">
                         <i class="fa-solid fa-bone"></i>
-                        <span data-i18n="symptomJoints">जोड़ों का दर्द</span>
+                        <span data-i18n="symptomJoints">Joint Pain / Arthritis</span>
                     </div>
 
-                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom('तेज़ बुखार व कंपकंपी (High Fever & Shivering)')">
+                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom(this, 'Fever & Shivering')">
                         <i class="fa-solid fa-temperature-arrow-up"></i>
-                        <span data-i18n="symptomFever">बुखार / कंपकंपी</span>
+                        <span data-i18n="symptomFever">Fever / Shivering</span>
                     </div>
 
-                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom('खांसी व गले में खराश (Cough & Sore Throat)')">
+                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom(this, 'Cough & Sore Throat')">
                         <i class="fa-solid fa-lungs"></i>
-                        <span data-i18n="symptomThroat">खांसी / गला</span>
+                        <span data-i18n="symptomThroat">Cough / Sore Throat</span>
                     </div>
 
-                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom('त्वचा पर खुजली व एलर्जी (Skin Allergy & Rash)')">
+                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom(this, 'Skin Rash & Itching')">
                         <i class="fa-solid fa-hand-dots"></i>
-                        <span data-i18n="symptomSkin">त्वचा / खुजली</span>
+                        <span data-i18n="symptomSkin">Skin Rash / Itching</span>
                     </div>
 
-                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom('शुगर व कमजोरी (Sugar & Fatigue)')">
+                    <div class="body-symptom-card" onclick="PatientPortal.toggleBodySymptom(this, 'Sugar & Weakness')">
                         <i class="fa-solid fa-battery-half"></i>
-                        <span data-i18n="symptomDiabetes">शुगर / कमजोरी</span>
+                        <span data-i18n="symptomDiabetes">Sugar / Weakness</span>
                     </div>
                 </div>
             </div>
@@ -463,35 +459,35 @@
     <div class="clinical-modal" id="addDiseaseModal">
         <div class="clinical-modal-content" style="max-width: 480px;">
             <div class="clinical-modal-header">
-                <h3><i class="fa-solid fa-virus" style="color: #16a34a;"></i> नई बीमारी / तकलीफ जोड़ें</h3>
+                <h3><i class="fa-solid fa-virus" style="color: #16a34a;"></i> <span data-i18n="modalAddDiseaseTitle">नई बीमारी / तकलीफ जोड़ें</span></h3>
                 <button type="button" class="sih-close-btn" onclick="PatientPortal.closeAddDiseaseModal()">&times;</button>
             </div>
             <div class="clinical-modal-body">
                 <form id="addDiseaseForm" onsubmit="PatientPortal.submitAddDisease(event)">
                     <div style="margin-bottom: 12px;">
-                        <label style="font-size: 13px; font-weight: 700;">बीमारी का नाम / मुख्य समस्या *</label>
-                        <input type="text" id="diseaseNameInput" placeholder="उदा. जोड़ों का दर्द (Arthritis), माइग्रेन, अस्थमा" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                        <label style="font-size: 13px; font-weight: 700;" data-i18n="modalDiseaseNameLabel">बीमारी का नाम / मुख्य समस्या *</label>
+                        <input type="text" id="diseaseNameInput" placeholder="उदा. जोड़ों का दर्द (Arthritis), माइग्रेन, अस्थमा" data-i18n="modalDiseaseNamePlaceholder" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
                         <div>
-                            <label style="font-size: 13px; font-weight: 700;">कब से है (Duration)</label>
-                            <input type="text" id="diseaseDurationInput" placeholder="उदा. 6 महीने से, 2 हफ्ते से" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                            <label style="font-size: 13px; font-weight: 700;" data-i18n="modalDurationLabel">कब से है (Duration)</label>
+                            <input type="text" id="diseaseDurationInput" placeholder="उदा. 6 महीने से, 2 हफ्ते से" data-i18n="modalDurationPlaceholder" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
                         </div>
                         <div>
-                            <label style="font-size: 13px; font-weight: 700;">तीव्रता (Severity)</label>
+                            <label style="font-size: 13px; font-weight: 700;" data-i18n="modalSeverityLabel">तीव्रता (Severity)</label>
                             <select id="diseaseSeverityInput" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
-                                <option value="Mild">हल्का (Mild)</option>
-                                <option value="Moderate" selected>मध्यम (Moderate)</option>
-                                <option value="Severe">गंभीर (Severe)</option>
+                                <option value="Mild" data-i18n="severityMild">हल्का (Mild)</option>
+                                <option value="Moderate" selected data-i18n="severityModerate">मध्यम (Moderate)</option>
+                                <option value="Severe" data-i18n="severitySevere">गंभीर (Severe)</option>
                             </select>
                         </div>
                     </div>
                     <div style="margin-bottom: 14px;">
-                        <label style="font-size: 13px; font-weight: 700;">लक्षण व अतिरिक्त विवरण</label>
-                        <textarea id="diseaseSymptomsInput" rows="2" placeholder="उदा. सुबह उठते ही अकड़न, चलने में सूजन..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;"></textarea>
+                        <label style="font-size: 13px; font-weight: 700;" data-i18n="modalSymptomsLabel">लक्षण व अतिरिक्त विवरण</label>
+                        <textarea id="diseaseSymptomsInput" rows="2" placeholder="उदा. सुबह उठते ही अकड़न, चलने में सूजन..." data-i18n="modalSymptomsPlaceholder" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;"></textarea>
                     </div>
                     <button type="submit" style="width: 100%; padding: 12px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer;">
-                        <i class="fa-solid fa-check"></i> बीमारी सेव करें व डॉक्टर को भेजें
+                        <i class="fa-solid fa-check"></i> <span data-i18n="modalSaveDiseaseBtn">बीमारी सेव करें व डॉक्टर को भेजें</span>
                     </button>
                 </form>
             </div>
@@ -502,41 +498,41 @@
     <div class="clinical-modal" id="addPastDoctorModal">
         <div class="clinical-modal-content" style="max-width: 520px;">
             <div class="clinical-modal-header">
-                <h3><i class="fa-solid fa-book-medical" style="color: #0284c7;"></i> पुराने डॉक्टर का डेटा / पिछला इलाज जोड़ें</h3>
+                <h3><i class="fa-solid fa-book-medical" style="color: #0284c7;"></i> <span data-i18n="modalAddPastDoctorTitle">पुराने डॉक्टर का डेटा / पिछला इलाज जोड़ें</span></h3>
                 <button type="button" class="sih-close-btn" onclick="PatientPortal.closeAddPastDoctorModal()">&times;</button>
             </div>
             <div class="clinical-modal-body">
                 <form id="addPastDoctorForm" onsubmit="PatientPortal.submitAddPastDoctor(event)">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
                         <div>
-                            <label style="font-size: 13px; font-weight: 700;">डॉक्टर का नाम *</label>
-                            <input type="text" id="pastDocNameInput" placeholder="उदा. Dr. R. K. Sharma" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                            <label style="font-size: 13px; font-weight: 700;" data-i18n="modalDoctorNameLabel">डॉक्टर का नाम *</label>
+                            <input type="text" id="pastDocNameInput" placeholder="उदा. Dr. R. K. Sharma" data-i18n="modalDoctorNamePlaceholder" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
                         </div>
                         <div>
-                            <label style="font-size: 13px; font-weight: 700;">क्लिनिक / अस्पताल का नाम</label>
-                            <input type="text" id="pastClinicInput" placeholder="उदा. City Hospital, Delhi" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                            <label style="font-size: 13px; font-weight: 700;" data-i18n="modalClinicNameLabel">क्लिनिक / अस्पताल का नाम</label>
+                            <input type="text" id="pastClinicInput" placeholder="उदा. City Hospital, Delhi" data-i18n="modalClinicNamePlaceholder" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
                         </div>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
                         <div>
-                            <label style="font-size: 13px; font-weight: 700;">निदान / बीमारी (Diagnosis) *</label>
-                            <input type="text" id="pastDiagnosisInput" placeholder="उदा. High Blood Pressure, Acidity" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                            <label style="font-size: 13px; font-weight: 700;" data-i18n="modalDiagnosisLabel">निदान / बीमारी (Diagnosis) *</label>
+                            <input type="text" id="pastDiagnosisInput" placeholder="उदा. High Blood Pressure, Acidity" data-i18n="modalDiagnosisPlaceholder" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
                         </div>
                         <div>
-                            <label style="font-size: 13px; font-weight: 700;">साल / तारीख (Year/Date)</label>
-                            <input type="text" id="pastYearInput" placeholder="उदा. 2023 या Aug 2024" value="2024" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                            <label style="font-size: 13px; font-weight: 700;" data-i18n="modalYearDateLabel">साल / तारीख (Year/Date)</label>
+                            <input type="text" id="pastYearInput" placeholder="उदा. 2023 या Aug 2024" data-i18n="modalYearDatePlaceholder" value="2024" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
                         </div>
                     </div>
                     <div style="margin-bottom: 12px;">
-                        <label style="font-size: 13px; font-weight: 700;">पिछली दवाइयां जो दी गई थीं</label>
-                        <input type="text" id="pastMedsInput" placeholder="उदा. Amlodipine 5mg, Pantocid 40mg" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
+                        <label style="font-size: 13px; font-weight: 700;" data-i18n="modalPastMedsLabel">पिछली दवाइयां जो दी गई थीं</label>
+                        <input type="text" id="pastMedsInput" placeholder="उदा. Amlodipine 5mg, Pantocid 40mg" data-i18n="modalPastMedsPlaceholder" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;">
                     </div>
                     <div style="margin-bottom: 14px;">
-                        <label style="font-size: 13px; font-weight: 700;">डॉक्टर के निर्देश / कोई पुरानी जांच</label>
-                        <textarea id="pastNotesInput" rows="2" placeholder="उदा. नमक कम खाने की सलाह दी थी, इको टेस्ट नॉर्मल था..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;"></textarea>
+                        <label style="font-size: 13px; font-weight: 700;" data-i18n="modalPastNotesLabel">डॉक्टर के निर्देश / कोई पुरानी जांच</label>
+                        <textarea id="pastNotesInput" rows="2" placeholder="उदा. नमक कम खाने की सलाह दी थी, इको टेस्ट नॉर्मल था..." data-i18n="modalPastNotesPlaceholder" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box;"></textarea>
                     </div>
                     <button type="submit" style="width: 100%; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer;">
-                        <i class="fa-solid fa-save"></i> पुराना रिकॉर्ड सुरक्षित करें (Save Record)
+                        <i class="fa-solid fa-save"></i> <span data-i18n="modalSavePastRecordBtn">पुराना रिकॉर्ड सुरक्षित करें (Save Record)</span>
                     </button>
                 </form>
             </div>
